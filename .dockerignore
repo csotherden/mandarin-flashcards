@@ -1,0 +1,6 @@
+.git
+web
+data
+tmp
+.env
+**/*_test.go

@@ -1,0 +1,132 @@
+package main
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"flag"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"strconv"
+	"strings"
+	"syscall"
+	"time"
+
+	"entgo.io/ent/dialect/sql/schema"
+	"github.com/csotherden/mandarin-flashcards/ent"
+	"github.com/csotherden/mandarin-flashcards/internal/auth"
+	"github.com/csotherden/mandarin-flashcards/internal/database"
+	"github.com/csotherden/mandarin-flashcards/internal/logging"
+	"github.com/csotherden/mandarin-flashcards/internal/server"
+	"github.com/joho/godotenv"
+	"go.uber.org/zap"
+)
+
+const gracefulShutdownTimeout = 15 * time.Second
+
+var (
+	srv    *server.Server
+	logger *zap.Logger
+	client *ent.Client
+	sqlDB  *sql.DB
+)
+
+func envBool(name string) (bool, bool) {
+	value, ok := os.LookupEnv(name)
+	if !ok {
+		return false, false
+	}
+	parsed, err := strconv.ParseBool(strings.TrimSpace(value))
+	if err != nil {
+		return false, false
+	}
+	return parsed, true
+}
+
+func init() {
+	var envFile string
+	flag.StringVar(&envFile, "env", ".env", "env file path")
+	flag.Parse()
+
+	if err := godotenv.Load(envFile); err != nil {
+		log.Printf("Warning: Error loading env file: %v", err)
+	}
+
+	var err error
+	logger, err = logging.NewLogger()
+	if err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+
+	config := server.NewConfig()
+	if err := auth.ValidateSecret("JWT_SECRET", os.Getenv("JWT_SECRET")); err != nil {
+		logger.Fatal("Invalid JWT_SECRET", zap.Error(err), zap.Int("minimum_length", auth.MinSecretLen))
+	}
+	if err := auth.ValidateSecret("JWT_REFRESH_SECRET", os.Getenv("JWT_REFRESH_SECRET")); err != nil {
+		logger.Fatal("Invalid JWT_REFRESH_SECRET", zap.Error(err), zap.Int("minimum_length", auth.MinSecretLen))
+	}
+
+	if destructive, ok := envBool("DESTRUCTIVE_MIGRATION"); ok && destructive && !config.IsExplicitLocalEnv() {
+		logger.Fatal("DESTRUCTIVE_MIGRATION=true requires ENV explicitly set to development, test, or local",
+			zap.String("environment", config.Environment),
+			zap.Bool("environment_explicit", config.EnvironmentExplicit),
+		)
+	}
+
+	client, sqlDB, err = database.NewClient(logger)
+	if err != nil {
+		logger.Fatal("Failed to connect to database", zap.Error(err))
+	}
+
+	autoMigrate, autoMigrateSet := envBool("AUTO_MIGRATE")
+	destructiveMigration, destructiveMigrationSet := envBool("DESTRUCTIVE_MIGRATION")
+	if !autoMigrateSet && os.Getenv("AUTO_MIGRATE") != "" {
+		logger.Warn("AUTO_MIGRATE has invalid value, defaulting to false", zap.String("value", os.Getenv("AUTO_MIGRATE")))
+	}
+	if !destructiveMigrationSet && os.Getenv("DESTRUCTIVE_MIGRATION") != "" {
+		logger.Warn("DESTRUCTIVE_MIGRATION has invalid value, defaulting to false", zap.String("value", os.Getenv("DESTRUCTIVE_MIGRATION")))
+	}
+
+	if autoMigrate {
+		if err := client.Schema.Create(context.Background()); err != nil {
+			logger.Fatal("Failed to run database migrations", zap.Error(err))
+		}
+		logger.Debug("Database migrations applied")
+		if destructiveMigration {
+			logger.Warn("Running destructive database migration options because DESTRUCTIVE_MIGRATION=true")
+			if err := client.Schema.Create(context.Background(), schema.WithDropColumn(true), schema.WithDropIndex(true)); err != nil {
+				logger.Fatal("Failed to run destructive database migrations", zap.Error(err))
+			}
+		}
+	}
+
+	srv, err = server.NewServer(config, logger, client, sqlDB)
+	if err != nil {
+		logger.Fatal("Failed to create server", zap.Error(err))
+	}
+}
+
+func main() {
+	defer logger.Sync()
+	defer client.Close()
+
+	go func() {
+		if err := srv.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Fatal("Server failed", zap.Error(err))
+		}
+	}()
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
+	sig := <-signals
+	logger.Info("Received signal, shutting down server", zap.String("signal", sig.String()))
+
+	ctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTimeout)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		logger.Fatal("Server forced to shutdown", zap.Error(err))
+	}
+	logger.Info("Server gracefully stopped")
+}

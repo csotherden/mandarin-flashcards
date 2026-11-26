@@ -1,0 +1,94 @@
+name: mandarin-flashcards
+
+services:
+  secrets-init:
+    image: busybox:1.36
+    command: ["sh", "/secrets-init.sh"]
+    volumes:
+      - ./docker/secrets-init.sh:/secrets-init.sh:ro
+      - secrets:/run/mandarin-secrets
+    restart: "no"
+
+  local-files-init:
+    image: busybox:1.36
+    command: sh -c "mkdir -p /var/lib/mandarin-files && chown -R 65532:0 /var/lib/mandarin-files && chmod -R 775 /var/lib/mandarin-files"
+    volumes:
+      - local-files:/var/lib/mandarin-files
+    restart: "no"
+
+  api:
+    build:
+      context: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${MANDARIN_DB_USER:-mandarin}
+      DB_PASSWORD: ${MANDARIN_DB_PASSWORD:-mandarin}
+      DB_NAME: ${MANDARIN_DB_NAME:-mandarin}
+      DB_SSL_MODE: disable
+      AUTO_MIGRATE: ${AUTO_MIGRATE:-true}
+      DESTRUCTIVE_MIGRATION: ${DESTRUCTIVE_MIGRATION:-false}
+      ENV: ${ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      FILE_STORE_DIR: /var/lib/mandarin-files
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:8091}
+      TONEPERFECT_API_KEY: ${TONEPERFECT_API_KEY:-}
+      TONEPERFECT_API_URL: ${TONEPERFECT_API_URL:-}
+      UNSPLASH_ACCESS_KEY: ${UNSPLASH_ACCESS_KEY:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+    command: ["-env", "/run/mandarin-secrets/secrets.env"]
+    depends_on:
+      secrets-init:
+        condition: service_completed_successfully
+      local-files-init:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+    ports:
+      - "${MANDARIN_API_PORT:-8090}:8080"
+    volumes:
+      - local-files:/var/lib/mandarin-files
+      - secrets:/run/mandarin-secrets:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health/live"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: ./web
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "${MANDARIN_WEB_PORT:-8091}:80"
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${MANDARIN_DB_USER:-mandarin}
+      POSTGRES_PASSWORD: ${MANDARIN_DB_PASSWORD:-mandarin}
+      POSTGRES_DB: ${MANDARIN_DB_NAME:-mandarin}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${MANDARIN_DB_USER:-mandarin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "${MANDARIN_DB_PORT:-5433}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
+  local-files:
+  secrets:

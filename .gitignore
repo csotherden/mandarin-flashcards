@@ -29,6 +29,12 @@ go.work.sum
 # env file
 .env
 
+# Local file store and frontend build output
+/data/
+/api-server
+web/node_modules/
+web/dist/
+
 # Editor/IDE
 # .idea/
 # .vscode/
