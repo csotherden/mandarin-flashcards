@@ -2,7 +2,7 @@
 
 A mobile-first flashcard app for drilling Mandarin vocabulary with tone-level pronunciation feedback.
 
-The Go API follows the what-iff shape: Ent on Postgres, local JWT auth (argon2id with a per-user salt), one file per handler function, and a local file store. The UI is React. Docker Compose runs both on a local server. There is no Cognito and no S3.
+The Go API uses Ent on Postgres, local JWT auth (argon2id with a per-user salt), one file per handler function, and a local file store. The UI is React. Docker Compose runs both on a local server.
 
 ## Run
 
