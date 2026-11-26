@@ -26,8 +26,9 @@ require (
 	github.com/zclconf/go-cty v1.14.4 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
-	golang.org/x/mod v0.39.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/mod v0.43.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/tools v0.53.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
