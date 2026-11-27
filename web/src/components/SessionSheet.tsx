@@ -16,12 +16,15 @@ export function SessionSheet({
   sets,
   initialSetIds = [],
   initialMode = "image_speak",
+  totalCards,
 }: {
   open: boolean;
   onClose: () => void;
   sets: CardSet[];
   initialSetIds?: string[];
   initialMode?: StudyMode;
+  /** How many cards "All cards" covers, to label the All option. */
+  totalCards?: number;
 }) {
   const navigate = useNavigate();
   const [setIds, setSetIds] = useState<string[]>(initialSetIds);
@@ -45,7 +48,7 @@ export function SessionSheet({
 
   const usable = sets.filter((set) => set.card_count > 0);
   const chosen = usable.filter((set) => setIds.includes(set.id));
-  const available = setIds.length ? chosen.reduce((sum, set) => sum + set.card_count, 0) : undefined;
+  const available = setIds.length ? chosen.reduce((sum, set) => sum + set.card_count, 0) : totalCards;
 
   function toggle(id: string) {
     setSetIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));

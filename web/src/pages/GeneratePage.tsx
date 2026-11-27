@@ -7,7 +7,8 @@ import { Pinyin } from "../components/Pinyin";
 import { SessionSheet } from "../components/SessionSheet";
 import type { CardSet, GeneratedSet } from "../types";
 
-const ideas = ["At the market", "Family", "In the kitchen", "Weather", "Getting around town", "Feelings"];
+// Themes the starter library doesn't already cover; basics like family or food live there ready-made.
+const ideas = ["At the market", "In the kitchen", "Feelings", "Hobbies", "At work", "At the doctor"];
 
 /** Describe a theme, pick a size, and get a finished set of new words (none you already have). */
 export function GeneratePage() {
@@ -102,11 +103,17 @@ export function GeneratePage() {
           <label className="label" htmlFor="theme">Theme</label>
           <input id="theme" autoFocus className="field mt-2 text-lg" placeholder="Things in the kitchen" value={theme} onChange={(event) => setTheme(event.target.value)} maxLength={80} />
           {!target && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {ideas.map((idea) => (
-                <button key={idea} type="button" className="chip bg-white" onClick={() => setTheme(idea)}>{idea}</button>
-              ))}
-            </div>
+            <>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {ideas.map((idea) => (
+                  <button key={idea} type="button" className="chip bg-white" onClick={() => setTheme(idea)}>{idea}</button>
+                ))}
+              </div>
+              <p className="mt-3 text-sm text-muted">
+                Looking for basics like family, food or animals?{" "}
+                <Link to="/library" className="link">The library has them ready-made.</Link>
+              </p>
+            </>
           )}
         </div>
         <div>

@@ -60,7 +60,7 @@ export function TodayPage() {
 
       {error && <p className="text-sm font-semibold text-crimson" role="alert">{error}</p>}
 
-      {home.open_session && <ResumeCard open={home.open_session} onEnded={load} />}
+      {home.open_session && <ResumeCard open={home.open_session} />}
 
       {home.total_cards === 0 && (
         <TonesCard home={home} />
@@ -185,7 +185,7 @@ export function TodayPage() {
         </div>
       )}
 
-      <SessionSheet open={builder} onClose={() => setBuilder(false)} sets={home.sets.map((item) => item.set)} initialMode={mode} />
+      <SessionSheet open={builder} onClose={() => setBuilder(false)} sets={home.sets.map((item) => item.set)} initialMode={mode} totalCards={home.total_cards} />
     </div>
   );
 }
@@ -229,7 +229,7 @@ function TonesCard({ home }: { home: Home }) {
 }
 
 /** The last unfinished session: pick it up, see its results, or end it. */
-function ResumeCard({ open, onEnded }: { open: NonNullable<Home["open_session"]>; onEnded: () => void }) {
+function ResumeCard({ open }: { open: NonNullable<Home["open_session"]> }) {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const finished = open.done >= open.total;
@@ -238,8 +238,7 @@ function ResumeCard({ open, onEnded }: { open: NonNullable<Home["open_session"]>
     setBusy(true);
     try {
       await api(`/api/study/sessions/${open.id}/complete`, { method: "POST" });
-      if (open.done > 0) navigate(`/summary/${open.id}`);
-      else onEnded();
+      navigate(`/summary/${open.id}`);
     } finally {
       setBusy(false);
     }
@@ -267,7 +266,7 @@ function ResumeCard({ open, onEnded }: { open: NonNullable<Home["open_session"]>
         ) : (
           <>
             <button type="button" className="btn-soft h-11 flex-1 sm:flex-none" disabled={busy} onClick={end}>
-              {open.done > 0 ? "End & see results" : "Dismiss"}
+              End &amp; see results
             </button>
             <Link to={`/drill/${open.id}`} className="btn-primary h-11 flex-1 sm:flex-none">
               Resume

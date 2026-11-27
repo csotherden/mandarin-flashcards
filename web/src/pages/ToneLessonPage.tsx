@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../api";
 import { Icon } from "../components/Icon";
+import { MicGate } from "../components/MicGate";
 import { markSyllable, Pinyin, toneLabel } from "../components/Pinyin";
 import { ToneContour } from "../components/ToneContour";
 import { useRecorder } from "../recorder";
@@ -74,14 +75,16 @@ export function ToneLessonPage() {
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 pb-10 pt-6">
         {step === "learn" && <Learn lesson={lesson} practice={practice} onStart={() => setStep(0)} />}
         {typeof step === "number" && (
-          <Say
-            key={lesson.items[step].key}
-            lesson={lesson}
-            index={step}
-            onXP={(n) => setLessonXP((x) => x + n)}
-            onError={setError}
-            onNext={() => (step + 1 >= total ? void complete() : setStep(step + 1))}
-          />
+          <MicGate exitTo="/tones" exitLabel="Back to tones">
+            <Say
+              key={lesson.items[step].key}
+              lesson={lesson}
+              index={step}
+              onXP={(n) => setLessonXP((x) => x + n)}
+              onError={setError}
+              onNext={() => (step + 1 >= total ? void complete() : setStep(step + 1))}
+            />
+          </MicGate>
         )}
         {step === "done" && finish && <Done lesson={lesson} finish={finish} xp={lessonXP} onNext={(next) => navigate(next ? `/tones/${next}` : "/tones")} />}
       </main>

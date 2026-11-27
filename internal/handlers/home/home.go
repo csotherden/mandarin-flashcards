@@ -232,7 +232,8 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 // openWindow is how long an unfinished session is offered for resuming.
 const openWindow = 7 * 24 * time.Hour
 
-// openSession finds the most recent unfinished session from the last week, with its progress.
+// openSession finds the most recent unfinished session from the last week that has at least one
+// graded card, with its progress.
 func openSession(ctx context.Context, db *ent.Client, userID uuid.UUID) (*models.OpenSession, error) {
 	a, err := db.LessonAttempt.Query().
 		Where(lessonattempt.HasOwnerWith(user.ID(userID)), lessonattempt.CompletedAtIsNil(),
@@ -255,6 +256,10 @@ func openSession(ctx context.Context, db *ent.Client, userID uuid.UUID) (*models
 		Strings(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if len(graded) == 0 {
+		// Nothing graded yet: resuming would be the same as starting fresh, so don't offer it.
+		return nil, nil
 	}
 	return &models.OpenSession{ID: a.ID, Mode: string(a.Mode), Done: len(graded), Total: len(a.CardIds), StartedAt: a.StartedAt}, nil
 }

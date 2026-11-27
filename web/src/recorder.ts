@@ -1,4 +1,5 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { markMicDenied } from "./mic";
 import { unlockSpeech } from "./speech";
 
 function mimeType() {
@@ -40,9 +41,10 @@ export function useRecorder(onTake: (audio: Blob) => void, onError: (message: st
       recorder.current = rec;
       rec.start();
       setRecording(true);
-    } catch {
-      onError("Allow the microphone to grade pronunciation.");
+    } catch (err) {
       holding.current = false;
+      if (err instanceof DOMException && (err.name === "NotAllowedError" || err.name === "SecurityError")) markMicDenied();
+      else onError("Couldn't start the microphone. Check that one is connected and try again.");
     }
   }
 

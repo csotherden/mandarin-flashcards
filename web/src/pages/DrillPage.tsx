@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../api";
 import { Attribution, CardImage } from "../components/CardImage";
 import { Icon } from "../components/Icon";
+import { MicGate } from "../components/MicGate";
 import { markSyllable, Pinyin, toneLabel } from "../components/Pinyin";
 import { useRecorder } from "../recorder";
 import { speakChinese, unlockSpeech } from "../speech";
@@ -96,14 +97,16 @@ export function DrillPage() {
       {match ? (
         <MatchRound session={session} onMatched={() => setGraded((n) => n + 1)} onXP={addXP} onDone={finish} onError={setError} />
       ) : (
-        <SpeakRound
-          session={session}
-          index={index}
-          onGraded={() => setGraded((n) => n + 1)}
-          onXP={addXP}
-          onNext={() => (index + 1 >= total ? finish() : setIndex(index + 1))}
-          onError={setError}
-        />
+        <MicGate exitTo="/">
+          <SpeakRound
+            session={session}
+            index={index}
+            onGraded={() => setGraded((n) => n + 1)}
+            onXP={addXP}
+            onNext={() => (index + 1 >= total ? finish() : setIndex(index + 1))}
+            onError={setError}
+          />
+        </MicGate>
       )}
     </div>
   );
@@ -193,7 +196,7 @@ function SpeakRound({
             <section className="flip-face col-start-1 row-start-1 overflow-hidden rounded-[32px] bg-white shadow-float" aria-hidden={flipped}>
               {session.attempt.mode === "image_speak" ? (
                 <>
-                  <CardImage card={card} className="aspect-[4/3] w-full" />
+                  <CardImage card={card} className="aspect-[4/3] w-full lg:aspect-[3/2]" />
                   <div className="flex min-h-[76px] items-center justify-center px-5 py-4 text-center">
                     {hint ? (
                       <span className="rise text-xl font-semibold">{card.english || "No English gloss"}</span>
