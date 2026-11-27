@@ -254,7 +254,7 @@
      "hanzi": "包子",
      "pinyin": "bāozi",
      "tonal_pinyin": "bao1 zi5",
-     "english": "steamed bun",
+     "english": "stuffed steamed bun",
      "example_sentence_hanzi": "早上我吃了两个包子。",
      "example_sentence_pinyin": "Zǎoshang wǒ chī le liǎng ge bāozi.",
      "categories": [
@@ -668,7 +668,7 @@
      "hanzi": "牛",
      "pinyin": "niú",
      "tonal_pinyin": "niu2",
-     "english": "cow",
+     "english": "cow, cattle",
      "example_sentence_hanzi": "牛在吃草。",
      "example_sentence_pinyin": "Niú zài chī cǎo.",
      "categories": [
@@ -786,8 +786,8 @@
      "pinyin": "yǐzi",
      "tonal_pinyin": "yi3 zi5",
      "english": "chair",
-     "example_sentence_hanzi": "请坐这把椅子。",
-     "example_sentence_pinyin": "Qǐng zuò zhè bǎ yǐzi.",
+     "example_sentence_hanzi": "你坐这把椅子吧。",
+     "example_sentence_pinyin": "Nǐ zuò zhè bǎ yǐzi ba.",
      "categories": [
       "Home"
      ],
@@ -911,7 +911,7 @@
      "hanzi": "杯子",
      "pinyin": "bēizi",
      "tonal_pinyin": "bei1 zi5",
-     "english": "cup",
+     "english": "cup, glass",
      "example_sentence_hanzi": "这是我的杯子。",
      "example_sentence_pinyin": "Zhè shì wǒ de bēizi.",
      "categories": [
@@ -1010,7 +1010,7 @@
      "hanzi": "裙子",
      "pinyin": "qúnzi",
      "tonal_pinyin": "qun2 zi5",
-     "english": "skirt",
+     "english": "skirt, dress",
      "example_sentence_hanzi": "她穿了一条红裙子。",
      "example_sentence_pinyin": "Tā chuān le yì tiáo hóng qúnzi.",
      "categories": [
@@ -1028,7 +1028,7 @@
      "hanzi": "外套",
      "pinyin": "wàitào",
      "tonal_pinyin": "wai4 tao4",
-     "english": "coat",
+     "english": "jacket, coat",
      "example_sentence_hanzi": "外面冷，穿外套吧。",
      "example_sentence_pinyin": "Wàimiàn lěng, chuān wàitào ba.",
      "categories": [
@@ -1142,12 +1142,12 @@
    "sort_order": 7,
    "cards": [
     {
-     "hanzi": "汽车",
-     "pinyin": "qìchē",
-     "tonal_pinyin": "qi4 che1",
+     "hanzi": "车",
+     "pinyin": "chē",
+     "tonal_pinyin": "che1",
      "english": "car",
-     "example_sentence_hanzi": "这辆汽车是白色的。",
-     "example_sentence_pinyin": "Zhè liàng qìchē shì báisè de.",
+     "example_sentence_hanzi": "我的车是白色的。",
+     "example_sentence_pinyin": "Wǒ de chē shì báisè de.",
      "categories": [
       "Transport"
      ],
@@ -1164,8 +1164,8 @@
      "pinyin": "chūzūchē",
      "tonal_pinyin": "chu1 zu1 che1",
      "english": "taxi",
-     "example_sentence_hanzi": "我们打出租车吧。",
-     "example_sentence_pinyin": "Wǒmen dǎ chūzūchē ba.",
+     "example_sentence_hanzi": "我们坐出租车去吧。",
+     "example_sentence_pinyin": "Wǒmen zuò chūzūchē qù ba.",
      "categories": [
       "Transport"
      ],
@@ -1628,12 +1628,12 @@
      }
     },
     {
-     "hanzi": "牙齿",
-     "pinyin": "yáchǐ",
-     "tonal_pinyin": "ya2 chi3",
-     "english": "teeth",
-     "example_sentence_hanzi": "他的牙齿很白。",
-     "example_sentence_pinyin": "Tā de yáchǐ hěn bái.",
+     "hanzi": "牙",
+     "pinyin": "yá",
+     "tonal_pinyin": "ya2",
+     "english": "tooth, teeth",
+     "example_sentence_hanzi": "我每天刷两次牙。",
+     "example_sentence_pinyin": "Wǒ měi tiān shuā liǎng cì yá.",
      "categories": [
       "Body"
      ],
@@ -1874,7 +1874,7 @@
      "hanzi": "厕所",
      "pinyin": "cèsuǒ",
      "tonal_pinyin": "ce4 suo3",
-     "english": "restroom",
+     "english": "toilet, bathroom",
      "example_sentence_hanzi": "请问，厕所在哪儿？",
      "example_sentence_pinyin": "Qǐngwèn, cèsuǒ zài nǎr?",
      "categories": [
