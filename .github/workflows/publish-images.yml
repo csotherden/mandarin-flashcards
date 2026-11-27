@@ -2,10 +2,18 @@ name: Publish images to GHCR
 
 # Builds the API and web images and pushes them to GHCR on every push to main, tagged latest and
 # sha-<short>. The lab stack (Blue-Door-Software-Group/lab, stacks/mandarin) runs :latest.
+#
+# Pushes that only touch library content or docs don't change either image, so they don't build.
+# Library content is loaded into a running deployment with api-server -library-load (see
+# library/README.md). Run the workflow by hand (workflow_dispatch) to force a build.
 
 on:
   push:
     branches: ["main"]
+    paths-ignore:
+      - "library/**"
+      - "**/*.md"
+      - "LICENSE"
   workflow_dispatch: {}
 
 permissions:
