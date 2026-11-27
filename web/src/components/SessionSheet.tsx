@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../api";
-import { modes, startSession } from "../session";
-import type { CardSet, Lesson, StudyMode } from "../types";
+import { practiceModes, reviewPath, startSession, type PracticeMode } from "../session";
+import type { CardSet, Lesson } from "../types";
 import { Icon } from "./Icon";
 import { Sheet } from "./Sheet";
 
@@ -22,14 +22,15 @@ export function SessionSheet({
   onClose: () => void;
   sets: CardSet[];
   initialSetIds?: string[];
-  initialMode?: StudyMode;
+  initialMode?: PracticeMode;
   /** How many cards "All cards" covers, to label the All option. */
   totalCards?: number;
 }) {
   const navigate = useNavigate();
   const [setIds, setSetIds] = useState<string[]>(initialSetIds);
   const [count, setCount] = useState(10);
-  const [mode, setMode] = useState<StudyMode>(initialMode);
+  const [mode, setMode] = useState<PracticeMode>(initialMode);
+  const location = useLocation();
   const [save, setSave] = useState(false);
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -55,6 +56,11 @@ export function SessionSheet({
   }
 
   async function start() {
+    if (mode === "review") {
+      // Review is ungraded and lives only in the browser: no session to create or resume.
+      navigate(reviewPath(setIds.length ? { setIds } : { all: true }, count, location.pathname));
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -97,9 +103,9 @@ export function SessionSheet({
         ))}
       </div>
 
-      <p className="label mt-5">Drill</p>
+      <p className="label mt-5">How to practice</p>
       <div className="mt-2 grid gap-2">
-        {modes.map((item) => (
+        {practiceModes.map((item) => (
           <button
             key={item.id}
             type="button"
@@ -112,7 +118,7 @@ export function SessionSheet({
         ))}
       </div>
 
-      {setIds.length > 0 && (
+      {setIds.length > 0 && mode !== "review" && (
         <div className="mt-5 rounded-2xl bg-[#F1EEEA] p-3">
           <label className="flex items-center gap-3 font-semibold">
             <input type="checkbox" className="h-5 w-5 accent-crimson" checked={save} onChange={(event) => setSave(event.target.checked)} />
@@ -131,7 +137,7 @@ export function SessionSheet({
 
       {error && <p className="mt-3 text-sm font-semibold text-crimson" role="alert">{error}</p>}
       <button type="button" className="btn-primary mt-5 h-14 w-full text-lg" disabled={busy} onClick={start}>
-        <Icon name="play" /> {busy ? "Starting…" : "Start"}
+        <Icon name="play" /> {busy ? "Starting…" : mode === "review" ? "Start review" : "Start"}
       </button>
     </Sheet>
   );

@@ -14,6 +14,7 @@ import { SetPage } from "./pages/SetPage";
 import { SetsPage } from "./pages/SetsPage";
 import { SummaryPage } from "./pages/SummaryPage";
 import { TodayPage } from "./pages/TodayPage";
+import { ReviewPage } from "./pages/ReviewPage";
 import { ToneLessonPage } from "./pages/ToneLessonPage";
 import { TonesPage } from "./pages/TonesPage";
 import { WelcomePage } from "./pages/WelcomePage";
@@ -58,6 +59,14 @@ export function App() {
         element={
           <Guard>
             <DrillPage />
+          </Guard>
+        }
+      />
+      <Route
+        path="/review"
+        element={
+          <Guard>
+            <ReviewPage />
           </Guard>
         }
       />

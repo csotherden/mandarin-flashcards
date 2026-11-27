@@ -5,6 +5,7 @@ import { CardImage } from "../components/CardImage";
 import { Icon } from "../components/Icon";
 import { Pinyin } from "../components/Pinyin";
 import { SessionSheet } from "../components/SessionSheet";
+import { reviewPath } from "../session";
 import { Sheet } from "../components/Sheet";
 import { UndoBar } from "../components/UndoBar";
 import type { CardSet, Flashcard, SetDetail } from "../types";
@@ -73,10 +74,17 @@ export function SetPage() {
         </button>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
         <button type="button" className="btn-primary h-14 text-lg" disabled={detail.cards.length === 0} onClick={() => setPractice(true)}>
           <Icon name="play" /> Practice
         </button>
+        <Link
+          to={reviewPath({ setIds: [id] }, 0, `/sets/${id}`)}
+          aria-disabled={detail.cards.length === 0}
+          className={`btn-ghost h-14 ${detail.cards.length === 0 ? "pointer-events-none opacity-50" : ""}`}
+        >
+          <Icon name="cards" /> Review
+        </Link>
         <Link to={`/add?set=${id}`} className="btn-ghost h-14">
           <Icon name="plus" /> New words
         </Link>

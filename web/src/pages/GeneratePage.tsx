@@ -5,6 +5,7 @@ import { CardImage } from "../components/CardImage";
 import { Icon } from "../components/Icon";
 import { Pinyin } from "../components/Pinyin";
 import { SessionSheet } from "../components/SessionSheet";
+import { reviewPath } from "../session";
 import type { CardSet, GeneratedSet } from "../types";
 
 // Themes the starter library doesn't already cover; basics like family or food live there ready-made.
@@ -81,6 +82,9 @@ export function GeneratePage() {
           ))}
         </ul>
         <div className="mt-5 flex flex-wrap gap-3">
+          <Link to={reviewPath({ setIds: [result.set.id] }, 0, `/sets/${result.set.id}`)} className="btn-ghost h-12">
+            <Icon name="cards" /> Review these
+          </Link>
           <Link to={`/sets/${result.set.id}`} className="btn-ghost h-12">Open the set</Link>
           <button type="button" className="btn-soft h-12" onClick={() => { setResult(null); setTheme(""); }}>
             Generate another

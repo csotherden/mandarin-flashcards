@@ -23,3 +23,21 @@ export async function startSession(source: SessionSource, mode: StudyMode, count
   const session = await api<Session>("/api/study/sessions", { method: "POST", body: JSON.stringify(body) });
   return session.attempt.id;
 }
+
+/** Every way to practice a set: the graded drills plus Review (flip through, no grading). */
+export type PracticeMode = StudyMode | "review";
+
+export const practiceModes: { id: PracticeMode; title: string; detail: string }[] = [
+  ...modes,
+  { id: "review", title: "Review", detail: "Flip through the cards at your own pace, no grading" },
+];
+
+/** The review screen for some sets (or all cards): /review?sets=a,b or ?all=1, &count, &from. */
+export function reviewPath(source: { setIds?: string[]; all?: boolean }, count = 0, from = "") {
+  const params = new URLSearchParams();
+  if (source.all || !source.setIds?.length) params.set("all", "1");
+  else params.set("sets", source.setIds.join(","));
+  if (count > 0) params.set("count", String(count));
+  if (from) params.set("from", from);
+  return `/review?${params.toString()}`;
+}

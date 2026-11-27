@@ -4,8 +4,8 @@ import { api, ApiError } from "../api";
 import { CardImage } from "../components/CardImage";
 import { Icon } from "../components/Icon";
 import { Pinyin } from "../components/Pinyin";
-import { modes, startSession } from "../session";
-import type { Flashcard, LibraryCard, LibraryImport, LibrarySetDetail, StudyMode } from "../types";
+import { practiceModes, reviewPath, startSession, type PracticeMode } from "../session";
+import type { Flashcard, LibraryCard, LibraryImport, LibrarySetDetail } from "../types";
 
 /** CardImage and friends take a Flashcard; a library card has everything they read. */
 function asCard(card: LibraryCard): Flashcard {
@@ -22,7 +22,7 @@ export function LibrarySetPage() {
   const welcome = params.has("welcome");
   const navigate = useNavigate();
   const [set, setSet] = useState<LibrarySetDetail | null>(null);
-  const [mode, setMode] = useState<StudyMode>("image_speak");
+  const [mode, setMode] = useState<PracticeMode>("image_speak");
   const [busy, setBusy] = useState<"" | "start" | "add">("");
   const [error, setError] = useState("");
 
@@ -42,7 +42,8 @@ export function LibrarySetPage() {
     setError("");
     try {
       const setId = await hydrate();
-      navigate(`/drill/${await startSession({ kind: "sets", setIds: [setId] }, mode, 0)}`);
+      if (mode === "review") navigate(reviewPath({ setIds: [setId] }, 0, `/sets/${setId}`));
+      else navigate(`/drill/${await startSession({ kind: "sets", setIds: [setId] }, mode, 0)}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Could not start the lesson");
       setBusy("");
@@ -87,7 +88,7 @@ export function LibrarySetPage() {
 
             <p className="mt-5 text-sm font-semibold uppercase tracking-[0.08em] text-white/85">How to practice</p>
             <div className="mt-2 grid gap-2">
-              {modes.map((item) => (
+              {practiceModes.map((item) => (
                 <button
                   key={item.id}
                   type="button"
@@ -106,7 +107,7 @@ export function LibrarySetPage() {
 
             {error && <p className="mt-3 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-crimson" role="alert">{error}</p>}
             <button type="button" disabled={!!busy} onClick={start} className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-white text-lg font-extrabold text-maroon disabled:opacity-70">
-              <Icon name="play" /> {busy === "start" ? "Starting…" : "Start lesson"}
+              <Icon name="play" /> {busy === "start" ? "Starting…" : mode === "review" ? "Start review" : "Start lesson"}
             </button>
             {set.imported_set_id ? (
               <Link to={`/sets/${set.imported_set_id}`} className="mt-1 flex min-h-11 items-center justify-center font-semibold text-white underline underline-offset-4">
