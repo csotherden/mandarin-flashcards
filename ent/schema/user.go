@@ -81,6 +81,10 @@ func (User) Edges() []ent.Edge {
 			Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("xp_awards", XPAward.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("tone_progress", ToneProgress.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("tone_attempts", ToneAttempt.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 

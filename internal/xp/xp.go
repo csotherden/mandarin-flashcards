@@ -196,3 +196,47 @@ func Today(ctx context.Context, db *ent.Client, u *ent.User, now time.Time) (int
 	}
 	return total, nil
 }
+
+// AwardOnce gives XP for a tier under a key that pays out at most once ever (not once a day):
+// what it has paid before, on any day, is subtracted, so a better take tops up and nothing more.
+// Used for the tones tutorial, where only the first pass through a lesson earns. The XP is
+// recorded on the day it was earned, so it shows in that day's total.
+func AwardOnce(ctx context.Context, db *ent.Client, userID uuid.UUID, key, tier string, score float64, at time.Time) (Result, error) {
+	tx, err := db.Tx(ctx)
+	if err != nil {
+		return Result{}, err
+	}
+	defer func() { _ = tx.Rollback() }()
+	u, err := tx.User.Query().Where(user.ID(userID)).ForUpdate().Only(ctx)
+	if err != nil {
+		return Result{}, fmt.Errorf("lock user: %w", err)
+	}
+	res := Result{Tier: tier, Total: u.XpTotal}
+	points := Points(tier, models.ModeHanziSpeak)
+	paid, err := tx.XPAward.Query().Where(xpaward.UserID(userID), xpaward.Word(key)).Select(xpaward.FieldXp).Ints(ctx)
+	if err != nil {
+		return Result{}, err
+	}
+	for _, p := range paid {
+		points -= p
+	}
+	if points <= 0 {
+		return res, tx.Commit()
+	}
+	day := at.In(streak.Location(u)).Format("2006-01-02")
+	row, err := tx.XPAward.Query().Where(xpaward.UserID(userID), xpaward.Word(key), xpaward.Day(day)).Only(ctx)
+	switch {
+	case ent.IsNotFound(err):
+		err = tx.XPAward.Create().SetUserID(userID).SetWord(key).SetDay(day).SetXp(points).SetTier(tier).SetBestScore(score).Exec(ctx)
+	case err == nil:
+		err = row.Update().AddXp(points).SetTier(tier).SetBestScore(max(score, row.BestScore)).Exec(ctx)
+	}
+	if err != nil {
+		return Result{}, fmt.Errorf("record award: %w", err)
+	}
+	if err := tx.User.UpdateOneID(userID).AddXpTotal(points).Exec(ctx); err != nil {
+		return Result{}, fmt.Errorf("add xp: %w", err)
+	}
+	res.Earned, res.Total = points, res.Total+points
+	return res, tx.Commit()
+}

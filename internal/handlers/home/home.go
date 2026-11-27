@@ -13,6 +13,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/flashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/lesson"
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/toneprogress"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/internal/handlerutils"
 	"github.com/csotherden/mandarin-flashcards/internal/middleware"
@@ -20,6 +21,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/internal/present"
 	"github.com/csotherden/mandarin-flashcards/internal/streak"
 	deck "github.com/csotherden/mandarin-flashcards/internal/study"
+	"github.com/csotherden/mandarin-flashcards/internal/tones"
 	"github.com/csotherden/mandarin-flashcards/internal/xp"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -77,6 +79,26 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	out.StreakLongest = status.Longest
 	out.StreakToday = status.Today
 	out.XPTotal = me.XpTotal
+	finished, err := h.db.ToneProgress.Query().
+		Where(toneprogress.UserID(userID), toneprogress.CompletedAtNotNil()).
+		Select(toneprogress.FieldLessonKey).
+		Strings(ctx)
+	if err != nil {
+		fail(err)
+		return
+	}
+	done := map[string]bool{}
+	for _, key := range finished {
+		done[key] = true
+	}
+	out.TonesTotal = len(tones.Lessons)
+	for _, l := range tones.Lessons {
+		if done[l.Key] {
+			out.TonesCompleted++
+		} else if out.TonesNext == "" {
+			out.TonesNext, out.TonesNextTitle = l.Key, l.Title
+		}
+	}
 	if out.XPToday, err = xp.Today(ctx, h.db, me, time.Now()); err != nil {
 		fail(err)
 		return

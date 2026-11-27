@@ -60,6 +60,9 @@ export function TodayPage() {
 
       {error && <p className="text-sm font-semibold text-crimson" role="alert">{error}</p>}
 
+      {home.total_cards === 0 && (
+        <TonesCard home={home} />
+      )}
       {home.total_cards === 0 ? (
         <section className="relative overflow-hidden rounded-[28px] bg-hero p-6 text-white lg:p-8">
           <Icon name="star" className="absolute right-5 top-5 text-5xl text-gold" />
@@ -119,6 +122,7 @@ export function TodayPage() {
             <button type="button" className="btn-ghost h-13 py-3.5" onClick={() => setBuilder(true)}>
               Build a custom session
             </button>
+            <TonesCard home={home} />
           </div>
 
           <div className="grid grid-cols-[minmax(0,1fr)] gap-7">
@@ -193,5 +197,29 @@ function QuickLabel({ title, detail, busy }: { title: string; detail: string; bu
         <Icon name="play" />
       </span>
     </div>
+  );
+}
+
+/** Intro to tones: a prominent "continue" until it's done, then a quiet way back to practice. */
+function TonesCard({ home }: { home: Home }) {
+  if (home.tones_next) {
+    const started = home.tones_completed > 0;
+    return (
+      <Link to={started ? `/tones/${home.tones_next}` : "/tones"} className="surface flex items-center gap-4 p-4 ring-2 ring-crimson/70">
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-ink font-hanzi text-2xl font-bold text-gold">声</span>
+        <span className="min-w-0 flex-1">
+          <b className="block">{started ? "Continue intro to tones" : "New to tones? Start here"}</b>
+          <span className="block truncate text-sm text-muted">
+            {started ? `${home.tones_completed} of ${home.tones_total} · next: ${home.tones_next_title}` : `${home.tones_total} short lessons with graded speaking`}
+          </span>
+        </span>
+        <Icon name="right" className="shrink-0 text-xl text-crimson" />
+      </Link>
+    );
+  }
+  return (
+    <Link to="/tones" className="flex items-center justify-center gap-2 rounded-2xl py-2 font-semibold text-muted underline-offset-4 hover:underline">
+      <span className="font-hanzi">声</span> Tone practice
+    </Link>
   );
 }

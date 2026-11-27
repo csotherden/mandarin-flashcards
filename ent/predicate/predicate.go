@@ -33,6 +33,12 @@ type LibrarySet func(*sql.Selector)
 // SetFlashcard is the predicate function for setflashcard builders.
 type SetFlashcard func(*sql.Selector)
 
+// ToneAttempt is the predicate function for toneattempt builders.
+type ToneAttempt func(*sql.Selector)
+
+// ToneProgress is the predicate function for toneprogress builders.
+type ToneProgress func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
 

@@ -20,6 +20,8 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/lesson"
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
 	"github.com/csotherden/mandarin-flashcards/ent/predicate"
+	"github.com/csotherden/mandarin-flashcards/ent/toneattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/toneprogress"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 	"github.com/google/uuid"
@@ -39,6 +41,8 @@ type UserQuery struct {
 	withLessonAttempts  *LessonAttemptQuery
 	withCardAttemptLogs *CardAttemptLogQuery
 	withXpAwards        *XPAwardQuery
+	withToneProgress    *ToneProgressQuery
+	withToneAttempts    *ToneAttemptQuery
 	modifiers           []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -223,6 +227,50 @@ func (_q *UserQuery) QueryXpAwards() *XPAwardQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(xpaward.Table, xpaward.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.XpAwardsTable, user.XpAwardsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryToneProgress chains the current query on the "tone_progress" edge.
+func (_q *UserQuery) QueryToneProgress() *ToneProgressQuery {
+	query := (&ToneProgressClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(toneprogress.Table, toneprogress.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ToneProgressTable, user.ToneProgressColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryToneAttempts chains the current query on the "tone_attempts" edge.
+func (_q *UserQuery) QueryToneAttempts() *ToneAttemptQuery {
+	query := (&ToneAttemptClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(toneattempt.Table, toneattempt.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ToneAttemptsTable, user.ToneAttemptsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -429,6 +477,8 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withLessonAttempts:  _q.withLessonAttempts.Clone(),
 		withCardAttemptLogs: _q.withCardAttemptLogs.Clone(),
 		withXpAwards:        _q.withXpAwards.Clone(),
+		withToneProgress:    _q.withToneProgress.Clone(),
+		withToneAttempts:    _q.withToneAttempts.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -512,6 +562,28 @@ func (_q *UserQuery) WithXpAwards(opts ...func(*XPAwardQuery)) *UserQuery {
 	return _q
 }
 
+// WithToneProgress tells the query-builder to eager-load the nodes that are connected to
+// the "tone_progress" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithToneProgress(opts ...func(*ToneProgressQuery)) *UserQuery {
+	query := (&ToneProgressClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withToneProgress = query
+	return _q
+}
+
+// WithToneAttempts tells the query-builder to eager-load the nodes that are connected to
+// the "tone_attempts" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithToneAttempts(opts ...func(*ToneAttemptQuery)) *UserQuery {
+	query := (&ToneAttemptClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withToneAttempts = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -590,7 +662,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [7]bool{
+		loadedTypes = [9]bool{
 			_q.withCategories != nil,
 			_q.withFlashcards != nil,
 			_q.withCardSets != nil,
@@ -598,6 +670,8 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withLessonAttempts != nil,
 			_q.withCardAttemptLogs != nil,
 			_q.withXpAwards != nil,
+			_q.withToneProgress != nil,
+			_q.withToneAttempts != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -667,6 +741,20 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadXpAwards(ctx, query, nodes,
 			func(n *User) { n.Edges.XpAwards = []*XPAward{} },
 			func(n *User, e *XPAward) { n.Edges.XpAwards = append(n.Edges.XpAwards, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withToneProgress; query != nil {
+		if err := _q.loadToneProgress(ctx, query, nodes,
+			func(n *User) { n.Edges.ToneProgress = []*ToneProgress{} },
+			func(n *User, e *ToneProgress) { n.Edges.ToneProgress = append(n.Edges.ToneProgress, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withToneAttempts; query != nil {
+		if err := _q.loadToneAttempts(ctx, query, nodes,
+			func(n *User) { n.Edges.ToneAttempts = []*ToneAttempt{} },
+			func(n *User, e *ToneAttempt) { n.Edges.ToneAttempts = append(n.Edges.ToneAttempts, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -873,6 +961,66 @@ func (_q *UserQuery) loadXpAwards(ctx context.Context, query *XPAwardQuery, node
 	}
 	query.Where(predicate.XPAward(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.XpAwardsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadToneProgress(ctx context.Context, query *ToneProgressQuery, nodes []*User, init func(*User), assign func(*User, *ToneProgress)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(toneprogress.FieldUserID)
+	}
+	query.Where(predicate.ToneProgress(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ToneProgressColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadToneAttempts(ctx context.Context, query *ToneAttemptQuery, nodes []*User, init func(*User), assign func(*User, *ToneAttempt)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(toneattempt.FieldUserID)
+	}
+	query.Where(predicate.ToneAttempt(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ToneAttemptsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

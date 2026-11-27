@@ -1,17 +1,13 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../api";
 import { Attribution, CardImage } from "../components/CardImage";
 import { Icon } from "../components/Icon";
 import { markSyllable, Pinyin, toneLabel } from "../components/Pinyin";
+import { useRecorder } from "../recorder";
 import { speakChinese, unlockSpeech } from "../speech";
 import type { AssessResponse, CardResult, Flashcard, Session, StudyMode } from "../types";
 import { tierLabel, tierPoints } from "../xp";
-
-function mimeType() {
-  const types = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
-  return types.find((type) => typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported(type));
-}
 
 export function DrillPage() {
   const { id = "" } = useParams();
@@ -130,12 +126,9 @@ function SpeakRound({
   const remaining = session.cards.length - index - 1;
   const [result, setResult] = useState<AssessResponse | null>(null);
   const [hint, setHint] = useState(false);
-  const [recording, setRecording] = useState(false);
   const [busy, setBusy] = useState(false);
-  const holding = useRef(false);
-  const recorder = useRef<MediaRecorder | null>(null);
-  const chunks = useRef<Blob[]>([]);
   const gradedCard = useRef<string | null>(null);
+  const { recording, bind } = useRecorder((take) => void grade(take), onError);
 
   useEffect(() => {
     setResult(null);
@@ -162,42 +155,6 @@ function SpeakRound({
     } finally {
       setBusy(false);
     }
-  }
-
-  async function pointerDown(event: PointerEvent<HTMLButtonElement>) {
-    event.preventDefault();
-    unlockSpeech();
-    onError("");
-    holding.current = true;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (!holding.current) {
-        stream.getTracks().forEach((track) => track.stop());
-        return;
-      }
-      const mime = mimeType();
-      const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
-      chunks.current = [];
-      rec.ondataavailable = (item) => {
-        if (item.data.size) chunks.current.push(item.data);
-      };
-      rec.onstop = () => {
-        stream.getTracks().forEach((track) => track.stop());
-        void grade(new Blob(chunks.current, { type: rec.mimeType || mime || "audio/webm" }));
-      };
-      recorder.current = rec;
-      rec.start();
-      setRecording(true);
-    } catch {
-      onError("Allow the microphone to grade pronunciation.");
-      holding.current = false;
-    }
-  }
-
-  function pointerUp() {
-    holding.current = false;
-    if (recorder.current && recorder.current.state === "recording") recorder.current.stop();
-    setRecording(false);
   }
 
   const flipped = result !== null;
@@ -256,10 +213,7 @@ function SpeakRound({
               type="button"
               aria-label={recording ? "Release to grade" : "Hold to speak"}
               className={`mic grid h-24 w-24 shrink-0 place-items-center rounded-full text-4xl text-white shadow-[0_12px_28px_rgba(200,16,46,.35)] transition ${recording ? "scale-110 bg-maroon ring-8 ring-crimson/25" : "bg-crimson"}`}
-              onPointerDown={pointerDown}
-              onPointerUp={pointerUp}
-              onPointerCancel={pointerUp}
-              onContextMenu={(event) => event.preventDefault()}
+              {...bind}
               disabled={busy}
             >
               <Icon name="mic" />

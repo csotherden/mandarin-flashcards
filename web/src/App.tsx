@@ -14,6 +14,8 @@ import { SetPage } from "./pages/SetPage";
 import { SetsPage } from "./pages/SetsPage";
 import { SummaryPage } from "./pages/SummaryPage";
 import { TodayPage } from "./pages/TodayPage";
+import { ToneLessonPage } from "./pages/ToneLessonPage";
+import { TonesPage } from "./pages/TonesPage";
 import { WelcomePage } from "./pages/WelcomePage";
 
 function Guard({ children }: { children: React.ReactNode }) {
@@ -46,6 +48,7 @@ export function App() {
         <Route path="/library" element={<LibraryPage />} />
         <Route path="/library/:id" element={<LibrarySetPage />} />
         <Route path="/welcome" element={<WelcomePage />} />
+        <Route path="/tones" element={<TonesPage />} />
         <Route path="/me" element={<MePage />} />
         {/* Lessons became quick starts on Today. */}
         <Route path="/lessons/*" element={<Navigate to="/" replace />} />
@@ -55,6 +58,14 @@ export function App() {
         element={
           <Guard>
             <DrillPage />
+          </Guard>
+        }
+      />
+      <Route
+        path="/tones/:key"
+        element={
+          <Guard>
+            <ToneLessonPage />
           </Guard>
         }
       />

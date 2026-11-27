@@ -2,7 +2,6 @@ package study
 
 import (
 	"errors"
-	"io"
 	"net/http"
 
 	"github.com/csotherden/mandarin-flashcards/ent"
@@ -72,24 +71,9 @@ func (h *Handler) Assess(w http.ResponseWriter, r *http.Request) {
 		handlerutils.RespondWithError(w, h.logger, http.StatusNotFound, handlerutils.CodeNotSet, "Flashcard not found", err)
 		return
 	}
-	file, header, err := r.FormFile("audio")
+	wav, err := audio.FromForm(r)
 	if err != nil {
-		handlerutils.RespondWithError(w, h.logger, http.StatusBadRequest, handlerutils.CodeNotSet, "Record audio before grading", err)
-		return
-	}
-	defer file.Close()
-	raw, err := io.ReadAll(io.LimitReader(file, 8<<20+1))
-	if err != nil {
-		handlerutils.RespondWithError(w, h.logger, http.StatusBadRequest, handlerutils.CodeNotSet, "Could not read the recording", err)
-		return
-	}
-	if len(raw) == 0 || len(raw) > 8_000_000 {
-		handlerutils.RespondWithError(w, h.logger, http.StatusBadRequest, handlerutils.CodeNotSet, "Recording must be under 8 MB", nil)
-		return
-	}
-	wav, err := audio.ToMonoWAV(r.Context(), raw, header.Header.Get("Content-Type"))
-	if err != nil {
-		handlerutils.RespondWithError(w, h.logger, http.StatusBadRequest, handlerutils.CodeNotSet, "Could not read that recording. Try again", err)
+		handlerutils.RespondWithError(w, h.logger, http.StatusBadRequest, handlerutils.CodeNotSet, err.Error(), err)
 		return
 	}
 	// The numbered form is what TonePerfect accepts; cards from before it fall back to the

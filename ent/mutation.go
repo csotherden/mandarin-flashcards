@@ -21,6 +21,8 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/libraryset"
 	"github.com/csotherden/mandarin-flashcards/ent/predicate"
 	"github.com/csotherden/mandarin-flashcards/ent/setflashcard"
+	"github.com/csotherden/mandarin-flashcards/ent/toneattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/toneprogress"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
@@ -45,6 +47,8 @@ const (
 	TypeLibraryCard    = "LibraryCard"
 	TypeLibrarySet     = "LibrarySet"
 	TypeSetFlashcard   = "SetFlashcard"
+	TypeToneAttempt    = "ToneAttempt"
+	TypeToneProgress   = "ToneProgress"
 	TypeUser           = "User"
 	TypeXPAward        = "XPAward"
 )
@@ -8685,6 +8689,1655 @@ func (m *SetFlashcardMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown SetFlashcard edge %s", name)
 }
 
+// ToneAttemptMutation represents an operation that mutates the ToneAttempt nodes in the graph.
+type ToneAttemptMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	created_at       *time.Time
+	updated_at       *time.Time
+	lesson_key       *string
+	item_key         *string
+	overall_score    *float64
+	addoverall_score *float64
+	xp_tier          *string
+	xp_earned        *int
+	addxp_earned     *int
+	raw_api_feedback **models.StoredFeedback
+	clearedFields    map[string]struct{}
+	owner            *uuid.UUID
+	clearedowner     bool
+	done             bool
+	oldValue         func(context.Context) (*ToneAttempt, error)
+	predicates       []predicate.ToneAttempt
+}
+
+var _ ent.Mutation = (*ToneAttemptMutation)(nil)
+
+// toneattemptOption allows management of the mutation configuration using functional options.
+type toneattemptOption func(*ToneAttemptMutation)
+
+// newToneAttemptMutation creates new mutation for the ToneAttempt entity.
+func newToneAttemptMutation(c config, op Op, opts ...toneattemptOption) *ToneAttemptMutation {
+	m := &ToneAttemptMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeToneAttempt,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withToneAttemptID sets the ID field of the mutation.
+func withToneAttemptID(id uuid.UUID) toneattemptOption {
+	return func(m *ToneAttemptMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ToneAttempt
+		)
+		m.oldValue = func(ctx context.Context) (*ToneAttempt, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ToneAttempt.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withToneAttempt sets the old ToneAttempt of the mutation.
+func withToneAttempt(node *ToneAttempt) toneattemptOption {
+	return func(m *ToneAttemptMutation) {
+		m.oldValue = func(context.Context) (*ToneAttempt, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ToneAttemptMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ToneAttemptMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of ToneAttempt entities.
+func (m *ToneAttemptMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ToneAttemptMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ToneAttemptMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ToneAttempt.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ToneAttemptMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ToneAttemptMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the ToneAttempt entity.
+// If the ToneAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneAttemptMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ToneAttemptMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *ToneAttemptMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *ToneAttemptMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the ToneAttempt entity.
+// If the ToneAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneAttemptMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *ToneAttemptMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *ToneAttemptMutation) SetUserID(u uuid.UUID) {
+	m.owner = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *ToneAttemptMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.owner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the ToneAttempt entity.
+// If the ToneAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneAttemptMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *ToneAttemptMutation) ResetUserID() {
+	m.owner = nil
+}
+
+// SetLessonKey sets the "lesson_key" field.
+func (m *ToneAttemptMutation) SetLessonKey(s string) {
+	m.lesson_key = &s
+}
+
+// LessonKey returns the value of the "lesson_key" field in the mutation.
+func (m *ToneAttemptMutation) LessonKey() (r string, exists bool) {
+	v := m.lesson_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLessonKey returns the old "lesson_key" field's value of the ToneAttempt entity.
+// If the ToneAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneAttemptMutation) OldLessonKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLessonKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLessonKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLessonKey: %w", err)
+	}
+	return oldValue.LessonKey, nil
+}
+
+// ResetLessonKey resets all changes to the "lesson_key" field.
+func (m *ToneAttemptMutation) ResetLessonKey() {
+	m.lesson_key = nil
+}
+
+// SetItemKey sets the "item_key" field.
+func (m *ToneAttemptMutation) SetItemKey(s string) {
+	m.item_key = &s
+}
+
+// ItemKey returns the value of the "item_key" field in the mutation.
+func (m *ToneAttemptMutation) ItemKey() (r string, exists bool) {
+	v := m.item_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItemKey returns the old "item_key" field's value of the ToneAttempt entity.
+// If the ToneAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneAttemptMutation) OldItemKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItemKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItemKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItemKey: %w", err)
+	}
+	return oldValue.ItemKey, nil
+}
+
+// ResetItemKey resets all changes to the "item_key" field.
+func (m *ToneAttemptMutation) ResetItemKey() {
+	m.item_key = nil
+}
+
+// SetOverallScore sets the "overall_score" field.
+func (m *ToneAttemptMutation) SetOverallScore(f float64) {
+	m.overall_score = &f
+	m.addoverall_score = nil
+}
+
+// OverallScore returns the value of the "overall_score" field in the mutation.
+func (m *ToneAttemptMutation) OverallScore() (r float64, exists bool) {
+	v := m.overall_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOverallScore returns the old "overall_score" field's value of the ToneAttempt entity.
+// If the ToneAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneAttemptMutation) OldOverallScore(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOverallScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOverallScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOverallScore: %w", err)
+	}
+	return oldValue.OverallScore, nil
+}
+
+// AddOverallScore adds f to the "overall_score" field.
+func (m *ToneAttemptMutation) AddOverallScore(f float64) {
+	if m.addoverall_score != nil {
+		*m.addoverall_score += f
+	} else {
+		m.addoverall_score = &f
+	}
+}
+
+// AddedOverallScore returns the value that was added to the "overall_score" field in this mutation.
+func (m *ToneAttemptMutation) AddedOverallScore() (r float64, exists bool) {
+	v := m.addoverall_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOverallScore resets all changes to the "overall_score" field.
+func (m *ToneAttemptMutation) ResetOverallScore() {
+	m.overall_score = nil
+	m.addoverall_score = nil
+}
+
+// SetXpTier sets the "xp_tier" field.
+func (m *ToneAttemptMutation) SetXpTier(s string) {
+	m.xp_tier = &s
+}
+
+// XpTier returns the value of the "xp_tier" field in the mutation.
+func (m *ToneAttemptMutation) XpTier() (r string, exists bool) {
+	v := m.xp_tier
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldXpTier returns the old "xp_tier" field's value of the ToneAttempt entity.
+// If the ToneAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneAttemptMutation) OldXpTier(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldXpTier is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldXpTier requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldXpTier: %w", err)
+	}
+	return oldValue.XpTier, nil
+}
+
+// ResetXpTier resets all changes to the "xp_tier" field.
+func (m *ToneAttemptMutation) ResetXpTier() {
+	m.xp_tier = nil
+}
+
+// SetXpEarned sets the "xp_earned" field.
+func (m *ToneAttemptMutation) SetXpEarned(i int) {
+	m.xp_earned = &i
+	m.addxp_earned = nil
+}
+
+// XpEarned returns the value of the "xp_earned" field in the mutation.
+func (m *ToneAttemptMutation) XpEarned() (r int, exists bool) {
+	v := m.xp_earned
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldXpEarned returns the old "xp_earned" field's value of the ToneAttempt entity.
+// If the ToneAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneAttemptMutation) OldXpEarned(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldXpEarned is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldXpEarned requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldXpEarned: %w", err)
+	}
+	return oldValue.XpEarned, nil
+}
+
+// AddXpEarned adds i to the "xp_earned" field.
+func (m *ToneAttemptMutation) AddXpEarned(i int) {
+	if m.addxp_earned != nil {
+		*m.addxp_earned += i
+	} else {
+		m.addxp_earned = &i
+	}
+}
+
+// AddedXpEarned returns the value that was added to the "xp_earned" field in this mutation.
+func (m *ToneAttemptMutation) AddedXpEarned() (r int, exists bool) {
+	v := m.addxp_earned
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetXpEarned resets all changes to the "xp_earned" field.
+func (m *ToneAttemptMutation) ResetXpEarned() {
+	m.xp_earned = nil
+	m.addxp_earned = nil
+}
+
+// SetRawAPIFeedback sets the "raw_api_feedback" field.
+func (m *ToneAttemptMutation) SetRawAPIFeedback(mf *models.StoredFeedback) {
+	m.raw_api_feedback = &mf
+}
+
+// RawAPIFeedback returns the value of the "raw_api_feedback" field in the mutation.
+func (m *ToneAttemptMutation) RawAPIFeedback() (r *models.StoredFeedback, exists bool) {
+	v := m.raw_api_feedback
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRawAPIFeedback returns the old "raw_api_feedback" field's value of the ToneAttempt entity.
+// If the ToneAttempt object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneAttemptMutation) OldRawAPIFeedback(ctx context.Context) (v *models.StoredFeedback, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRawAPIFeedback is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRawAPIFeedback requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRawAPIFeedback: %w", err)
+	}
+	return oldValue.RawAPIFeedback, nil
+}
+
+// ClearRawAPIFeedback clears the value of the "raw_api_feedback" field.
+func (m *ToneAttemptMutation) ClearRawAPIFeedback() {
+	m.raw_api_feedback = nil
+	m.clearedFields[toneattempt.FieldRawAPIFeedback] = struct{}{}
+}
+
+// RawAPIFeedbackCleared returns if the "raw_api_feedback" field was cleared in this mutation.
+func (m *ToneAttemptMutation) RawAPIFeedbackCleared() bool {
+	_, ok := m.clearedFields[toneattempt.FieldRawAPIFeedback]
+	return ok
+}
+
+// ResetRawAPIFeedback resets all changes to the "raw_api_feedback" field.
+func (m *ToneAttemptMutation) ResetRawAPIFeedback() {
+	m.raw_api_feedback = nil
+	delete(m.clearedFields, toneattempt.FieldRawAPIFeedback)
+}
+
+// SetOwnerID sets the "owner" edge to the User entity by id.
+func (m *ToneAttemptMutation) SetOwnerID(id uuid.UUID) {
+	m.owner = &id
+}
+
+// ClearOwner clears the "owner" edge to the User entity.
+func (m *ToneAttemptMutation) ClearOwner() {
+	m.clearedowner = true
+	m.clearedFields[toneattempt.FieldUserID] = struct{}{}
+}
+
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
+func (m *ToneAttemptMutation) OwnerCleared() bool {
+	return m.clearedowner
+}
+
+// OwnerID returns the "owner" edge ID in the mutation.
+func (m *ToneAttemptMutation) OwnerID() (id uuid.UUID, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
+	}
+	return
+}
+
+// OwnerIDs returns the "owner" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// OwnerID instead. It exists only for internal usage by the builders.
+func (m *ToneAttemptMutation) OwnerIDs() (ids []uuid.UUID) {
+	if id := m.owner; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetOwner resets all changes to the "owner" edge.
+func (m *ToneAttemptMutation) ResetOwner() {
+	m.owner = nil
+	m.clearedowner = false
+}
+
+// Where appends a list predicates to the ToneAttemptMutation builder.
+func (m *ToneAttemptMutation) Where(ps ...predicate.ToneAttempt) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ToneAttemptMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ToneAttemptMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ToneAttempt, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ToneAttemptMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ToneAttemptMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ToneAttempt).
+func (m *ToneAttemptMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ToneAttemptMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.created_at != nil {
+		fields = append(fields, toneattempt.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, toneattempt.FieldUpdatedAt)
+	}
+	if m.owner != nil {
+		fields = append(fields, toneattempt.FieldUserID)
+	}
+	if m.lesson_key != nil {
+		fields = append(fields, toneattempt.FieldLessonKey)
+	}
+	if m.item_key != nil {
+		fields = append(fields, toneattempt.FieldItemKey)
+	}
+	if m.overall_score != nil {
+		fields = append(fields, toneattempt.FieldOverallScore)
+	}
+	if m.xp_tier != nil {
+		fields = append(fields, toneattempt.FieldXpTier)
+	}
+	if m.xp_earned != nil {
+		fields = append(fields, toneattempt.FieldXpEarned)
+	}
+	if m.raw_api_feedback != nil {
+		fields = append(fields, toneattempt.FieldRawAPIFeedback)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ToneAttemptMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case toneattempt.FieldCreatedAt:
+		return m.CreatedAt()
+	case toneattempt.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case toneattempt.FieldUserID:
+		return m.UserID()
+	case toneattempt.FieldLessonKey:
+		return m.LessonKey()
+	case toneattempt.FieldItemKey:
+		return m.ItemKey()
+	case toneattempt.FieldOverallScore:
+		return m.OverallScore()
+	case toneattempt.FieldXpTier:
+		return m.XpTier()
+	case toneattempt.FieldXpEarned:
+		return m.XpEarned()
+	case toneattempt.FieldRawAPIFeedback:
+		return m.RawAPIFeedback()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ToneAttemptMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case toneattempt.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case toneattempt.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case toneattempt.FieldUserID:
+		return m.OldUserID(ctx)
+	case toneattempt.FieldLessonKey:
+		return m.OldLessonKey(ctx)
+	case toneattempt.FieldItemKey:
+		return m.OldItemKey(ctx)
+	case toneattempt.FieldOverallScore:
+		return m.OldOverallScore(ctx)
+	case toneattempt.FieldXpTier:
+		return m.OldXpTier(ctx)
+	case toneattempt.FieldXpEarned:
+		return m.OldXpEarned(ctx)
+	case toneattempt.FieldRawAPIFeedback:
+		return m.OldRawAPIFeedback(ctx)
+	}
+	return nil, fmt.Errorf("unknown ToneAttempt field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ToneAttemptMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case toneattempt.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case toneattempt.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case toneattempt.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case toneattempt.FieldLessonKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLessonKey(v)
+		return nil
+	case toneattempt.FieldItemKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItemKey(v)
+		return nil
+	case toneattempt.FieldOverallScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOverallScore(v)
+		return nil
+	case toneattempt.FieldXpTier:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetXpTier(v)
+		return nil
+	case toneattempt.FieldXpEarned:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetXpEarned(v)
+		return nil
+	case toneattempt.FieldRawAPIFeedback:
+		v, ok := value.(*models.StoredFeedback)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRawAPIFeedback(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ToneAttempt field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ToneAttemptMutation) AddedFields() []string {
+	var fields []string
+	if m.addoverall_score != nil {
+		fields = append(fields, toneattempt.FieldOverallScore)
+	}
+	if m.addxp_earned != nil {
+		fields = append(fields, toneattempt.FieldXpEarned)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ToneAttemptMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case toneattempt.FieldOverallScore:
+		return m.AddedOverallScore()
+	case toneattempt.FieldXpEarned:
+		return m.AddedXpEarned()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ToneAttemptMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case toneattempt.FieldOverallScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOverallScore(v)
+		return nil
+	case toneattempt.FieldXpEarned:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddXpEarned(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ToneAttempt numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ToneAttemptMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(toneattempt.FieldRawAPIFeedback) {
+		fields = append(fields, toneattempt.FieldRawAPIFeedback)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ToneAttemptMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ToneAttemptMutation) ClearField(name string) error {
+	switch name {
+	case toneattempt.FieldRawAPIFeedback:
+		m.ClearRawAPIFeedback()
+		return nil
+	}
+	return fmt.Errorf("unknown ToneAttempt nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ToneAttemptMutation) ResetField(name string) error {
+	switch name {
+	case toneattempt.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case toneattempt.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case toneattempt.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case toneattempt.FieldLessonKey:
+		m.ResetLessonKey()
+		return nil
+	case toneattempt.FieldItemKey:
+		m.ResetItemKey()
+		return nil
+	case toneattempt.FieldOverallScore:
+		m.ResetOverallScore()
+		return nil
+	case toneattempt.FieldXpTier:
+		m.ResetXpTier()
+		return nil
+	case toneattempt.FieldXpEarned:
+		m.ResetXpEarned()
+		return nil
+	case toneattempt.FieldRawAPIFeedback:
+		m.ResetRawAPIFeedback()
+		return nil
+	}
+	return fmt.Errorf("unknown ToneAttempt field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ToneAttemptMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.owner != nil {
+		edges = append(edges, toneattempt.EdgeOwner)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ToneAttemptMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case toneattempt.EdgeOwner:
+		if id := m.owner; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ToneAttemptMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ToneAttemptMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ToneAttemptMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedowner {
+		edges = append(edges, toneattempt.EdgeOwner)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ToneAttemptMutation) EdgeCleared(name string) bool {
+	switch name {
+	case toneattempt.EdgeOwner:
+		return m.clearedowner
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ToneAttemptMutation) ClearEdge(name string) error {
+	switch name {
+	case toneattempt.EdgeOwner:
+		m.ClearOwner()
+		return nil
+	}
+	return fmt.Errorf("unknown ToneAttempt unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ToneAttemptMutation) ResetEdge(name string) error {
+	switch name {
+	case toneattempt.EdgeOwner:
+		m.ResetOwner()
+		return nil
+	}
+	return fmt.Errorf("unknown ToneAttempt edge %s", name)
+}
+
+// ToneProgressMutation represents an operation that mutates the ToneProgress nodes in the graph.
+type ToneProgressMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	created_at    *time.Time
+	updated_at    *time.Time
+	lesson_key    *string
+	completed_at  *time.Time
+	best_score    *float64
+	addbest_score *float64
+	clearedFields map[string]struct{}
+	owner         *uuid.UUID
+	clearedowner  bool
+	done          bool
+	oldValue      func(context.Context) (*ToneProgress, error)
+	predicates    []predicate.ToneProgress
+}
+
+var _ ent.Mutation = (*ToneProgressMutation)(nil)
+
+// toneprogressOption allows management of the mutation configuration using functional options.
+type toneprogressOption func(*ToneProgressMutation)
+
+// newToneProgressMutation creates new mutation for the ToneProgress entity.
+func newToneProgressMutation(c config, op Op, opts ...toneprogressOption) *ToneProgressMutation {
+	m := &ToneProgressMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeToneProgress,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withToneProgressID sets the ID field of the mutation.
+func withToneProgressID(id uuid.UUID) toneprogressOption {
+	return func(m *ToneProgressMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ToneProgress
+		)
+		m.oldValue = func(ctx context.Context) (*ToneProgress, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ToneProgress.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withToneProgress sets the old ToneProgress of the mutation.
+func withToneProgress(node *ToneProgress) toneprogressOption {
+	return func(m *ToneProgressMutation) {
+		m.oldValue = func(context.Context) (*ToneProgress, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ToneProgressMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ToneProgressMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of ToneProgress entities.
+func (m *ToneProgressMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ToneProgressMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ToneProgressMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ToneProgress.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ToneProgressMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ToneProgressMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the ToneProgress entity.
+// If the ToneProgress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneProgressMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ToneProgressMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *ToneProgressMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *ToneProgressMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the ToneProgress entity.
+// If the ToneProgress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneProgressMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *ToneProgressMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *ToneProgressMutation) SetUserID(u uuid.UUID) {
+	m.owner = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *ToneProgressMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.owner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the ToneProgress entity.
+// If the ToneProgress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneProgressMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *ToneProgressMutation) ResetUserID() {
+	m.owner = nil
+}
+
+// SetLessonKey sets the "lesson_key" field.
+func (m *ToneProgressMutation) SetLessonKey(s string) {
+	m.lesson_key = &s
+}
+
+// LessonKey returns the value of the "lesson_key" field in the mutation.
+func (m *ToneProgressMutation) LessonKey() (r string, exists bool) {
+	v := m.lesson_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLessonKey returns the old "lesson_key" field's value of the ToneProgress entity.
+// If the ToneProgress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneProgressMutation) OldLessonKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLessonKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLessonKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLessonKey: %w", err)
+	}
+	return oldValue.LessonKey, nil
+}
+
+// ResetLessonKey resets all changes to the "lesson_key" field.
+func (m *ToneProgressMutation) ResetLessonKey() {
+	m.lesson_key = nil
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (m *ToneProgressMutation) SetCompletedAt(t time.Time) {
+	m.completed_at = &t
+}
+
+// CompletedAt returns the value of the "completed_at" field in the mutation.
+func (m *ToneProgressMutation) CompletedAt() (r time.Time, exists bool) {
+	v := m.completed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCompletedAt returns the old "completed_at" field's value of the ToneProgress entity.
+// If the ToneProgress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneProgressMutation) OldCompletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCompletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCompletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCompletedAt: %w", err)
+	}
+	return oldValue.CompletedAt, nil
+}
+
+// ClearCompletedAt clears the value of the "completed_at" field.
+func (m *ToneProgressMutation) ClearCompletedAt() {
+	m.completed_at = nil
+	m.clearedFields[toneprogress.FieldCompletedAt] = struct{}{}
+}
+
+// CompletedAtCleared returns if the "completed_at" field was cleared in this mutation.
+func (m *ToneProgressMutation) CompletedAtCleared() bool {
+	_, ok := m.clearedFields[toneprogress.FieldCompletedAt]
+	return ok
+}
+
+// ResetCompletedAt resets all changes to the "completed_at" field.
+func (m *ToneProgressMutation) ResetCompletedAt() {
+	m.completed_at = nil
+	delete(m.clearedFields, toneprogress.FieldCompletedAt)
+}
+
+// SetBestScore sets the "best_score" field.
+func (m *ToneProgressMutation) SetBestScore(f float64) {
+	m.best_score = &f
+	m.addbest_score = nil
+}
+
+// BestScore returns the value of the "best_score" field in the mutation.
+func (m *ToneProgressMutation) BestScore() (r float64, exists bool) {
+	v := m.best_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBestScore returns the old "best_score" field's value of the ToneProgress entity.
+// If the ToneProgress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ToneProgressMutation) OldBestScore(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBestScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBestScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBestScore: %w", err)
+	}
+	return oldValue.BestScore, nil
+}
+
+// AddBestScore adds f to the "best_score" field.
+func (m *ToneProgressMutation) AddBestScore(f float64) {
+	if m.addbest_score != nil {
+		*m.addbest_score += f
+	} else {
+		m.addbest_score = &f
+	}
+}
+
+// AddedBestScore returns the value that was added to the "best_score" field in this mutation.
+func (m *ToneProgressMutation) AddedBestScore() (r float64, exists bool) {
+	v := m.addbest_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBestScore resets all changes to the "best_score" field.
+func (m *ToneProgressMutation) ResetBestScore() {
+	m.best_score = nil
+	m.addbest_score = nil
+}
+
+// SetOwnerID sets the "owner" edge to the User entity by id.
+func (m *ToneProgressMutation) SetOwnerID(id uuid.UUID) {
+	m.owner = &id
+}
+
+// ClearOwner clears the "owner" edge to the User entity.
+func (m *ToneProgressMutation) ClearOwner() {
+	m.clearedowner = true
+	m.clearedFields[toneprogress.FieldUserID] = struct{}{}
+}
+
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
+func (m *ToneProgressMutation) OwnerCleared() bool {
+	return m.clearedowner
+}
+
+// OwnerID returns the "owner" edge ID in the mutation.
+func (m *ToneProgressMutation) OwnerID() (id uuid.UUID, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
+	}
+	return
+}
+
+// OwnerIDs returns the "owner" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// OwnerID instead. It exists only for internal usage by the builders.
+func (m *ToneProgressMutation) OwnerIDs() (ids []uuid.UUID) {
+	if id := m.owner; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetOwner resets all changes to the "owner" edge.
+func (m *ToneProgressMutation) ResetOwner() {
+	m.owner = nil
+	m.clearedowner = false
+}
+
+// Where appends a list predicates to the ToneProgressMutation builder.
+func (m *ToneProgressMutation) Where(ps ...predicate.ToneProgress) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ToneProgressMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ToneProgressMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ToneProgress, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ToneProgressMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ToneProgressMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ToneProgress).
+func (m *ToneProgressMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ToneProgressMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.created_at != nil {
+		fields = append(fields, toneprogress.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, toneprogress.FieldUpdatedAt)
+	}
+	if m.owner != nil {
+		fields = append(fields, toneprogress.FieldUserID)
+	}
+	if m.lesson_key != nil {
+		fields = append(fields, toneprogress.FieldLessonKey)
+	}
+	if m.completed_at != nil {
+		fields = append(fields, toneprogress.FieldCompletedAt)
+	}
+	if m.best_score != nil {
+		fields = append(fields, toneprogress.FieldBestScore)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ToneProgressMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case toneprogress.FieldCreatedAt:
+		return m.CreatedAt()
+	case toneprogress.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case toneprogress.FieldUserID:
+		return m.UserID()
+	case toneprogress.FieldLessonKey:
+		return m.LessonKey()
+	case toneprogress.FieldCompletedAt:
+		return m.CompletedAt()
+	case toneprogress.FieldBestScore:
+		return m.BestScore()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ToneProgressMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case toneprogress.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case toneprogress.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case toneprogress.FieldUserID:
+		return m.OldUserID(ctx)
+	case toneprogress.FieldLessonKey:
+		return m.OldLessonKey(ctx)
+	case toneprogress.FieldCompletedAt:
+		return m.OldCompletedAt(ctx)
+	case toneprogress.FieldBestScore:
+		return m.OldBestScore(ctx)
+	}
+	return nil, fmt.Errorf("unknown ToneProgress field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ToneProgressMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case toneprogress.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case toneprogress.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case toneprogress.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case toneprogress.FieldLessonKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLessonKey(v)
+		return nil
+	case toneprogress.FieldCompletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCompletedAt(v)
+		return nil
+	case toneprogress.FieldBestScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBestScore(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ToneProgress field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ToneProgressMutation) AddedFields() []string {
+	var fields []string
+	if m.addbest_score != nil {
+		fields = append(fields, toneprogress.FieldBestScore)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ToneProgressMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case toneprogress.FieldBestScore:
+		return m.AddedBestScore()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ToneProgressMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case toneprogress.FieldBestScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBestScore(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ToneProgress numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ToneProgressMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(toneprogress.FieldCompletedAt) {
+		fields = append(fields, toneprogress.FieldCompletedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ToneProgressMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ToneProgressMutation) ClearField(name string) error {
+	switch name {
+	case toneprogress.FieldCompletedAt:
+		m.ClearCompletedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown ToneProgress nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ToneProgressMutation) ResetField(name string) error {
+	switch name {
+	case toneprogress.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case toneprogress.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case toneprogress.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case toneprogress.FieldLessonKey:
+		m.ResetLessonKey()
+		return nil
+	case toneprogress.FieldCompletedAt:
+		m.ResetCompletedAt()
+		return nil
+	case toneprogress.FieldBestScore:
+		m.ResetBestScore()
+		return nil
+	}
+	return fmt.Errorf("unknown ToneProgress field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ToneProgressMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.owner != nil {
+		edges = append(edges, toneprogress.EdgeOwner)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ToneProgressMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case toneprogress.EdgeOwner:
+		if id := m.owner; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ToneProgressMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ToneProgressMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ToneProgressMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedowner {
+		edges = append(edges, toneprogress.EdgeOwner)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ToneProgressMutation) EdgeCleared(name string) bool {
+	switch name {
+	case toneprogress.EdgeOwner:
+		return m.clearedowner
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ToneProgressMutation) ClearEdge(name string) error {
+	switch name {
+	case toneprogress.EdgeOwner:
+		m.ClearOwner()
+		return nil
+	}
+	return fmt.Errorf("unknown ToneProgress unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ToneProgressMutation) ResetEdge(name string) error {
+	switch name {
+	case toneprogress.EdgeOwner:
+		m.ResetOwner()
+		return nil
+	}
+	return fmt.Errorf("unknown ToneProgress edge %s", name)
+}
+
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
@@ -8728,6 +10381,12 @@ type UserMutation struct {
 	xp_awards                map[uuid.UUID]struct{}
 	removedxp_awards         map[uuid.UUID]struct{}
 	clearedxp_awards         bool
+	tone_progress            map[uuid.UUID]struct{}
+	removedtone_progress     map[uuid.UUID]struct{}
+	clearedtone_progress     bool
+	tone_attempts            map[uuid.UUID]struct{}
+	removedtone_attempts     map[uuid.UUID]struct{}
+	clearedtone_attempts     bool
 	done                     bool
 	oldValue                 func(context.Context) (*User, error)
 	predicates               []predicate.User
@@ -9733,6 +11392,114 @@ func (m *UserMutation) ResetXpAwards() {
 	m.removedxp_awards = nil
 }
 
+// AddToneProgresIDs adds the "tone_progress" edge to the ToneProgress entity by ids.
+func (m *UserMutation) AddToneProgresIDs(ids ...uuid.UUID) {
+	if m.tone_progress == nil {
+		m.tone_progress = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.tone_progress[ids[i]] = struct{}{}
+	}
+}
+
+// ClearToneProgress clears the "tone_progress" edge to the ToneProgress entity.
+func (m *UserMutation) ClearToneProgress() {
+	m.clearedtone_progress = true
+}
+
+// ToneProgressCleared reports if the "tone_progress" edge to the ToneProgress entity was cleared.
+func (m *UserMutation) ToneProgressCleared() bool {
+	return m.clearedtone_progress
+}
+
+// RemoveToneProgresIDs removes the "tone_progress" edge to the ToneProgress entity by IDs.
+func (m *UserMutation) RemoveToneProgresIDs(ids ...uuid.UUID) {
+	if m.removedtone_progress == nil {
+		m.removedtone_progress = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.tone_progress, ids[i])
+		m.removedtone_progress[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedToneProgress returns the removed IDs of the "tone_progress" edge to the ToneProgress entity.
+func (m *UserMutation) RemovedToneProgressIDs() (ids []uuid.UUID) {
+	for id := range m.removedtone_progress {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ToneProgressIDs returns the "tone_progress" edge IDs in the mutation.
+func (m *UserMutation) ToneProgressIDs() (ids []uuid.UUID) {
+	for id := range m.tone_progress {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetToneProgress resets all changes to the "tone_progress" edge.
+func (m *UserMutation) ResetToneProgress() {
+	m.tone_progress = nil
+	m.clearedtone_progress = false
+	m.removedtone_progress = nil
+}
+
+// AddToneAttemptIDs adds the "tone_attempts" edge to the ToneAttempt entity by ids.
+func (m *UserMutation) AddToneAttemptIDs(ids ...uuid.UUID) {
+	if m.tone_attempts == nil {
+		m.tone_attempts = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.tone_attempts[ids[i]] = struct{}{}
+	}
+}
+
+// ClearToneAttempts clears the "tone_attempts" edge to the ToneAttempt entity.
+func (m *UserMutation) ClearToneAttempts() {
+	m.clearedtone_attempts = true
+}
+
+// ToneAttemptsCleared reports if the "tone_attempts" edge to the ToneAttempt entity was cleared.
+func (m *UserMutation) ToneAttemptsCleared() bool {
+	return m.clearedtone_attempts
+}
+
+// RemoveToneAttemptIDs removes the "tone_attempts" edge to the ToneAttempt entity by IDs.
+func (m *UserMutation) RemoveToneAttemptIDs(ids ...uuid.UUID) {
+	if m.removedtone_attempts == nil {
+		m.removedtone_attempts = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.tone_attempts, ids[i])
+		m.removedtone_attempts[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedToneAttempts returns the removed IDs of the "tone_attempts" edge to the ToneAttempt entity.
+func (m *UserMutation) RemovedToneAttemptsIDs() (ids []uuid.UUID) {
+	for id := range m.removedtone_attempts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ToneAttemptsIDs returns the "tone_attempts" edge IDs in the mutation.
+func (m *UserMutation) ToneAttemptsIDs() (ids []uuid.UUID) {
+	for id := range m.tone_attempts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetToneAttempts resets all changes to the "tone_attempts" edge.
+func (m *UserMutation) ResetToneAttempts() {
+	m.tone_attempts = nil
+	m.clearedtone_attempts = false
+	m.removedtone_attempts = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -10107,7 +11874,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 9)
 	if m.categories != nil {
 		edges = append(edges, user.EdgeCategories)
 	}
@@ -10128,6 +11895,12 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.xp_awards != nil {
 		edges = append(edges, user.EdgeXpAwards)
+	}
+	if m.tone_progress != nil {
+		edges = append(edges, user.EdgeToneProgress)
+	}
+	if m.tone_attempts != nil {
+		edges = append(edges, user.EdgeToneAttempts)
 	}
 	return edges
 }
@@ -10178,13 +11951,25 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeToneProgress:
+		ids := make([]ent.Value, 0, len(m.tone_progress))
+		for id := range m.tone_progress {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeToneAttempts:
+		ids := make([]ent.Value, 0, len(m.tone_attempts))
+		for id := range m.tone_attempts {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 9)
 	if m.removedcategories != nil {
 		edges = append(edges, user.EdgeCategories)
 	}
@@ -10205,6 +11990,12 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedxp_awards != nil {
 		edges = append(edges, user.EdgeXpAwards)
+	}
+	if m.removedtone_progress != nil {
+		edges = append(edges, user.EdgeToneProgress)
+	}
+	if m.removedtone_attempts != nil {
+		edges = append(edges, user.EdgeToneAttempts)
 	}
 	return edges
 }
@@ -10255,13 +12046,25 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeToneProgress:
+		ids := make([]ent.Value, 0, len(m.removedtone_progress))
+		for id := range m.removedtone_progress {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeToneAttempts:
+		ids := make([]ent.Value, 0, len(m.removedtone_attempts))
+		for id := range m.removedtone_attempts {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 9)
 	if m.clearedcategories {
 		edges = append(edges, user.EdgeCategories)
 	}
@@ -10282,6 +12085,12 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedxp_awards {
 		edges = append(edges, user.EdgeXpAwards)
+	}
+	if m.clearedtone_progress {
+		edges = append(edges, user.EdgeToneProgress)
+	}
+	if m.clearedtone_attempts {
+		edges = append(edges, user.EdgeToneAttempts)
 	}
 	return edges
 }
@@ -10304,6 +12113,10 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedcard_attempt_logs
 	case user.EdgeXpAwards:
 		return m.clearedxp_awards
+	case user.EdgeToneProgress:
+		return m.clearedtone_progress
+	case user.EdgeToneAttempts:
+		return m.clearedtone_attempts
 	}
 	return false
 }
@@ -10340,6 +12153,12 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeXpAwards:
 		m.ResetXpAwards()
+		return nil
+	case user.EdgeToneProgress:
+		m.ResetToneProgress()
+		return nil
+	case user.EdgeToneAttempts:
+		m.ResetToneAttempts()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

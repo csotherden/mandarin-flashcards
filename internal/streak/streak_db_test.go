@@ -130,3 +130,22 @@ func TestBackfillHasNoWindow(t *testing.T) {
 		t.Fatalf("backfill: %+v", s)
 	}
 }
+
+func TestRecordWithoutCardHistory(t *testing.T) {
+	db := testDB(t)
+	u := newUser(t, db, "UTC")
+	at := time.Date(2026, 11, 3, 12, 0, 0, 0, time.UTC)
+	// A tutorial take: no card log exists, only the Record call.
+	if err := Record(context.Background(), db, u.ID, at); err != nil {
+		t.Fatal(err)
+	}
+	if s := check(t, db, u, at); s != (Status{Current: 1, Longest: 1, Today: true}) {
+		t.Fatalf("first-ever practice without cards: %+v", s)
+	}
+	if err := Record(context.Background(), db, u.ID, at.AddDate(0, 0, 1)); err != nil {
+		t.Fatal(err)
+	}
+	if s := check(t, db, u, at.AddDate(0, 0, 1)); s.Current != 2 {
+		t.Fatalf("next day: %+v", s)
+	}
+}

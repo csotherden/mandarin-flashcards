@@ -117,6 +117,30 @@ func (f SetFlashcardFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SetFlashcardMutation", m)
 }
 
+// The ToneAttemptFunc type is an adapter to allow the use of ordinary
+// function as ToneAttempt mutator.
+type ToneAttemptFunc func(context.Context, *ent.ToneAttemptMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ToneAttemptFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ToneAttemptMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ToneAttemptMutation", m)
+}
+
+// The ToneProgressFunc type is an adapter to allow the use of ordinary
+// function as ToneProgress mutator.
+type ToneProgressFunc func(context.Context, *ent.ToneProgressMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ToneProgressFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ToneProgressMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ToneProgressMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)

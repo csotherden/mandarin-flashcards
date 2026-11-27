@@ -37,11 +37,20 @@ export function WelcomePage() {
         </p>
       </section>
 
+      <Link to="/tones" className="surface mt-5 flex items-center gap-4 p-4 ring-2 ring-crimson/70">
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-ink font-hanzi text-2xl font-bold text-gold">声</span>
+        <span className="min-w-0 flex-1">
+          <b className="block">New to tones? Start here</b>
+          <span className="block text-sm text-muted">Short lessons on the four tones, with your speaking graded. A great first step.</span>
+        </span>
+        <Icon name="right" className="shrink-0 text-xl text-crimson" />
+      </Link>
+
       {sets === null ? (
         <p className="mt-6 text-muted">Loading…</p>
       ) : starters.length > 0 ? (
         <section className="mt-6">
-          <h2 className="mb-3 font-bold">Pick a set to start</h2>
+          <h2 className="mb-3 font-bold">Or jump into a set</h2>
           <LibraryGrid sets={starters} compact from="welcome" />
         </section>
       ) : null}

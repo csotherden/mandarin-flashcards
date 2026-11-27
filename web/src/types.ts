@@ -154,6 +154,11 @@ export type Home = {
   streak_longest: number;
   xp_total: number;
   xp_today: number;
+  tones_completed: number;
+  tones_total: number;
+  /** Next unfinished tones lesson; empty once the tutorial is done. */
+  tones_next: string;
+  tones_next_title: string;
   practiced_today: number;
   total_cards: number;
   suggested_count: number;
@@ -203,3 +208,38 @@ export type LibraryCard = {
 export type LibrarySetDetail = LibrarySet & { cards: LibraryCard[] };
 
 export type LibraryImport = { set: CardSet; created: boolean; new_cards: number };
+
+export type ToneItem = { key: string; hanzi: string; pinyin: string; tonal_pinyin: string; english: string };
+
+export type ToneLesson = {
+  key: string;
+  title: string;
+  subtitle: string;
+  /** 1-4, 5 for neutral, 0 for mixed lessons. */
+  tone: number;
+  /** Pitch path on the 1-5 scale (Chao tone letters), e.g. [2, 1, 4] for tone 3. */
+  contour?: number[];
+  explain: string[];
+  tip: string;
+  examples: { hanzi: string; pinyin: string; tonal_pinyin: string; note: string }[];
+  items: ToneItem[];
+  completed: boolean;
+  completed_at?: string;
+  best_score: number;
+};
+
+export type TonesOverview = { lessons: ToneLesson[]; completed: number; next: string };
+
+export type ToneAssess = {
+  overall_score: number;
+  assessable: boolean;
+  reason?: string;
+  syllables: Syllable[];
+  xp_earned: number;
+  xp_tier: XPTier;
+  /** True until the lesson is first finished; after that takes are practice (no XP). */
+  first_pass: boolean;
+  xp_total: number;
+};
+
+export type ToneComplete = { first_time: boolean; best_score: number; xp_earned: number; next: string };

@@ -18,6 +18,8 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/lesson"
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
 	"github.com/csotherden/mandarin-flashcards/ent/predicate"
+	"github.com/csotherden/mandarin-flashcards/ent/toneattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/toneprogress"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
@@ -321,6 +323,36 @@ func (_u *UserUpdate) AddXpAwards(v ...*XPAward) *UserUpdate {
 	return _u.AddXpAwardIDs(ids...)
 }
 
+// AddToneProgresIDs adds the "tone_progress" edge to the ToneProgress entity by IDs.
+func (_u *UserUpdate) AddToneProgresIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.AddToneProgresIDs(ids...)
+	return _u
+}
+
+// AddToneProgress adds the "tone_progress" edges to the ToneProgress entity.
+func (_u *UserUpdate) AddToneProgress(v ...*ToneProgress) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddToneProgresIDs(ids...)
+}
+
+// AddToneAttemptIDs adds the "tone_attempts" edge to the ToneAttempt entity by IDs.
+func (_u *UserUpdate) AddToneAttemptIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.AddToneAttemptIDs(ids...)
+	return _u
+}
+
+// AddToneAttempts adds the "tone_attempts" edges to the ToneAttempt entity.
+func (_u *UserUpdate) AddToneAttempts(v ...*ToneAttempt) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddToneAttemptIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -471,6 +503,48 @@ func (_u *UserUpdate) RemoveXpAwards(v ...*XPAward) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveXpAwardIDs(ids...)
+}
+
+// ClearToneProgress clears all "tone_progress" edges to the ToneProgress entity.
+func (_u *UserUpdate) ClearToneProgress() *UserUpdate {
+	_u.mutation.ClearToneProgress()
+	return _u
+}
+
+// RemoveToneProgresIDs removes the "tone_progress" edge to ToneProgress entities by IDs.
+func (_u *UserUpdate) RemoveToneProgresIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.RemoveToneProgresIDs(ids...)
+	return _u
+}
+
+// RemoveToneProgress removes "tone_progress" edges to ToneProgress entities.
+func (_u *UserUpdate) RemoveToneProgress(v ...*ToneProgress) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveToneProgresIDs(ids...)
+}
+
+// ClearToneAttempts clears all "tone_attempts" edges to the ToneAttempt entity.
+func (_u *UserUpdate) ClearToneAttempts() *UserUpdate {
+	_u.mutation.ClearToneAttempts()
+	return _u
+}
+
+// RemoveToneAttemptIDs removes the "tone_attempts" edge to ToneAttempt entities by IDs.
+func (_u *UserUpdate) RemoveToneAttemptIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.RemoveToneAttemptIDs(ids...)
+	return _u
+}
+
+// RemoveToneAttempts removes "tone_attempts" edges to ToneAttempt entities.
+func (_u *UserUpdate) RemoveToneAttempts(v ...*ToneAttempt) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveToneAttemptIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -914,6 +988,96 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ToneProgressCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneProgressTable,
+			Columns: []string{user.ToneProgressColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneprogress.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedToneProgressIDs(); len(nodes) > 0 && !_u.mutation.ToneProgressCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneProgressTable,
+			Columns: []string{user.ToneProgressColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneprogress.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ToneProgressIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneProgressTable,
+			Columns: []string{user.ToneProgressColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneprogress.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ToneAttemptsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneAttemptsTable,
+			Columns: []string{user.ToneAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneattempt.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedToneAttemptsIDs(); len(nodes) > 0 && !_u.mutation.ToneAttemptsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneAttemptsTable,
+			Columns: []string{user.ToneAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneattempt.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ToneAttemptsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneAttemptsTable,
+			Columns: []string{user.ToneAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneattempt.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -1218,6 +1382,36 @@ func (_u *UserUpdateOne) AddXpAwards(v ...*XPAward) *UserUpdateOne {
 	return _u.AddXpAwardIDs(ids...)
 }
 
+// AddToneProgresIDs adds the "tone_progress" edge to the ToneProgress entity by IDs.
+func (_u *UserUpdateOne) AddToneProgresIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.AddToneProgresIDs(ids...)
+	return _u
+}
+
+// AddToneProgress adds the "tone_progress" edges to the ToneProgress entity.
+func (_u *UserUpdateOne) AddToneProgress(v ...*ToneProgress) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddToneProgresIDs(ids...)
+}
+
+// AddToneAttemptIDs adds the "tone_attempts" edge to the ToneAttempt entity by IDs.
+func (_u *UserUpdateOne) AddToneAttemptIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.AddToneAttemptIDs(ids...)
+	return _u
+}
+
+// AddToneAttempts adds the "tone_attempts" edges to the ToneAttempt entity.
+func (_u *UserUpdateOne) AddToneAttempts(v ...*ToneAttempt) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddToneAttemptIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -1368,6 +1562,48 @@ func (_u *UserUpdateOne) RemoveXpAwards(v ...*XPAward) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveXpAwardIDs(ids...)
+}
+
+// ClearToneProgress clears all "tone_progress" edges to the ToneProgress entity.
+func (_u *UserUpdateOne) ClearToneProgress() *UserUpdateOne {
+	_u.mutation.ClearToneProgress()
+	return _u
+}
+
+// RemoveToneProgresIDs removes the "tone_progress" edge to ToneProgress entities by IDs.
+func (_u *UserUpdateOne) RemoveToneProgresIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.RemoveToneProgresIDs(ids...)
+	return _u
+}
+
+// RemoveToneProgress removes "tone_progress" edges to ToneProgress entities.
+func (_u *UserUpdateOne) RemoveToneProgress(v ...*ToneProgress) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveToneProgresIDs(ids...)
+}
+
+// ClearToneAttempts clears all "tone_attempts" edges to the ToneAttempt entity.
+func (_u *UserUpdateOne) ClearToneAttempts() *UserUpdateOne {
+	_u.mutation.ClearToneAttempts()
+	return _u
+}
+
+// RemoveToneAttemptIDs removes the "tone_attempts" edge to ToneAttempt entities by IDs.
+func (_u *UserUpdateOne) RemoveToneAttemptIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.RemoveToneAttemptIDs(ids...)
+	return _u
+}
+
+// RemoveToneAttempts removes "tone_attempts" edges to ToneAttempt entities.
+func (_u *UserUpdateOne) RemoveToneAttempts(v ...*ToneAttempt) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveToneAttemptIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1834,6 +2070,96 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(xpaward.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ToneProgressCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneProgressTable,
+			Columns: []string{user.ToneProgressColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneprogress.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedToneProgressIDs(); len(nodes) > 0 && !_u.mutation.ToneProgressCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneProgressTable,
+			Columns: []string{user.ToneProgressColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneprogress.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ToneProgressIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneProgressTable,
+			Columns: []string{user.ToneProgressColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneprogress.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ToneAttemptsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneAttemptsTable,
+			Columns: []string{user.ToneAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneattempt.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedToneAttemptsIDs(); len(nodes) > 0 && !_u.mutation.ToneAttemptsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneAttemptsTable,
+			Columns: []string{user.ToneAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneattempt.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ToneAttemptsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneAttemptsTable,
+			Columns: []string{user.ToneAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneattempt.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

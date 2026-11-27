@@ -100,10 +100,22 @@ func Record(ctx context.Context, db *ent.Client, userID uuid.UUID, at time.Time)
 		return err
 	}
 	if u.StreakLastDay == nil {
-		// First practice since streaks were stored: the history (including this grade,
-		// already saved) gives the right counters.
-		_, err := backfill(ctx, db, u)
-		return err
+		// First practice since streaks were stored: the card history (including this grade,
+		// if it was a card) gives the right counters.
+		if u, err = backfill(ctx, db, u); err != nil {
+			return err
+		}
+		if u.StreakLastDay == nil {
+			// No card history (say, a tutorial take came first): this is day one.
+			loc := Location(u)
+			return db.User.Update().
+				Where(user.ID(userID), user.StreakLastDayIsNil()).
+				SetStreakCurrent(1).
+				SetStreakLongest(max(1, u.StreakLongest)).
+				SetStreakLastDay(at.In(loc).Format(dayLayout)).
+				Exec(ctx)
+		}
+		return nil
 	}
 	loc := Location(u)
 	today := at.In(loc).Format(dayLayout)

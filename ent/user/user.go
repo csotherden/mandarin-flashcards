@@ -54,6 +54,10 @@ const (
 	EdgeCardAttemptLogs = "card_attempt_logs"
 	// EdgeXpAwards holds the string denoting the xp_awards edge name in mutations.
 	EdgeXpAwards = "xp_awards"
+	// EdgeToneProgress holds the string denoting the tone_progress edge name in mutations.
+	EdgeToneProgress = "tone_progress"
+	// EdgeToneAttempts holds the string denoting the tone_attempts edge name in mutations.
+	EdgeToneAttempts = "tone_attempts"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// CategoriesTable is the table that holds the categories relation/edge.
@@ -105,6 +109,20 @@ const (
 	XpAwardsInverseTable = "xp_awards"
 	// XpAwardsColumn is the table column denoting the xp_awards relation/edge.
 	XpAwardsColumn = "user_id"
+	// ToneProgressTable is the table that holds the tone_progress relation/edge.
+	ToneProgressTable = "tone_progresses"
+	// ToneProgressInverseTable is the table name for the ToneProgress entity.
+	// It exists in this package in order to avoid circular dependency with the "toneprogress" package.
+	ToneProgressInverseTable = "tone_progresses"
+	// ToneProgressColumn is the table column denoting the tone_progress relation/edge.
+	ToneProgressColumn = "user_id"
+	// ToneAttemptsTable is the table that holds the tone_attempts relation/edge.
+	ToneAttemptsTable = "tone_attempts"
+	// ToneAttemptsInverseTable is the table name for the ToneAttempt entity.
+	// It exists in this package in order to avoid circular dependency with the "toneattempt" package.
+	ToneAttemptsInverseTable = "tone_attempts"
+	// ToneAttemptsColumn is the table column denoting the tone_attempts relation/edge.
+	ToneAttemptsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -325,6 +343,34 @@ func ByXpAwards(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newXpAwardsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByToneProgressCount orders the results by tone_progress count.
+func ByToneProgressCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newToneProgressStep(), opts...)
+	}
+}
+
+// ByToneProgress orders the results by tone_progress terms.
+func ByToneProgress(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newToneProgressStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByToneAttemptsCount orders the results by tone_attempts count.
+func ByToneAttemptsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newToneAttemptsStep(), opts...)
+	}
+}
+
+// ByToneAttempts orders the results by tone_attempts terms.
+func ByToneAttempts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newToneAttemptsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newCategoriesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -372,5 +418,19 @@ func newXpAwardsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(XpAwardsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, XpAwardsTable, XpAwardsColumn),
+	)
+}
+func newToneProgressStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ToneProgressInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ToneProgressTable, ToneProgressColumn),
+	)
+}
+func newToneAttemptsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ToneAttemptsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ToneAttemptsTable, ToneAttemptsColumn),
 	)
 }

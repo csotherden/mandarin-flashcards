@@ -339,6 +339,71 @@ var (
 			},
 		},
 	}
+	// ToneAttemptsColumns holds the columns for the "tone_attempts" table.
+	ToneAttemptsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "lesson_key", Type: field.TypeString, Size: 40},
+		{Name: "item_key", Type: field.TypeString, Size: 40},
+		{Name: "overall_score", Type: field.TypeFloat64, Default: 0},
+		{Name: "xp_tier", Type: field.TypeString, Default: ""},
+		{Name: "xp_earned", Type: field.TypeInt, Default: 0},
+		{Name: "raw_api_feedback", Type: field.TypeJSON, Nullable: true},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// ToneAttemptsTable holds the schema information for the "tone_attempts" table.
+	ToneAttemptsTable = &schema.Table{
+		Name:       "tone_attempts",
+		Columns:    ToneAttemptsColumns,
+		PrimaryKey: []*schema.Column{ToneAttemptsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tone_attempts_users_tone_attempts",
+				Columns:    []*schema.Column{ToneAttemptsColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "toneattempt_user_id_lesson_key",
+				Unique:  false,
+				Columns: []*schema.Column{ToneAttemptsColumns[9], ToneAttemptsColumns[3]},
+			},
+		},
+	}
+	// ToneProgressesColumns holds the columns for the "tone_progresses" table.
+	ToneProgressesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "lesson_key", Type: field.TypeString, Size: 40},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "best_score", Type: field.TypeFloat64, Default: 0},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// ToneProgressesTable holds the schema information for the "tone_progresses" table.
+	ToneProgressesTable = &schema.Table{
+		Name:       "tone_progresses",
+		Columns:    ToneProgressesColumns,
+		PrimaryKey: []*schema.Column{ToneProgressesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tone_progresses_users_tone_progress",
+				Columns:    []*schema.Column{ToneProgressesColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "toneprogress_user_id_lesson_key",
+				Unique:  true,
+				Columns: []*schema.Column{ToneProgressesColumns[6], ToneProgressesColumns[3]},
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -485,6 +550,8 @@ var (
 		LibraryCardsTable,
 		LibrarySetsTable,
 		SetFlashcardsTable,
+		ToneAttemptsTable,
+		ToneProgressesTable,
 		UsersTable,
 		XpAwardsTable,
 		FlashcardCategoriesTable,
@@ -512,6 +579,8 @@ func init() {
 	SetFlashcardsTable.Annotation = &entsql.Annotation{
 		Table: "set_flashcards",
 	}
+	ToneAttemptsTable.ForeignKeys[0].RefTable = UsersTable
+	ToneProgressesTable.ForeignKeys[0].RefTable = UsersTable
 	XpAwardsTable.ForeignKeys[0].RefTable = UsersTable
 	FlashcardCategoriesTable.ForeignKeys[0].RefTable = FlashcardsTable
 	FlashcardCategoriesTable.ForeignKeys[1].RefTable = CategoriesTable

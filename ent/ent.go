@@ -21,6 +21,8 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/librarycard"
 	"github.com/csotherden/mandarin-flashcards/ent/libraryset"
 	"github.com/csotherden/mandarin-flashcards/ent/setflashcard"
+	"github.com/csotherden/mandarin-flashcards/ent/toneattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/toneprogress"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 )
@@ -92,6 +94,8 @@ func checkColumn(t, c string) error {
 			librarycard.Table:    librarycard.ValidColumn,
 			libraryset.Table:     libraryset.ValidColumn,
 			setflashcard.Table:   setflashcard.ValidColumn,
+			toneattempt.Table:    toneattempt.ValidColumn,
+			toneprogress.Table:   toneprogress.ValidColumn,
 			user.Table:           user.ValidColumn,
 			xpaward.Table:        xpaward.ValidColumn,
 		})

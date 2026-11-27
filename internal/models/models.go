@@ -305,11 +305,17 @@ type MatchInput struct {
 // HomeResponse is the Today screen.
 type HomeResponse struct {
 	// StreakDays is the live streak; StreakToday says whether today already counts toward it.
-	StreakDays     int            `json:"streak_days"`
-	StreakToday    bool           `json:"streak_today"`
-	StreakLongest  int            `json:"streak_longest"`
-	XPTotal        int            `json:"xp_total"`
-	XPToday        int            `json:"xp_today"`
+	StreakDays    int  `json:"streak_days"`
+	StreakToday   bool `json:"streak_today"`
+	StreakLongest int  `json:"streak_longest"`
+	XPTotal       int  `json:"xp_total"`
+	XPToday       int  `json:"xp_today"`
+	// Intro to tones: lessons finished, lessons in all, and the next unfinished lesson's key
+	// and title (empty once the tutorial is done).
+	TonesCompleted int            `json:"tones_completed"`
+	TonesTotal     int            `json:"tones_total"`
+	TonesNext      string         `json:"tones_next"`
+	TonesNextTitle string         `json:"tones_next_title"`
 	PracticedToday int            `json:"practiced_today"`
 	TotalCards     int            `json:"total_cards"`
 	SuggestedCount int            `json:"suggested_count"`

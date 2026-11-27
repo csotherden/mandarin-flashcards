@@ -66,9 +66,13 @@ type UserEdges struct {
 	CardAttemptLogs []*CardAttemptLog `json:"card_attempt_logs,omitempty"`
 	// XpAwards holds the value of the xp_awards edge.
 	XpAwards []*XPAward `json:"xp_awards,omitempty"`
+	// ToneProgress holds the value of the tone_progress edge.
+	ToneProgress []*ToneProgress `json:"tone_progress,omitempty"`
+	// ToneAttempts holds the value of the tone_attempts edge.
+	ToneAttempts []*ToneAttempt `json:"tone_attempts,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [7]bool
+	loadedTypes [9]bool
 }
 
 // CategoriesOrErr returns the Categories value or an error if the edge
@@ -132,6 +136,24 @@ func (e UserEdges) XpAwardsOrErr() ([]*XPAward, error) {
 		return e.XpAwards, nil
 	}
 	return nil, &NotLoadedError{edge: "xp_awards"}
+}
+
+// ToneProgressOrErr returns the ToneProgress value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ToneProgressOrErr() ([]*ToneProgress, error) {
+	if e.loadedTypes[7] {
+		return e.ToneProgress, nil
+	}
+	return nil, &NotLoadedError{edge: "tone_progress"}
+}
+
+// ToneAttemptsOrErr returns the ToneAttempts value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ToneAttemptsOrErr() ([]*ToneAttempt, error) {
+	if e.loadedTypes[8] {
+		return e.ToneAttempts, nil
+	}
+	return nil, &NotLoadedError{edge: "tone_attempts"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -292,6 +314,16 @@ func (_m *User) QueryCardAttemptLogs() *CardAttemptLogQuery {
 // QueryXpAwards queries the "xp_awards" edge of the User entity.
 func (_m *User) QueryXpAwards() *XPAwardQuery {
 	return NewUserClient(_m.config).QueryXpAwards(_m)
+}
+
+// QueryToneProgress queries the "tone_progress" edge of the User entity.
+func (_m *User) QueryToneProgress() *ToneProgressQuery {
+	return NewUserClient(_m.config).QueryToneProgress(_m)
+}
+
+// QueryToneAttempts queries the "tone_attempts" edge of the User entity.
+func (_m *User) QueryToneAttempts() *ToneAttemptQuery {
+	return NewUserClient(_m.config).QueryToneAttempts(_m)
 }
 
 // Update returns a builder for updating this User.

@@ -15,6 +15,8 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/libraryset"
 	"github.com/csotherden/mandarin-flashcards/ent/schema"
 	"github.com/csotherden/mandarin-flashcards/ent/setflashcard"
+	"github.com/csotherden/mandarin-flashcards/ent/toneattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/toneprogress"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
@@ -458,6 +460,114 @@ func init() {
 	setflashcardDescID := setflashcardFields[0].Descriptor()
 	// setflashcard.DefaultID holds the default value on creation for the id field.
 	setflashcard.DefaultID = setflashcardDescID.Default.(func() uuid.UUID)
+	toneattemptMixin := schema.ToneAttempt{}.Mixin()
+	toneattemptMixinFields0 := toneattemptMixin[0].Fields()
+	_ = toneattemptMixinFields0
+	toneattemptFields := schema.ToneAttempt{}.Fields()
+	_ = toneattemptFields
+	// toneattemptDescCreatedAt is the schema descriptor for created_at field.
+	toneattemptDescCreatedAt := toneattemptMixinFields0[0].Descriptor()
+	// toneattempt.DefaultCreatedAt holds the default value on creation for the created_at field.
+	toneattempt.DefaultCreatedAt = toneattemptDescCreatedAt.Default.(func() time.Time)
+	// toneattemptDescUpdatedAt is the schema descriptor for updated_at field.
+	toneattemptDescUpdatedAt := toneattemptMixinFields0[1].Descriptor()
+	// toneattempt.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	toneattempt.DefaultUpdatedAt = toneattemptDescUpdatedAt.Default.(func() time.Time)
+	// toneattempt.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	toneattempt.UpdateDefaultUpdatedAt = toneattemptDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// toneattemptDescLessonKey is the schema descriptor for lesson_key field.
+	toneattemptDescLessonKey := toneattemptFields[2].Descriptor()
+	// toneattempt.LessonKeyValidator is a validator for the "lesson_key" field. It is called by the builders before save.
+	toneattempt.LessonKeyValidator = func() func(string) error {
+		validators := toneattemptDescLessonKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(lesson_key string) error {
+			for _, fn := range fns {
+				if err := fn(lesson_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// toneattemptDescItemKey is the schema descriptor for item_key field.
+	toneattemptDescItemKey := toneattemptFields[3].Descriptor()
+	// toneattempt.ItemKeyValidator is a validator for the "item_key" field. It is called by the builders before save.
+	toneattempt.ItemKeyValidator = func() func(string) error {
+		validators := toneattemptDescItemKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(item_key string) error {
+			for _, fn := range fns {
+				if err := fn(item_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// toneattemptDescOverallScore is the schema descriptor for overall_score field.
+	toneattemptDescOverallScore := toneattemptFields[4].Descriptor()
+	// toneattempt.DefaultOverallScore holds the default value on creation for the overall_score field.
+	toneattempt.DefaultOverallScore = toneattemptDescOverallScore.Default.(float64)
+	// toneattemptDescXpTier is the schema descriptor for xp_tier field.
+	toneattemptDescXpTier := toneattemptFields[5].Descriptor()
+	// toneattempt.DefaultXpTier holds the default value on creation for the xp_tier field.
+	toneattempt.DefaultXpTier = toneattemptDescXpTier.Default.(string)
+	// toneattemptDescXpEarned is the schema descriptor for xp_earned field.
+	toneattemptDescXpEarned := toneattemptFields[6].Descriptor()
+	// toneattempt.DefaultXpEarned holds the default value on creation for the xp_earned field.
+	toneattempt.DefaultXpEarned = toneattemptDescXpEarned.Default.(int)
+	// toneattemptDescID is the schema descriptor for id field.
+	toneattemptDescID := toneattemptFields[0].Descriptor()
+	// toneattempt.DefaultID holds the default value on creation for the id field.
+	toneattempt.DefaultID = toneattemptDescID.Default.(func() uuid.UUID)
+	toneprogressMixin := schema.ToneProgress{}.Mixin()
+	toneprogressMixinFields0 := toneprogressMixin[0].Fields()
+	_ = toneprogressMixinFields0
+	toneprogressFields := schema.ToneProgress{}.Fields()
+	_ = toneprogressFields
+	// toneprogressDescCreatedAt is the schema descriptor for created_at field.
+	toneprogressDescCreatedAt := toneprogressMixinFields0[0].Descriptor()
+	// toneprogress.DefaultCreatedAt holds the default value on creation for the created_at field.
+	toneprogress.DefaultCreatedAt = toneprogressDescCreatedAt.Default.(func() time.Time)
+	// toneprogressDescUpdatedAt is the schema descriptor for updated_at field.
+	toneprogressDescUpdatedAt := toneprogressMixinFields0[1].Descriptor()
+	// toneprogress.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	toneprogress.DefaultUpdatedAt = toneprogressDescUpdatedAt.Default.(func() time.Time)
+	// toneprogress.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	toneprogress.UpdateDefaultUpdatedAt = toneprogressDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// toneprogressDescLessonKey is the schema descriptor for lesson_key field.
+	toneprogressDescLessonKey := toneprogressFields[2].Descriptor()
+	// toneprogress.LessonKeyValidator is a validator for the "lesson_key" field. It is called by the builders before save.
+	toneprogress.LessonKeyValidator = func() func(string) error {
+		validators := toneprogressDescLessonKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(lesson_key string) error {
+			for _, fn := range fns {
+				if err := fn(lesson_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// toneprogressDescBestScore is the schema descriptor for best_score field.
+	toneprogressDescBestScore := toneprogressFields[4].Descriptor()
+	// toneprogress.DefaultBestScore holds the default value on creation for the best_score field.
+	toneprogress.DefaultBestScore = toneprogressDescBestScore.Default.(float64)
+	// toneprogressDescID is the schema descriptor for id field.
+	toneprogressDescID := toneprogressFields[0].Descriptor()
+	// toneprogress.DefaultID holds the default value on creation for the id field.
+	toneprogress.DefaultID = toneprogressDescID.Default.(func() uuid.UUID)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

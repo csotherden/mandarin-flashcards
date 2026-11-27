@@ -25,6 +25,8 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/librarycard"
 	"github.com/csotherden/mandarin-flashcards/ent/libraryset"
 	"github.com/csotherden/mandarin-flashcards/ent/setflashcard"
+	"github.com/csotherden/mandarin-flashcards/ent/toneattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/toneprogress"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 )
@@ -52,6 +54,10 @@ type Client struct {
 	LibrarySet *LibrarySetClient
 	// SetFlashcard is the client for interacting with the SetFlashcard builders.
 	SetFlashcard *SetFlashcardClient
+	// ToneAttempt is the client for interacting with the ToneAttempt builders.
+	ToneAttempt *ToneAttemptClient
+	// ToneProgress is the client for interacting with the ToneProgress builders.
+	ToneProgress *ToneProgressClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// XPAward is the client for interacting with the XPAward builders.
@@ -76,6 +82,8 @@ func (c *Client) init() {
 	c.LibraryCard = NewLibraryCardClient(c.config)
 	c.LibrarySet = NewLibrarySetClient(c.config)
 	c.SetFlashcard = NewSetFlashcardClient(c.config)
+	c.ToneAttempt = NewToneAttemptClient(c.config)
+	c.ToneProgress = NewToneProgressClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.XPAward = NewXPAwardClient(c.config)
 }
@@ -179,6 +187,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		LibraryCard:    NewLibraryCardClient(cfg),
 		LibrarySet:     NewLibrarySetClient(cfg),
 		SetFlashcard:   NewSetFlashcardClient(cfg),
+		ToneAttempt:    NewToneAttemptClient(cfg),
+		ToneProgress:   NewToneProgressClient(cfg),
 		User:           NewUserClient(cfg),
 		XPAward:        NewXPAwardClient(cfg),
 	}, nil
@@ -209,6 +219,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		LibraryCard:    NewLibraryCardClient(cfg),
 		LibrarySet:     NewLibrarySetClient(cfg),
 		SetFlashcard:   NewSetFlashcardClient(cfg),
+		ToneAttempt:    NewToneAttemptClient(cfg),
+		ToneProgress:   NewToneProgressClient(cfg),
 		User:           NewUserClient(cfg),
 		XPAward:        NewXPAwardClient(cfg),
 	}, nil
@@ -241,7 +253,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.CardAttemptLog, c.CardSet, c.Category, c.Flashcard, c.Lesson, c.LessonAttempt,
-		c.LibraryCard, c.LibrarySet, c.SetFlashcard, c.User, c.XPAward,
+		c.LibraryCard, c.LibrarySet, c.SetFlashcard, c.ToneAttempt, c.ToneProgress,
+		c.User, c.XPAward,
 	} {
 		n.Use(hooks...)
 	}
@@ -252,7 +265,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.CardAttemptLog, c.CardSet, c.Category, c.Flashcard, c.Lesson, c.LessonAttempt,
-		c.LibraryCard, c.LibrarySet, c.SetFlashcard, c.User, c.XPAward,
+		c.LibraryCard, c.LibrarySet, c.SetFlashcard, c.ToneAttempt, c.ToneProgress,
+		c.User, c.XPAward,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -279,6 +293,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.LibrarySet.mutate(ctx, m)
 	case *SetFlashcardMutation:
 		return c.SetFlashcard.mutate(ctx, m)
+	case *ToneAttemptMutation:
+		return c.ToneAttempt.mutate(ctx, m)
+	case *ToneProgressMutation:
+		return c.ToneProgress.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	case *XPAwardMutation:
@@ -1869,6 +1887,304 @@ func (c *SetFlashcardClient) mutate(ctx context.Context, m *SetFlashcardMutation
 	}
 }
 
+// ToneAttemptClient is a client for the ToneAttempt schema.
+type ToneAttemptClient struct {
+	config
+}
+
+// NewToneAttemptClient returns a client for the ToneAttempt from the given config.
+func NewToneAttemptClient(c config) *ToneAttemptClient {
+	return &ToneAttemptClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `toneattempt.Hooks(f(g(h())))`.
+func (c *ToneAttemptClient) Use(hooks ...Hook) {
+	c.hooks.ToneAttempt = append(c.hooks.ToneAttempt, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `toneattempt.Intercept(f(g(h())))`.
+func (c *ToneAttemptClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ToneAttempt = append(c.inters.ToneAttempt, interceptors...)
+}
+
+// Create returns a builder for creating a ToneAttempt entity.
+func (c *ToneAttemptClient) Create() *ToneAttemptCreate {
+	mutation := newToneAttemptMutation(c.config, OpCreate)
+	return &ToneAttemptCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ToneAttempt entities.
+func (c *ToneAttemptClient) CreateBulk(builders ...*ToneAttemptCreate) *ToneAttemptCreateBulk {
+	return &ToneAttemptCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ToneAttemptClient) MapCreateBulk(slice any, setFunc func(*ToneAttemptCreate, int)) *ToneAttemptCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ToneAttemptCreateBulk{err: fmt.Errorf("calling to ToneAttemptClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ToneAttemptCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ToneAttemptCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ToneAttempt.
+func (c *ToneAttemptClient) Update() *ToneAttemptUpdate {
+	mutation := newToneAttemptMutation(c.config, OpUpdate)
+	return &ToneAttemptUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ToneAttemptClient) UpdateOne(_m *ToneAttempt) *ToneAttemptUpdateOne {
+	mutation := newToneAttemptMutation(c.config, OpUpdateOne, withToneAttempt(_m))
+	return &ToneAttemptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ToneAttemptClient) UpdateOneID(id uuid.UUID) *ToneAttemptUpdateOne {
+	mutation := newToneAttemptMutation(c.config, OpUpdateOne, withToneAttemptID(id))
+	return &ToneAttemptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ToneAttempt.
+func (c *ToneAttemptClient) Delete() *ToneAttemptDelete {
+	mutation := newToneAttemptMutation(c.config, OpDelete)
+	return &ToneAttemptDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ToneAttemptClient) DeleteOne(_m *ToneAttempt) *ToneAttemptDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ToneAttemptClient) DeleteOneID(id uuid.UUID) *ToneAttemptDeleteOne {
+	builder := c.Delete().Where(toneattempt.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ToneAttemptDeleteOne{builder}
+}
+
+// Query returns a query builder for ToneAttempt.
+func (c *ToneAttemptClient) Query() *ToneAttemptQuery {
+	return &ToneAttemptQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeToneAttempt},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ToneAttempt entity by its id.
+func (c *ToneAttemptClient) Get(ctx context.Context, id uuid.UUID) (*ToneAttempt, error) {
+	return c.Query().Where(toneattempt.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ToneAttemptClient) GetX(ctx context.Context, id uuid.UUID) *ToneAttempt {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryOwner queries the owner edge of a ToneAttempt.
+func (c *ToneAttemptClient) QueryOwner(_m *ToneAttempt) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(toneattempt.Table, toneattempt.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, toneattempt.OwnerTable, toneattempt.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ToneAttemptClient) Hooks() []Hook {
+	return c.hooks.ToneAttempt
+}
+
+// Interceptors returns the client interceptors.
+func (c *ToneAttemptClient) Interceptors() []Interceptor {
+	return c.inters.ToneAttempt
+}
+
+func (c *ToneAttemptClient) mutate(ctx context.Context, m *ToneAttemptMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ToneAttemptCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ToneAttemptUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ToneAttemptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ToneAttemptDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ToneAttempt mutation op: %q", m.Op())
+	}
+}
+
+// ToneProgressClient is a client for the ToneProgress schema.
+type ToneProgressClient struct {
+	config
+}
+
+// NewToneProgressClient returns a client for the ToneProgress from the given config.
+func NewToneProgressClient(c config) *ToneProgressClient {
+	return &ToneProgressClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `toneprogress.Hooks(f(g(h())))`.
+func (c *ToneProgressClient) Use(hooks ...Hook) {
+	c.hooks.ToneProgress = append(c.hooks.ToneProgress, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `toneprogress.Intercept(f(g(h())))`.
+func (c *ToneProgressClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ToneProgress = append(c.inters.ToneProgress, interceptors...)
+}
+
+// Create returns a builder for creating a ToneProgress entity.
+func (c *ToneProgressClient) Create() *ToneProgressCreate {
+	mutation := newToneProgressMutation(c.config, OpCreate)
+	return &ToneProgressCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ToneProgress entities.
+func (c *ToneProgressClient) CreateBulk(builders ...*ToneProgressCreate) *ToneProgressCreateBulk {
+	return &ToneProgressCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ToneProgressClient) MapCreateBulk(slice any, setFunc func(*ToneProgressCreate, int)) *ToneProgressCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ToneProgressCreateBulk{err: fmt.Errorf("calling to ToneProgressClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ToneProgressCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ToneProgressCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ToneProgress.
+func (c *ToneProgressClient) Update() *ToneProgressUpdate {
+	mutation := newToneProgressMutation(c.config, OpUpdate)
+	return &ToneProgressUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ToneProgressClient) UpdateOne(_m *ToneProgress) *ToneProgressUpdateOne {
+	mutation := newToneProgressMutation(c.config, OpUpdateOne, withToneProgress(_m))
+	return &ToneProgressUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ToneProgressClient) UpdateOneID(id uuid.UUID) *ToneProgressUpdateOne {
+	mutation := newToneProgressMutation(c.config, OpUpdateOne, withToneProgressID(id))
+	return &ToneProgressUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ToneProgress.
+func (c *ToneProgressClient) Delete() *ToneProgressDelete {
+	mutation := newToneProgressMutation(c.config, OpDelete)
+	return &ToneProgressDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ToneProgressClient) DeleteOne(_m *ToneProgress) *ToneProgressDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ToneProgressClient) DeleteOneID(id uuid.UUID) *ToneProgressDeleteOne {
+	builder := c.Delete().Where(toneprogress.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ToneProgressDeleteOne{builder}
+}
+
+// Query returns a query builder for ToneProgress.
+func (c *ToneProgressClient) Query() *ToneProgressQuery {
+	return &ToneProgressQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeToneProgress},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ToneProgress entity by its id.
+func (c *ToneProgressClient) Get(ctx context.Context, id uuid.UUID) (*ToneProgress, error) {
+	return c.Query().Where(toneprogress.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ToneProgressClient) GetX(ctx context.Context, id uuid.UUID) *ToneProgress {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryOwner queries the owner edge of a ToneProgress.
+func (c *ToneProgressClient) QueryOwner(_m *ToneProgress) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(toneprogress.Table, toneprogress.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, toneprogress.OwnerTable, toneprogress.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ToneProgressClient) Hooks() []Hook {
+	return c.hooks.ToneProgress
+}
+
+// Interceptors returns the client interceptors.
+func (c *ToneProgressClient) Interceptors() []Interceptor {
+	return c.inters.ToneProgress
+}
+
+func (c *ToneProgressClient) mutate(ctx context.Context, m *ToneProgressMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ToneProgressCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ToneProgressUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ToneProgressUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ToneProgressDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ToneProgress mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -2089,6 +2405,38 @@ func (c *UserClient) QueryXpAwards(_m *User) *XPAwardQuery {
 	return query
 }
 
+// QueryToneProgress queries the tone_progress edge of a User.
+func (c *UserClient) QueryToneProgress(_m *User) *ToneProgressQuery {
+	query := (&ToneProgressClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(toneprogress.Table, toneprogress.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ToneProgressTable, user.ToneProgressColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryToneAttempts queries the tone_attempts edge of a User.
+func (c *UserClient) QueryToneAttempts(_m *User) *ToneAttemptQuery {
+	query := (&ToneAttemptClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(toneattempt.Table, toneattempt.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ToneAttemptsTable, user.ToneAttemptsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -2267,10 +2615,12 @@ func (c *XPAwardClient) mutate(ctx context.Context, m *XPAwardMutation) (Value, 
 type (
 	hooks struct {
 		CardAttemptLog, CardSet, Category, Flashcard, Lesson, LessonAttempt,
-		LibraryCard, LibrarySet, SetFlashcard, User, XPAward []ent.Hook
+		LibraryCard, LibrarySet, SetFlashcard, ToneAttempt, ToneProgress, User,
+		XPAward []ent.Hook
 	}
 	inters struct {
 		CardAttemptLog, CardSet, Category, Flashcard, Lesson, LessonAttempt,
-		LibraryCard, LibrarySet, SetFlashcard, User, XPAward []ent.Interceptor
+		LibraryCard, LibrarySet, SetFlashcard, ToneAttempt, ToneProgress, User,
+		XPAward []ent.Interceptor
 	}
 )

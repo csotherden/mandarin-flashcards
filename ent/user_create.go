@@ -16,6 +16,8 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/flashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/lesson"
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/toneattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/toneprogress"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
@@ -290,6 +292,36 @@ func (_c *UserCreate) AddXpAwards(v ...*XPAward) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddXpAwardIDs(ids...)
+}
+
+// AddToneProgresIDs adds the "tone_progress" edge to the ToneProgress entity by IDs.
+func (_c *UserCreate) AddToneProgresIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddToneProgresIDs(ids...)
+	return _c
+}
+
+// AddToneProgress adds the "tone_progress" edges to the ToneProgress entity.
+func (_c *UserCreate) AddToneProgress(v ...*ToneProgress) *UserCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddToneProgresIDs(ids...)
+}
+
+// AddToneAttemptIDs adds the "tone_attempts" edge to the ToneAttempt entity by IDs.
+func (_c *UserCreate) AddToneAttemptIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddToneAttemptIDs(ids...)
+	return _c
+}
+
+// AddToneAttempts adds the "tone_attempts" edges to the ToneAttempt entity.
+func (_c *UserCreate) AddToneAttempts(v ...*ToneAttempt) *UserCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddToneAttemptIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -606,6 +638,38 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(xpaward.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ToneProgressIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneProgressTable,
+			Columns: []string{user.ToneProgressColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneprogress.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ToneAttemptsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ToneAttemptsTable,
+			Columns: []string{user.ToneAttemptsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(toneattempt.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

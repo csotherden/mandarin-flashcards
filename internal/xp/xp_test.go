@@ -170,3 +170,37 @@ func TestConcurrentGradesCountOnce(t *testing.T) {
 		t.Fatalf("total after 8 concurrent Nice grades = %d, want 8", got)
 	}
 }
+
+func TestAwardOnce(t *testing.T) {
+	f := setup(t)
+	ctx := context.Background()
+	at := func(d, h int) time.Time { return time.Date(2026, 11, d, h, 0, 0, 0, f.tz) }
+	steps := []struct {
+		tier string
+		at   time.Time
+		want int
+	}{
+		{Close, at(1, 9), 5},
+		{Keep, at(1, 10), 0},
+		{Nice, at(2, 9), 3},     // another day tops up, never resets
+		{Nice, at(3, 9), 0},     // already paid 8
+		{Perfect, at(3, 10), 4}, // tops up to 12, the most it ever pays
+		{Perfect, at(4, 9), 0},
+	}
+	for i, s := range steps {
+		res, err := AwardOnce(ctx, f.db, f.user.ID, "tones/tone-1/ma", s.tier, 0, s.at)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if res.Earned != s.want {
+			t.Fatalf("step %d: earned %d, want %d", i, res.Earned, s.want)
+		}
+	}
+	if got := f.total(t); got != 12 {
+		t.Fatalf("total %d, want 12", got)
+	}
+	u := f.db.User.GetX(ctx, f.user.ID)
+	if got, _ := Today(ctx, f.db, u, at(3, 12)); got != 4 {
+		t.Fatalf("XP today on day 3 = %d, want 4 (only what that day earned)", got)
+	}
+}

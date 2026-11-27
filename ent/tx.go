@@ -30,6 +30,10 @@ type Tx struct {
 	LibrarySet *LibrarySetClient
 	// SetFlashcard is the client for interacting with the SetFlashcard builders.
 	SetFlashcard *SetFlashcardClient
+	// ToneAttempt is the client for interacting with the ToneAttempt builders.
+	ToneAttempt *ToneAttemptClient
+	// ToneProgress is the client for interacting with the ToneProgress builders.
+	ToneProgress *ToneProgressClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// XPAward is the client for interacting with the XPAward builders.
@@ -174,6 +178,8 @@ func (tx *Tx) init() {
 	tx.LibraryCard = NewLibraryCardClient(tx.config)
 	tx.LibrarySet = NewLibrarySetClient(tx.config)
 	tx.SetFlashcard = NewSetFlashcardClient(tx.config)
+	tx.ToneAttempt = NewToneAttemptClient(tx.config)
+	tx.ToneProgress = NewToneProgressClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.XPAward = NewXPAwardClient(tx.config)
 }

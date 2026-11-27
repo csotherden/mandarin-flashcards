@@ -882,6 +882,52 @@ func HasXpAwardsWith(preds ...predicate.XPAward) predicate.User {
 	})
 }
 
+// HasToneProgress applies the HasEdge predicate on the "tone_progress" edge.
+func HasToneProgress() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ToneProgressTable, ToneProgressColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasToneProgressWith applies the HasEdge predicate on the "tone_progress" edge with a given conditions (other predicates).
+func HasToneProgressWith(preds ...predicate.ToneProgress) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newToneProgressStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasToneAttempts applies the HasEdge predicate on the "tone_attempts" edge.
+func HasToneAttempts() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ToneAttemptsTable, ToneAttemptsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasToneAttemptsWith applies the HasEdge predicate on the "tone_attempts" edge with a given conditions (other predicates).
+func HasToneAttemptsWith(preds ...predicate.ToneAttempt) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newToneAttemptsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(sql.AndPredicates(predicates...))
