@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ApiError } from "../api";
 import { useAuth } from "../auth";
+import { BrandMark } from "../components/Shell";
 
 export function AuthPage({ mode }: { mode: "login" | "register" }) {
   const { user, login, register } = useAuth();
@@ -26,31 +27,41 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5">
-      <p className="text-xs uppercase tracking-[0.18em] text-cinnabar">Mandarin cards</p>
-      <h1 className="mt-2 font-hanzi text-4xl font-semibold">{mode === "login" ? "Welcome back" : "Create an account"}</h1>
-      <p className="mt-2 text-stone-600">Drill the words that stick, then hear exactly which tone slipped.</p>
-      <form className="mt-8 grid gap-3" onSubmit={submit}>
-        <label className="grid gap-1 text-sm">
-          Email
-          <input className="rounded-2xl border border-stone-300 bg-white px-3 py-3 text-base" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
-        </label>
-        <label className="grid gap-1 text-sm">
-          Password
-          <input className="rounded-2xl border border-stone-300 bg-white px-3 py-3 text-base" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} />
-        </label>
-        {error && <p className="text-sm text-cinnabar">{error}</p>}
-        <button className="rounded-2xl bg-ink py-3 font-semibold text-paper" disabled={busy} type="submit">
-          {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
-        </button>
-      </form>
-      <p className="mt-4 text-sm text-stone-600">
-        {mode === "login" ? (
-          <Link className="underline" to="/register">Need an account?</Link>
-        ) : (
-          <Link className="underline" to="/login">Already have one?</Link>
-        )}
-      </p>
+    <main className="min-h-screen lg:grid lg:grid-cols-2">
+      <section className="relative hidden overflow-hidden bg-hero p-12 text-white lg:flex lg:flex-col lg:justify-end">
+        <span className="absolute -right-10 -top-16 font-hanzi text-[22rem] font-black leading-none text-white/10" aria-hidden>卡</span>
+        <h2 className="text-5xl font-extrabold leading-tight">Say it.<br />Hear which tone slipped.</h2>
+        <p className="mt-4 max-w-md text-lg text-white/90">Picture cards for the words that keep getting away, graded syllable by syllable.</p>
+      </section>
+      <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 lg:min-h-0">
+        <div className="flex items-center gap-3 text-lg font-bold">
+          <BrandMark />
+          Mandarin Cards
+        </div>
+        <h1 className="mt-8 text-3xl font-extrabold">{mode === "login" ? "Welcome back" : "Create an account"}</h1>
+        <p className="mt-1 text-muted">{mode === "login" ? "Pick up where you left off." : "Add your first words in seconds."}</p>
+        <form className="mt-7 grid gap-4" onSubmit={submit}>
+          <label className="grid gap-1.5">
+            <span className="label">Email</span>
+            <input className="field" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+          </label>
+          <label className="grid gap-1.5">
+            <span className="label">Password</span>
+            <input className="field" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} />
+          </label>
+          {error && <p className="text-sm font-semibold text-crimson" role="alert">{error}</p>}
+          <button className="btn-primary h-13 py-3.5 text-lg" disabled={busy} type="submit">
+            {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
+          </button>
+        </form>
+        <p className="mt-5 text-muted">
+          {mode === "login" ? (
+            <>New here? <Link className="link" to="/register">Create an account</Link></>
+          ) : (
+            <>Have an account? <Link className="link" to="/login">Sign in</Link></>
+          )}
+        </p>
+      </div>
     </main>
   );
 }

@@ -33,7 +33,11 @@ export function CardImage({ card, className }: { card: Flashcard; className?: st
   }, [card.has_local_image, card.id, card.image_url]);
 
   if (!src) {
-    return <div className={`${className ?? ""} grid place-items-center bg-stone-200 text-sm text-stone-500`}>No image</div>;
+    return (
+      <div className={`${className ?? ""} grid place-items-center bg-[#F1EEEA] font-hanzi text-3xl font-bold text-[#BDB5AC]`} aria-hidden>
+        {card.hanzi.slice(0, 2)}
+      </div>
+    );
   }
   return <img src={src} alt="" className={`${className ?? ""} object-cover`} />;
 }
@@ -42,7 +46,7 @@ export function Attribution({ card }: { card: Flashcard }) {
   const credit = card.unsplash_attribution;
   if (!credit?.photographer_name) return null;
   return (
-    <p className="text-xs text-stone-500">
+    <p className="text-xs text-muted">
       Photo by{" "}
       <a className="underline" href={credit.photographer_url} target="_blank" rel="noreferrer">
         {credit.photographer_name}

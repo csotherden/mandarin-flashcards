@@ -54,6 +54,8 @@ export type Autofill = {
   example_sentence_hanzi: string;
   example_sentence_pinyin: string;
   image_search: string;
+  categories: string[];
+  existing_card_id?: string;
 };
 
 export type ImageCandidate = {
@@ -133,3 +135,26 @@ export type AssessResponse = {
   assessable: boolean;
   reason?: string;
 };
+
+export type HomeSet = { set: CardSet; cover?: Flashcard };
+
+export type Home = {
+  streak_days: number;
+  practiced_today: number;
+  total_cards: number;
+  suggested_count: number;
+  last_mode?: StudyMode;
+  sets: HomeSet[];
+  slipped: { card: Flashcard; average: number }[];
+  saved_sessions: { id: string; title: string; card_count: number }[];
+};
+
+export type GeneratedSet = { set: CardSet; cards: Flashcard[]; skipped: string[] };
+
+/** Where a session's cards come from. */
+export type SessionSource =
+  | { kind: "all" }
+  | { kind: "sets"; setIds: string[] }
+  | { kind: "lesson"; lessonId: string }
+  | { kind: "missed"; attemptId: string };
+
