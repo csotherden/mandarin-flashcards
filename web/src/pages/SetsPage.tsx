@@ -16,7 +16,7 @@ export function SetsPage() {
 
   useEffect(() => {
     // Home carries each set with a cover card, which is what this grid shows.
-    api<Home>(`/api/home?tz_offset=${new Date().getTimezoneOffset()}`)
+    api<Home>("/api/home")
       .then(setHome)
       .catch((err: Error) => setError(err.message));
   }, []);

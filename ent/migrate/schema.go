@@ -288,6 +288,10 @@ var (
 		{Name: "password_hash", Type: field.TypeString},
 		{Name: "password_salt", Type: field.TypeString},
 		{Name: "refresh_token_id", Type: field.TypeString, Nullable: true},
+		{Name: "timezone", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "streak_current", Type: field.TypeInt, Default: 0},
+		{Name: "streak_longest", Type: field.TypeInt, Default: 0},
+		{Name: "streak_last_day", Type: field.TypeString, Nullable: true, Size: 10},
 		{Name: "preferences", Type: field.TypeJSON},
 	}
 	// UsersTable holds the schema information for the "users" table.

@@ -3,9 +3,9 @@
 package home
 
 import (
+	"github.com/csotherden/mandarin-flashcards/internal/streak"
 	"net/http"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/csotherden/mandarin-flashcards/ent"
@@ -41,22 +41,23 @@ func (h *Handler) Register(router *mux.Router) {
 	router.HandleFunc("/home", h.Get).Methods(http.MethodGet)
 }
 
-// Get is GET /api/home?tz_offset=<minutes, as JS getTimezoneOffset>.
+// Get is GET /api/home. Days are the user's saved timezone's calendar days.
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.GetUserIDFromContext(r.Context())
 	if !ok {
 		handlerutils.RespondWithError(w, h.logger, http.StatusUnauthorized, handlerutils.CodeNotSet, "Unauthorized", nil)
 		return
 	}
-	offset, _ := strconv.Atoi(r.URL.Query().Get("tz_offset"))
-	if offset < -840 || offset > 840 {
-		offset = 0
-	}
-	loc := time.FixedZone("user", -offset*60)
 	ctx := r.Context()
 	fail := func(err error) {
 		handlerutils.RespondWithError(w, h.logger, http.StatusInternalServerError, handlerutils.CodeNotSet, "Could not load today", err)
 	}
+	me, err := h.db.User.Get(ctx, userID)
+	if err != nil {
+		fail(err)
+		return
+	}
+	loc := streak.Location(me)
 
 	out := models.HomeResponse{Sets: []models.HomeSet{}, Slipped: []models.SlippedCard{}, SavedSessions: []models.SavedSession{}}
 	total, err := h.db.Flashcard.Query().Where(flashcard.HasOwnerWith(user.ID(userID))).Count(ctx)
@@ -66,24 +67,24 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 	out.TotalCards = total
 
-	// Streak: consecutive local days with a finished drill, ending today or yesterday.
-	since := time.Now().AddDate(0, 0, -120)
-	finished, err := h.db.LessonAttempt.Query().
-		Where(lessonattempt.HasOwnerWith(user.ID(userID)), lessonattempt.CompletedAtGT(since)).
-		Order(ent.Desc(lessonattempt.FieldCompletedAt)).All(ctx)
+	status, err := streak.Check(ctx, h.db, userID, time.Now())
 	if err != nil {
 		fail(err)
 		return
 	}
-	days := map[string]bool{}
-	for _, a := range finished {
-		if a.CompletedAt != nil {
-			days[a.CompletedAt.In(loc).Format("2006-01-02")] = true
-		}
+	out.StreakDays = status.Current
+	out.StreakLongest = status.Longest
+	out.StreakToday = status.Today
+
+	last, err := h.db.LessonAttempt.Query().
+		Where(lessonattempt.HasOwnerWith(user.ID(userID)), lessonattempt.CompletedAtNotNil()).
+		Order(ent.Desc(lessonattempt.FieldCompletedAt)).First(ctx)
+	if err != nil && !ent.IsNotFound(err) {
+		fail(err)
+		return
 	}
-	out.StreakDays = streak(days, time.Now().In(loc))
-	if len(finished) > 0 {
-		out.LastMode = string(finished[0].Mode)
+	if last != nil {
+		out.LastMode = string(last.Mode)
 	}
 
 	// Cards practiced today, and the averages behind "words that slipped".
@@ -189,18 +190,4 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 
 	out.SuggestedCount = min(10, total)
 	handlerutils.RespondWithJSON(w, h.logger, http.StatusOK, out)
-}
-
-// streak counts consecutive days in days ending today, or yesterday when today has none yet.
-func streak(days map[string]bool, now time.Time) int {
-	day := now
-	if !days[day.Format("2006-01-02")] {
-		day = day.AddDate(0, 0, -1)
-	}
-	n := 0
-	for days[day.Format("2006-01-02")] {
-		n++
-		day = day.AddDate(0, 0, -1)
-	}
-	return n
 }

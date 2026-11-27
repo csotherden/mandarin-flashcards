@@ -104,6 +104,82 @@ func (_u *UserUpdate) ClearRefreshTokenID() *UserUpdate {
 	return _u
 }
 
+// SetTimezone sets the "timezone" field.
+func (_u *UserUpdate) SetTimezone(v string) *UserUpdate {
+	_u.mutation.SetTimezone(v)
+	return _u
+}
+
+// SetNillableTimezone sets the "timezone" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableTimezone(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetTimezone(*v)
+	}
+	return _u
+}
+
+// SetStreakCurrent sets the "streak_current" field.
+func (_u *UserUpdate) SetStreakCurrent(v int) *UserUpdate {
+	_u.mutation.ResetStreakCurrent()
+	_u.mutation.SetStreakCurrent(v)
+	return _u
+}
+
+// SetNillableStreakCurrent sets the "streak_current" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableStreakCurrent(v *int) *UserUpdate {
+	if v != nil {
+		_u.SetStreakCurrent(*v)
+	}
+	return _u
+}
+
+// AddStreakCurrent adds value to the "streak_current" field.
+func (_u *UserUpdate) AddStreakCurrent(v int) *UserUpdate {
+	_u.mutation.AddStreakCurrent(v)
+	return _u
+}
+
+// SetStreakLongest sets the "streak_longest" field.
+func (_u *UserUpdate) SetStreakLongest(v int) *UserUpdate {
+	_u.mutation.ResetStreakLongest()
+	_u.mutation.SetStreakLongest(v)
+	return _u
+}
+
+// SetNillableStreakLongest sets the "streak_longest" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableStreakLongest(v *int) *UserUpdate {
+	if v != nil {
+		_u.SetStreakLongest(*v)
+	}
+	return _u
+}
+
+// AddStreakLongest adds value to the "streak_longest" field.
+func (_u *UserUpdate) AddStreakLongest(v int) *UserUpdate {
+	_u.mutation.AddStreakLongest(v)
+	return _u
+}
+
+// SetStreakLastDay sets the "streak_last_day" field.
+func (_u *UserUpdate) SetStreakLastDay(v string) *UserUpdate {
+	_u.mutation.SetStreakLastDay(v)
+	return _u
+}
+
+// SetNillableStreakLastDay sets the "streak_last_day" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableStreakLastDay(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetStreakLastDay(*v)
+	}
+	return _u
+}
+
+// ClearStreakLastDay clears the value of the "streak_last_day" field.
+func (_u *UserUpdate) ClearStreakLastDay() *UserUpdate {
+	_u.mutation.ClearStreakLastDay()
+	return _u
+}
+
 // SetPreferences sets the "preferences" field.
 func (_u *UserUpdate) SetPreferences(v models.Preferences) *UserUpdate {
 	_u.mutation.SetPreferences(v)
@@ -392,6 +468,16 @@ func (_u *UserUpdate) check() error {
 			return &ValidationError{Name: "password_salt", err: fmt.Errorf(`ent: validator failed for field "User.password_salt": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Timezone(); ok {
+		if err := user.TimezoneValidator(v); err != nil {
+			return &ValidationError{Name: "timezone", err: fmt.Errorf(`ent: validator failed for field "User.timezone": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StreakLastDay(); ok {
+		if err := user.StreakLastDayValidator(v); err != nil {
+			return &ValidationError{Name: "streak_last_day", err: fmt.Errorf(`ent: validator failed for field "User.streak_last_day": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -424,6 +510,27 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.RefreshTokenIDCleared() {
 		_spec.ClearField(user.FieldRefreshTokenID, field.TypeString)
+	}
+	if value, ok := _u.mutation.Timezone(); ok {
+		_spec.SetField(user.FieldTimezone, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StreakCurrent(); ok {
+		_spec.SetField(user.FieldStreakCurrent, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStreakCurrent(); ok {
+		_spec.AddField(user.FieldStreakCurrent, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.StreakLongest(); ok {
+		_spec.SetField(user.FieldStreakLongest, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStreakLongest(); ok {
+		_spec.AddField(user.FieldStreakLongest, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.StreakLastDay(); ok {
+		_spec.SetField(user.FieldStreakLastDay, field.TypeString, value)
+	}
+	if _u.mutation.StreakLastDayCleared() {
+		_spec.ClearField(user.FieldStreakLastDay, field.TypeString)
 	}
 	if value, ok := _u.mutation.Preferences(); ok {
 		_spec.SetField(user.FieldPreferences, field.TypeJSON, value)
@@ -786,6 +893,82 @@ func (_u *UserUpdateOne) ClearRefreshTokenID() *UserUpdateOne {
 	return _u
 }
 
+// SetTimezone sets the "timezone" field.
+func (_u *UserUpdateOne) SetTimezone(v string) *UserUpdateOne {
+	_u.mutation.SetTimezone(v)
+	return _u
+}
+
+// SetNillableTimezone sets the "timezone" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableTimezone(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetTimezone(*v)
+	}
+	return _u
+}
+
+// SetStreakCurrent sets the "streak_current" field.
+func (_u *UserUpdateOne) SetStreakCurrent(v int) *UserUpdateOne {
+	_u.mutation.ResetStreakCurrent()
+	_u.mutation.SetStreakCurrent(v)
+	return _u
+}
+
+// SetNillableStreakCurrent sets the "streak_current" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableStreakCurrent(v *int) *UserUpdateOne {
+	if v != nil {
+		_u.SetStreakCurrent(*v)
+	}
+	return _u
+}
+
+// AddStreakCurrent adds value to the "streak_current" field.
+func (_u *UserUpdateOne) AddStreakCurrent(v int) *UserUpdateOne {
+	_u.mutation.AddStreakCurrent(v)
+	return _u
+}
+
+// SetStreakLongest sets the "streak_longest" field.
+func (_u *UserUpdateOne) SetStreakLongest(v int) *UserUpdateOne {
+	_u.mutation.ResetStreakLongest()
+	_u.mutation.SetStreakLongest(v)
+	return _u
+}
+
+// SetNillableStreakLongest sets the "streak_longest" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableStreakLongest(v *int) *UserUpdateOne {
+	if v != nil {
+		_u.SetStreakLongest(*v)
+	}
+	return _u
+}
+
+// AddStreakLongest adds value to the "streak_longest" field.
+func (_u *UserUpdateOne) AddStreakLongest(v int) *UserUpdateOne {
+	_u.mutation.AddStreakLongest(v)
+	return _u
+}
+
+// SetStreakLastDay sets the "streak_last_day" field.
+func (_u *UserUpdateOne) SetStreakLastDay(v string) *UserUpdateOne {
+	_u.mutation.SetStreakLastDay(v)
+	return _u
+}
+
+// SetNillableStreakLastDay sets the "streak_last_day" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableStreakLastDay(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetStreakLastDay(*v)
+	}
+	return _u
+}
+
+// ClearStreakLastDay clears the value of the "streak_last_day" field.
+func (_u *UserUpdateOne) ClearStreakLastDay() *UserUpdateOne {
+	_u.mutation.ClearStreakLastDay()
+	return _u
+}
+
 // SetPreferences sets the "preferences" field.
 func (_u *UserUpdateOne) SetPreferences(v models.Preferences) *UserUpdateOne {
 	_u.mutation.SetPreferences(v)
@@ -1087,6 +1270,16 @@ func (_u *UserUpdateOne) check() error {
 			return &ValidationError{Name: "password_salt", err: fmt.Errorf(`ent: validator failed for field "User.password_salt": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Timezone(); ok {
+		if err := user.TimezoneValidator(v); err != nil {
+			return &ValidationError{Name: "timezone", err: fmt.Errorf(`ent: validator failed for field "User.timezone": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StreakLastDay(); ok {
+		if err := user.StreakLastDayValidator(v); err != nil {
+			return &ValidationError{Name: "streak_last_day", err: fmt.Errorf(`ent: validator failed for field "User.streak_last_day": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -1136,6 +1329,27 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if _u.mutation.RefreshTokenIDCleared() {
 		_spec.ClearField(user.FieldRefreshTokenID, field.TypeString)
+	}
+	if value, ok := _u.mutation.Timezone(); ok {
+		_spec.SetField(user.FieldTimezone, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StreakCurrent(); ok {
+		_spec.SetField(user.FieldStreakCurrent, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStreakCurrent(); ok {
+		_spec.AddField(user.FieldStreakCurrent, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.StreakLongest(); ok {
+		_spec.SetField(user.FieldStreakLongest, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStreakLongest(); ok {
+		_spec.AddField(user.FieldStreakLongest, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.StreakLastDay(); ok {
+		_spec.SetField(user.FieldStreakLastDay, field.TypeString, value)
+	}
+	if _u.mutation.StreakLastDayCleared() {
+		_spec.ClearField(user.FieldStreakLastDay, field.TypeString)
 	}
 	if value, ok := _u.mutation.Preferences(); ok {
 		_spec.SetField(user.FieldPreferences, field.TypeJSON, value)

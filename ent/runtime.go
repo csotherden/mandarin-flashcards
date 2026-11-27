@@ -336,8 +336,26 @@ func init() {
 	userDescPasswordSalt := userFields[3].Descriptor()
 	// user.PasswordSaltValidator is a validator for the "password_salt" field. It is called by the builders before save.
 	user.PasswordSaltValidator = userDescPasswordSalt.Validators[0].(func(string) error)
+	// userDescTimezone is the schema descriptor for timezone field.
+	userDescTimezone := userFields[5].Descriptor()
+	// user.DefaultTimezone holds the default value on creation for the timezone field.
+	user.DefaultTimezone = userDescTimezone.Default.(string)
+	// user.TimezoneValidator is a validator for the "timezone" field. It is called by the builders before save.
+	user.TimezoneValidator = userDescTimezone.Validators[0].(func(string) error)
+	// userDescStreakCurrent is the schema descriptor for streak_current field.
+	userDescStreakCurrent := userFields[6].Descriptor()
+	// user.DefaultStreakCurrent holds the default value on creation for the streak_current field.
+	user.DefaultStreakCurrent = userDescStreakCurrent.Default.(int)
+	// userDescStreakLongest is the schema descriptor for streak_longest field.
+	userDescStreakLongest := userFields[7].Descriptor()
+	// user.DefaultStreakLongest holds the default value on creation for the streak_longest field.
+	user.DefaultStreakLongest = userDescStreakLongest.Default.(int)
+	// userDescStreakLastDay is the schema descriptor for streak_last_day field.
+	userDescStreakLastDay := userFields[8].Descriptor()
+	// user.StreakLastDayValidator is a validator for the "streak_last_day" field. It is called by the builders before save.
+	user.StreakLastDayValidator = userDescStreakLastDay.Validators[0].(func(string) error)
 	// userDescPreferences is the schema descriptor for preferences field.
-	userDescPreferences := userFields[5].Descriptor()
+	userDescPreferences := userFields[9].Descriptor()
 	// user.DefaultPreferences holds the default value on creation for the preferences field.
 	user.DefaultPreferences = userDescPreferences.Default.(models.Preferences)
 	// userDescID is the schema descriptor for id field.

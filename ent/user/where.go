@@ -86,6 +86,26 @@ func RefreshTokenID(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldRefreshTokenID, v))
 }
 
+// Timezone applies equality check predicate on the "timezone" field. It's identical to TimezoneEQ.
+func Timezone(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldTimezone, v))
+}
+
+// StreakCurrent applies equality check predicate on the "streak_current" field. It's identical to StreakCurrentEQ.
+func StreakCurrent(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldStreakCurrent, v))
+}
+
+// StreakLongest applies equality check predicate on the "streak_longest" field. It's identical to StreakLongestEQ.
+func StreakLongest(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldStreakLongest, v))
+}
+
+// StreakLastDay applies equality check predicate on the "streak_last_day" field. It's identical to StreakLastDayEQ.
+func StreakLastDay(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldStreakLastDay, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldCreatedAt, v))
@@ -434,6 +454,226 @@ func RefreshTokenIDEqualFold(v string) predicate.User {
 // RefreshTokenIDContainsFold applies the ContainsFold predicate on the "refresh_token_id" field.
 func RefreshTokenIDContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldRefreshTokenID, v))
+}
+
+// TimezoneEQ applies the EQ predicate on the "timezone" field.
+func TimezoneEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldTimezone, v))
+}
+
+// TimezoneNEQ applies the NEQ predicate on the "timezone" field.
+func TimezoneNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldTimezone, v))
+}
+
+// TimezoneIn applies the In predicate on the "timezone" field.
+func TimezoneIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldTimezone, vs...))
+}
+
+// TimezoneNotIn applies the NotIn predicate on the "timezone" field.
+func TimezoneNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldTimezone, vs...))
+}
+
+// TimezoneGT applies the GT predicate on the "timezone" field.
+func TimezoneGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldTimezone, v))
+}
+
+// TimezoneGTE applies the GTE predicate on the "timezone" field.
+func TimezoneGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldTimezone, v))
+}
+
+// TimezoneLT applies the LT predicate on the "timezone" field.
+func TimezoneLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldTimezone, v))
+}
+
+// TimezoneLTE applies the LTE predicate on the "timezone" field.
+func TimezoneLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldTimezone, v))
+}
+
+// TimezoneContains applies the Contains predicate on the "timezone" field.
+func TimezoneContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldTimezone, v))
+}
+
+// TimezoneHasPrefix applies the HasPrefix predicate on the "timezone" field.
+func TimezoneHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldTimezone, v))
+}
+
+// TimezoneHasSuffix applies the HasSuffix predicate on the "timezone" field.
+func TimezoneHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldTimezone, v))
+}
+
+// TimezoneEqualFold applies the EqualFold predicate on the "timezone" field.
+func TimezoneEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldTimezone, v))
+}
+
+// TimezoneContainsFold applies the ContainsFold predicate on the "timezone" field.
+func TimezoneContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldTimezone, v))
+}
+
+// StreakCurrentEQ applies the EQ predicate on the "streak_current" field.
+func StreakCurrentEQ(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldStreakCurrent, v))
+}
+
+// StreakCurrentNEQ applies the NEQ predicate on the "streak_current" field.
+func StreakCurrentNEQ(v int) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldStreakCurrent, v))
+}
+
+// StreakCurrentIn applies the In predicate on the "streak_current" field.
+func StreakCurrentIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldIn(FieldStreakCurrent, vs...))
+}
+
+// StreakCurrentNotIn applies the NotIn predicate on the "streak_current" field.
+func StreakCurrentNotIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldStreakCurrent, vs...))
+}
+
+// StreakCurrentGT applies the GT predicate on the "streak_current" field.
+func StreakCurrentGT(v int) predicate.User {
+	return predicate.User(sql.FieldGT(FieldStreakCurrent, v))
+}
+
+// StreakCurrentGTE applies the GTE predicate on the "streak_current" field.
+func StreakCurrentGTE(v int) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldStreakCurrent, v))
+}
+
+// StreakCurrentLT applies the LT predicate on the "streak_current" field.
+func StreakCurrentLT(v int) predicate.User {
+	return predicate.User(sql.FieldLT(FieldStreakCurrent, v))
+}
+
+// StreakCurrentLTE applies the LTE predicate on the "streak_current" field.
+func StreakCurrentLTE(v int) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldStreakCurrent, v))
+}
+
+// StreakLongestEQ applies the EQ predicate on the "streak_longest" field.
+func StreakLongestEQ(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldStreakLongest, v))
+}
+
+// StreakLongestNEQ applies the NEQ predicate on the "streak_longest" field.
+func StreakLongestNEQ(v int) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldStreakLongest, v))
+}
+
+// StreakLongestIn applies the In predicate on the "streak_longest" field.
+func StreakLongestIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldIn(FieldStreakLongest, vs...))
+}
+
+// StreakLongestNotIn applies the NotIn predicate on the "streak_longest" field.
+func StreakLongestNotIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldStreakLongest, vs...))
+}
+
+// StreakLongestGT applies the GT predicate on the "streak_longest" field.
+func StreakLongestGT(v int) predicate.User {
+	return predicate.User(sql.FieldGT(FieldStreakLongest, v))
+}
+
+// StreakLongestGTE applies the GTE predicate on the "streak_longest" field.
+func StreakLongestGTE(v int) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldStreakLongest, v))
+}
+
+// StreakLongestLT applies the LT predicate on the "streak_longest" field.
+func StreakLongestLT(v int) predicate.User {
+	return predicate.User(sql.FieldLT(FieldStreakLongest, v))
+}
+
+// StreakLongestLTE applies the LTE predicate on the "streak_longest" field.
+func StreakLongestLTE(v int) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldStreakLongest, v))
+}
+
+// StreakLastDayEQ applies the EQ predicate on the "streak_last_day" field.
+func StreakLastDayEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldStreakLastDay, v))
+}
+
+// StreakLastDayNEQ applies the NEQ predicate on the "streak_last_day" field.
+func StreakLastDayNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldStreakLastDay, v))
+}
+
+// StreakLastDayIn applies the In predicate on the "streak_last_day" field.
+func StreakLastDayIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldStreakLastDay, vs...))
+}
+
+// StreakLastDayNotIn applies the NotIn predicate on the "streak_last_day" field.
+func StreakLastDayNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldStreakLastDay, vs...))
+}
+
+// StreakLastDayGT applies the GT predicate on the "streak_last_day" field.
+func StreakLastDayGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldStreakLastDay, v))
+}
+
+// StreakLastDayGTE applies the GTE predicate on the "streak_last_day" field.
+func StreakLastDayGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldStreakLastDay, v))
+}
+
+// StreakLastDayLT applies the LT predicate on the "streak_last_day" field.
+func StreakLastDayLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldStreakLastDay, v))
+}
+
+// StreakLastDayLTE applies the LTE predicate on the "streak_last_day" field.
+func StreakLastDayLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldStreakLastDay, v))
+}
+
+// StreakLastDayContains applies the Contains predicate on the "streak_last_day" field.
+func StreakLastDayContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldStreakLastDay, v))
+}
+
+// StreakLastDayHasPrefix applies the HasPrefix predicate on the "streak_last_day" field.
+func StreakLastDayHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldStreakLastDay, v))
+}
+
+// StreakLastDayHasSuffix applies the HasSuffix predicate on the "streak_last_day" field.
+func StreakLastDayHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldStreakLastDay, v))
+}
+
+// StreakLastDayIsNil applies the IsNil predicate on the "streak_last_day" field.
+func StreakLastDayIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldStreakLastDay))
+}
+
+// StreakLastDayNotNil applies the NotNil predicate on the "streak_last_day" field.
+func StreakLastDayNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldStreakLastDay))
+}
+
+// StreakLastDayEqualFold applies the EqualFold predicate on the "streak_last_day" field.
+func StreakLastDayEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldStreakLastDay, v))
+}
+
+// StreakLastDayContainsFold applies the ContainsFold predicate on the "streak_last_day" field.
+func StreakLastDayContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldStreakLastDay, v))
 }
 
 // HasCategories applies the HasEdge predicate on the "categories" edge.

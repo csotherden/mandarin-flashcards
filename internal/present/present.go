@@ -11,6 +11,7 @@ func User(u *ent.User) models.UserResponse {
 		ID:          u.ID,
 		Email:       u.Email,
 		Preferences: u.Preferences,
+		Timezone:    u.Timezone,
 		CreatedAt:   u.CreatedAt,
 	}
 }

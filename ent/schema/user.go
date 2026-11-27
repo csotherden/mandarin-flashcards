@@ -34,6 +34,21 @@ func (User) Fields() []ent.Field {
 			Optional().
 			Sensitive().
 			Nillable(),
+		// IANA zone (America/New_York) from the user's own device. Streak days are this zone's
+		// calendar days, so anyone reading the streak sees the same answer.
+		field.String("timezone").
+			Default("").
+			MaxLen(64),
+		// Materialized streak: consecutive local days with a graded card, ending on
+		// streak_last_day. A lapse is settled when the streak is next read.
+		field.Int("streak_current").
+			Default(0),
+		field.Int("streak_longest").
+			Default(0),
+		field.String("streak_last_day").
+			Optional().
+			Nillable().
+			MaxLen(10),
 		field.JSON("preferences", models.Preferences{}).
 			Default(models.Preferences{
 				DefaultTTSSpeed: 1,

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/csotherden/mandarin-flashcards/internal/streak"
 	"net/http"
 
 	"github.com/csotherden/mandarin-flashcards/ent"
@@ -31,11 +32,14 @@ func (h *Handler) RegisterAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userRow, err := h.db.User.Create().
+	create := h.db.User.Create().
 		SetEmail(email).
 		SetPasswordHash(hash).
-		SetPasswordSalt(salt).
-		Save(r.Context())
+		SetPasswordSalt(salt)
+	if streak.ValidTimezone(req.Timezone) {
+		create.SetTimezone(req.Timezone)
+	}
+	userRow, err := create.Save(r.Context())
 	if err != nil {
 		if ent.IsConstraintError(err) {
 			handlerutils.RespondWithError(w, h.logger, http.StatusConflict, handlerutils.CodeNotSet, "Email already registered", nil)

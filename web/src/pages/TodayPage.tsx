@@ -6,6 +6,7 @@ import { Icon } from "../components/Icon";
 import { Pinyin } from "../components/Pinyin";
 import { SessionSheet } from "../components/SessionSheet";
 import { BrandMark } from "../components/Shell";
+import { StreakBadge } from "../components/StreakBadge";
 import { modeTitle, startSession } from "../session";
 import type { Home, SessionSource, StudyMode } from "../types";
 
@@ -17,7 +18,7 @@ export function TodayPage() {
   const [builder, setBuilder] = useState(false);
 
   function load() {
-    api<Home>(`/api/home?tz_offset=${new Date().getTimezoneOffset()}`)
+    api<Home>("/api/home")
       .then(setHome)
       .catch((err: Error) => setError(err.message));
   }
@@ -54,16 +55,7 @@ export function TodayPage() {
           Mandarin Cards
         </div>
         <h1 className="hidden text-3xl font-extrabold lg:block">Today</h1>
-        <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-ink px-3.5 py-2 text-sm font-semibold text-white">
-          <Icon name="star" className="text-gold" />
-          {home.streak_days > 0 ? (
-            <>
-              <b className="text-gold">{home.streak_days}</b> day streak
-            </>
-          ) : (
-            "Start a streak"
-          )}
-        </span>
+        <StreakBadge days={home.streak_days} today={home.streak_today} />
       </header>
 
       {error && <p className="text-sm font-semibold text-crimson" role="alert">{error}</p>}
@@ -90,6 +82,19 @@ export function TodayPage() {
               <Icon name="star" className="absolute right-5 top-5 text-5xl text-gold" />
               <p className="text-sm font-semibold uppercase tracking-[0.08em] text-white/85">Today's practice</p>
               <h2 className="mt-1.5 pr-14 text-3xl font-extrabold leading-tight lg:text-4xl">Ready for {count} cards?</h2>
+              {home.streak_days > 0 && (
+                <p className="mt-2 flex items-center gap-1.5 font-semibold text-white">
+                  {home.streak_today ? (
+                    <>
+                      <Icon name="check" className="text-gold" /> Today counts. {home.streak_days}-day streak.
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="star-outline" className="text-gold" /> Practice today to keep your {home.streak_days}-day streak.
+                    </>
+                  )}
+                </p>
+              )}
               <p className="mt-2 text-white/90">
                 {home.slipped.length > 0 ? "Words that slipped come first, then the ones you see least." : "The words you have seen least come first."}
               </p>

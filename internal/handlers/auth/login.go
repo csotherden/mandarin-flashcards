@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/csotherden/mandarin-flashcards/internal/streak"
 	"net/http"
 
 	"github.com/csotherden/mandarin-flashcards/ent"
@@ -30,7 +31,11 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		handlerutils.RespondWithError(w, h.logger, http.StatusInternalServerError, handlerutils.CodeNotSet, "Could not sign in", err)
 		return
 	}
-	updated, err := h.db.User.UpdateOneID(row.ID).SetRefreshTokenID(pair.TokenID).Save(r.Context())
+	update := h.db.User.UpdateOneID(row.ID).SetRefreshTokenID(pair.TokenID)
+	if streak.ValidTimezone(req.Timezone) {
+		update.SetTimezone(req.Timezone)
+	}
+	updated, err := update.Save(r.Context())
 	if err != nil {
 		handlerutils.RespondWithError(w, h.logger, http.StatusInternalServerError, handlerutils.CodeNotSet, "Could not sign in", err)
 		return

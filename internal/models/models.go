@@ -80,14 +80,21 @@ func GenericErrorCode(status int) string {
 	}
 }
 
+// Timezone is the device's IANA zone; it sets which calendar day counts toward the streak.
 type RegisterRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Timezone string `json:"timezone"`
 }
 
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Timezone string `json:"timezone"`
+}
+
+type TimezoneRequest struct {
+	Timezone string `json:"timezone"`
 }
 
 type RefreshRequest struct {
@@ -103,6 +110,7 @@ type UserResponse struct {
 	ID          uuid.UUID   `json:"id"`
 	Email       string      `json:"email"`
 	Preferences Preferences `json:"preferences"`
+	Timezone    string      `json:"timezone"`
 	CreatedAt   time.Time   `json:"created_at"`
 }
 
@@ -288,7 +296,10 @@ type MatchInput struct {
 
 // HomeResponse is the Today screen.
 type HomeResponse struct {
+	// StreakDays is the live streak; StreakToday says whether today already counts toward it.
 	StreakDays     int            `json:"streak_days"`
+	StreakToday    bool           `json:"streak_today"`
+	StreakLongest  int            `json:"streak_longest"`
 	PracticedToday int            `json:"practiced_today"`
 	TotalCards     int            `json:"total_cards"`
 	SuggestedCount int            `json:"suggested_count"`

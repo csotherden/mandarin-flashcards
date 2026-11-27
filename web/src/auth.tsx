@@ -2,6 +2,15 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { api, clearSession, saveSession, token } from "./api";
 import type { LoginResponse, User } from "./types";
 
+/** The device's IANA zone. The server keeps it so streak days are the user's own calendar days. */
+export function deviceTimezone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
+  } catch {
+    return "";
+  }
+}
+
 type AuthValue = {
   user: User | null;
   ready: boolean;
@@ -22,7 +31,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     api<User>("/api/user/profile")
-      .then(setUser)
+      .then(async (profile) => {
+        // Keep the saved zone in step with this device (new account flow, travel, older accounts).
+        const zone = deviceTimezone();
+        if (zone && zone !== profile.timezone) {
+          profile = await api<User>("/api/user/timezone", { method: "PUT", body: JSON.stringify({ timezone: zone }) }).catch(() => profile);
+        }
+        setUser(profile);
+      })
       .catch(() => clearSession())
       .finally(() => setReady(true));
   }, []);
@@ -30,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string) {
     const res = await api<LoginResponse>("/api/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, timezone: deviceTimezone() }),
     });
     saveSession(res);
     setUser(res.user);
@@ -39,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function register(email: string, password: string) {
     const res = await api<LoginResponse>("/api/auth/register", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, timezone: deviceTimezone() }),
     });
     saveSession(res);
     setUser(res.user);

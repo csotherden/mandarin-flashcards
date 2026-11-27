@@ -6434,6 +6434,12 @@ type UserMutation struct {
 	password_hash            *string
 	password_salt            *string
 	refresh_token_id         *string
+	timezone                 *string
+	streak_current           *int
+	addstreak_current        *int
+	streak_longest           *int
+	addstreak_longest        *int
+	streak_last_day          *string
 	preferences              *models.Preferences
 	clearedFields            map[string]struct{}
 	categories               map[uuid.UUID]struct{}
@@ -6790,6 +6796,203 @@ func (m *UserMutation) RefreshTokenIDCleared() bool {
 func (m *UserMutation) ResetRefreshTokenID() {
 	m.refresh_token_id = nil
 	delete(m.clearedFields, user.FieldRefreshTokenID)
+}
+
+// SetTimezone sets the "timezone" field.
+func (m *UserMutation) SetTimezone(s string) {
+	m.timezone = &s
+}
+
+// Timezone returns the value of the "timezone" field in the mutation.
+func (m *UserMutation) Timezone() (r string, exists bool) {
+	v := m.timezone
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTimezone returns the old "timezone" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldTimezone(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTimezone is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTimezone requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTimezone: %w", err)
+	}
+	return oldValue.Timezone, nil
+}
+
+// ResetTimezone resets all changes to the "timezone" field.
+func (m *UserMutation) ResetTimezone() {
+	m.timezone = nil
+}
+
+// SetStreakCurrent sets the "streak_current" field.
+func (m *UserMutation) SetStreakCurrent(i int) {
+	m.streak_current = &i
+	m.addstreak_current = nil
+}
+
+// StreakCurrent returns the value of the "streak_current" field in the mutation.
+func (m *UserMutation) StreakCurrent() (r int, exists bool) {
+	v := m.streak_current
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStreakCurrent returns the old "streak_current" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldStreakCurrent(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStreakCurrent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStreakCurrent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStreakCurrent: %w", err)
+	}
+	return oldValue.StreakCurrent, nil
+}
+
+// AddStreakCurrent adds i to the "streak_current" field.
+func (m *UserMutation) AddStreakCurrent(i int) {
+	if m.addstreak_current != nil {
+		*m.addstreak_current += i
+	} else {
+		m.addstreak_current = &i
+	}
+}
+
+// AddedStreakCurrent returns the value that was added to the "streak_current" field in this mutation.
+func (m *UserMutation) AddedStreakCurrent() (r int, exists bool) {
+	v := m.addstreak_current
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStreakCurrent resets all changes to the "streak_current" field.
+func (m *UserMutation) ResetStreakCurrent() {
+	m.streak_current = nil
+	m.addstreak_current = nil
+}
+
+// SetStreakLongest sets the "streak_longest" field.
+func (m *UserMutation) SetStreakLongest(i int) {
+	m.streak_longest = &i
+	m.addstreak_longest = nil
+}
+
+// StreakLongest returns the value of the "streak_longest" field in the mutation.
+func (m *UserMutation) StreakLongest() (r int, exists bool) {
+	v := m.streak_longest
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStreakLongest returns the old "streak_longest" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldStreakLongest(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStreakLongest is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStreakLongest requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStreakLongest: %w", err)
+	}
+	return oldValue.StreakLongest, nil
+}
+
+// AddStreakLongest adds i to the "streak_longest" field.
+func (m *UserMutation) AddStreakLongest(i int) {
+	if m.addstreak_longest != nil {
+		*m.addstreak_longest += i
+	} else {
+		m.addstreak_longest = &i
+	}
+}
+
+// AddedStreakLongest returns the value that was added to the "streak_longest" field in this mutation.
+func (m *UserMutation) AddedStreakLongest() (r int, exists bool) {
+	v := m.addstreak_longest
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStreakLongest resets all changes to the "streak_longest" field.
+func (m *UserMutation) ResetStreakLongest() {
+	m.streak_longest = nil
+	m.addstreak_longest = nil
+}
+
+// SetStreakLastDay sets the "streak_last_day" field.
+func (m *UserMutation) SetStreakLastDay(s string) {
+	m.streak_last_day = &s
+}
+
+// StreakLastDay returns the value of the "streak_last_day" field in the mutation.
+func (m *UserMutation) StreakLastDay() (r string, exists bool) {
+	v := m.streak_last_day
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStreakLastDay returns the old "streak_last_day" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldStreakLastDay(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStreakLastDay is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStreakLastDay requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStreakLastDay: %w", err)
+	}
+	return oldValue.StreakLastDay, nil
+}
+
+// ClearStreakLastDay clears the value of the "streak_last_day" field.
+func (m *UserMutation) ClearStreakLastDay() {
+	m.streak_last_day = nil
+	m.clearedFields[user.FieldStreakLastDay] = struct{}{}
+}
+
+// StreakLastDayCleared returns if the "streak_last_day" field was cleared in this mutation.
+func (m *UserMutation) StreakLastDayCleared() bool {
+	_, ok := m.clearedFields[user.FieldStreakLastDay]
+	return ok
+}
+
+// ResetStreakLastDay resets all changes to the "streak_last_day" field.
+func (m *UserMutation) ResetStreakLastDay() {
+	m.streak_last_day = nil
+	delete(m.clearedFields, user.FieldStreakLastDay)
 }
 
 // SetPreferences sets the "preferences" field.
@@ -7186,7 +7389,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -7204,6 +7407,18 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.refresh_token_id != nil {
 		fields = append(fields, user.FieldRefreshTokenID)
+	}
+	if m.timezone != nil {
+		fields = append(fields, user.FieldTimezone)
+	}
+	if m.streak_current != nil {
+		fields = append(fields, user.FieldStreakCurrent)
+	}
+	if m.streak_longest != nil {
+		fields = append(fields, user.FieldStreakLongest)
+	}
+	if m.streak_last_day != nil {
+		fields = append(fields, user.FieldStreakLastDay)
 	}
 	if m.preferences != nil {
 		fields = append(fields, user.FieldPreferences)
@@ -7228,6 +7443,14 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.PasswordSalt()
 	case user.FieldRefreshTokenID:
 		return m.RefreshTokenID()
+	case user.FieldTimezone:
+		return m.Timezone()
+	case user.FieldStreakCurrent:
+		return m.StreakCurrent()
+	case user.FieldStreakLongest:
+		return m.StreakLongest()
+	case user.FieldStreakLastDay:
+		return m.StreakLastDay()
 	case user.FieldPreferences:
 		return m.Preferences()
 	}
@@ -7251,6 +7474,14 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPasswordSalt(ctx)
 	case user.FieldRefreshTokenID:
 		return m.OldRefreshTokenID(ctx)
+	case user.FieldTimezone:
+		return m.OldTimezone(ctx)
+	case user.FieldStreakCurrent:
+		return m.OldStreakCurrent(ctx)
+	case user.FieldStreakLongest:
+		return m.OldStreakLongest(ctx)
+	case user.FieldStreakLastDay:
+		return m.OldStreakLastDay(ctx)
 	case user.FieldPreferences:
 		return m.OldPreferences(ctx)
 	}
@@ -7304,6 +7535,34 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRefreshTokenID(v)
 		return nil
+	case user.FieldTimezone:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTimezone(v)
+		return nil
+	case user.FieldStreakCurrent:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStreakCurrent(v)
+		return nil
+	case user.FieldStreakLongest:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStreakLongest(v)
+		return nil
+	case user.FieldStreakLastDay:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStreakLastDay(v)
+		return nil
 	case user.FieldPreferences:
 		v, ok := value.(models.Preferences)
 		if !ok {
@@ -7318,13 +7577,26 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UserMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addstreak_current != nil {
+		fields = append(fields, user.FieldStreakCurrent)
+	}
+	if m.addstreak_longest != nil {
+		fields = append(fields, user.FieldStreakLongest)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case user.FieldStreakCurrent:
+		return m.AddedStreakCurrent()
+	case user.FieldStreakLongest:
+		return m.AddedStreakLongest()
+	}
 	return nil, false
 }
 
@@ -7333,6 +7605,20 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldStreakCurrent:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStreakCurrent(v)
+		return nil
+	case user.FieldStreakLongest:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStreakLongest(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -7343,6 +7629,9 @@ func (m *UserMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(user.FieldRefreshTokenID) {
 		fields = append(fields, user.FieldRefreshTokenID)
+	}
+	if m.FieldCleared(user.FieldStreakLastDay) {
+		fields = append(fields, user.FieldStreakLastDay)
 	}
 	return fields
 }
@@ -7360,6 +7649,9 @@ func (m *UserMutation) ClearField(name string) error {
 	switch name {
 	case user.FieldRefreshTokenID:
 		m.ClearRefreshTokenID()
+		return nil
+	case user.FieldStreakLastDay:
+		m.ClearStreakLastDay()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -7386,6 +7678,18 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldRefreshTokenID:
 		m.ResetRefreshTokenID()
+		return nil
+	case user.FieldTimezone:
+		m.ResetTimezone()
+		return nil
+	case user.FieldStreakCurrent:
+		m.ResetStreakCurrent()
+		return nil
+	case user.FieldStreakLongest:
+		m.ResetStreakLongest()
+		return nil
+	case user.FieldStreakLastDay:
+		m.ResetStreakLastDay()
 		return nil
 	case user.FieldPreferences:
 		m.ResetPreferences()

@@ -88,6 +88,62 @@ func (_c *UserCreate) SetNillableRefreshTokenID(v *string) *UserCreate {
 	return _c
 }
 
+// SetTimezone sets the "timezone" field.
+func (_c *UserCreate) SetTimezone(v string) *UserCreate {
+	_c.mutation.SetTimezone(v)
+	return _c
+}
+
+// SetNillableTimezone sets the "timezone" field if the given value is not nil.
+func (_c *UserCreate) SetNillableTimezone(v *string) *UserCreate {
+	if v != nil {
+		_c.SetTimezone(*v)
+	}
+	return _c
+}
+
+// SetStreakCurrent sets the "streak_current" field.
+func (_c *UserCreate) SetStreakCurrent(v int) *UserCreate {
+	_c.mutation.SetStreakCurrent(v)
+	return _c
+}
+
+// SetNillableStreakCurrent sets the "streak_current" field if the given value is not nil.
+func (_c *UserCreate) SetNillableStreakCurrent(v *int) *UserCreate {
+	if v != nil {
+		_c.SetStreakCurrent(*v)
+	}
+	return _c
+}
+
+// SetStreakLongest sets the "streak_longest" field.
+func (_c *UserCreate) SetStreakLongest(v int) *UserCreate {
+	_c.mutation.SetStreakLongest(v)
+	return _c
+}
+
+// SetNillableStreakLongest sets the "streak_longest" field if the given value is not nil.
+func (_c *UserCreate) SetNillableStreakLongest(v *int) *UserCreate {
+	if v != nil {
+		_c.SetStreakLongest(*v)
+	}
+	return _c
+}
+
+// SetStreakLastDay sets the "streak_last_day" field.
+func (_c *UserCreate) SetStreakLastDay(v string) *UserCreate {
+	_c.mutation.SetStreakLastDay(v)
+	return _c
+}
+
+// SetNillableStreakLastDay sets the "streak_last_day" field if the given value is not nil.
+func (_c *UserCreate) SetNillableStreakLastDay(v *string) *UserCreate {
+	if v != nil {
+		_c.SetStreakLastDay(*v)
+	}
+	return _c
+}
+
 // SetPreferences sets the "preferences" field.
 func (_c *UserCreate) SetPreferences(v models.Preferences) *UserCreate {
 	_c.mutation.SetPreferences(v)
@@ -249,6 +305,18 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.Timezone(); !ok {
+		v := user.DefaultTimezone
+		_c.mutation.SetTimezone(v)
+	}
+	if _, ok := _c.mutation.StreakCurrent(); !ok {
+		v := user.DefaultStreakCurrent
+		_c.mutation.SetStreakCurrent(v)
+	}
+	if _, ok := _c.mutation.StreakLongest(); !ok {
+		v := user.DefaultStreakLongest
+		_c.mutation.SetStreakLongest(v)
+	}
 	if _, ok := _c.mutation.Preferences(); !ok {
 		v := user.DefaultPreferences
 		_c.mutation.SetPreferences(v)
@@ -289,6 +357,25 @@ func (_c *UserCreate) check() error {
 	if v, ok := _c.mutation.PasswordSalt(); ok {
 		if err := user.PasswordSaltValidator(v); err != nil {
 			return &ValidationError{Name: "password_salt", err: fmt.Errorf(`ent: validator failed for field "User.password_salt": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Timezone(); !ok {
+		return &ValidationError{Name: "timezone", err: errors.New(`ent: missing required field "User.timezone"`)}
+	}
+	if v, ok := _c.mutation.Timezone(); ok {
+		if err := user.TimezoneValidator(v); err != nil {
+			return &ValidationError{Name: "timezone", err: fmt.Errorf(`ent: validator failed for field "User.timezone": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.StreakCurrent(); !ok {
+		return &ValidationError{Name: "streak_current", err: errors.New(`ent: missing required field "User.streak_current"`)}
+	}
+	if _, ok := _c.mutation.StreakLongest(); !ok {
+		return &ValidationError{Name: "streak_longest", err: errors.New(`ent: missing required field "User.streak_longest"`)}
+	}
+	if v, ok := _c.mutation.StreakLastDay(); ok {
+		if err := user.StreakLastDayValidator(v); err != nil {
+			return &ValidationError{Name: "streak_last_day", err: fmt.Errorf(`ent: validator failed for field "User.streak_last_day": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Preferences(); !ok {
@@ -352,6 +439,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.RefreshTokenID(); ok {
 		_spec.SetField(user.FieldRefreshTokenID, field.TypeString, value)
 		_node.RefreshTokenID = &value
+	}
+	if value, ok := _c.mutation.Timezone(); ok {
+		_spec.SetField(user.FieldTimezone, field.TypeString, value)
+		_node.Timezone = value
+	}
+	if value, ok := _c.mutation.StreakCurrent(); ok {
+		_spec.SetField(user.FieldStreakCurrent, field.TypeInt, value)
+		_node.StreakCurrent = value
+	}
+	if value, ok := _c.mutation.StreakLongest(); ok {
+		_spec.SetField(user.FieldStreakLongest, field.TypeInt, value)
+		_node.StreakLongest = value
+	}
+	if value, ok := _c.mutation.StreakLastDay(); ok {
+		_spec.SetField(user.FieldStreakLastDay, field.TypeString, value)
+		_node.StreakLastDay = &value
 	}
 	if value, ok := _c.mutation.Preferences(); ok {
 		_spec.SetField(user.FieldPreferences, field.TypeJSON, value)

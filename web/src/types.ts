@@ -7,6 +7,7 @@ export type User = {
   id: string;
   email: string;
   preferences: Preferences;
+  timezone: string;
   created_at: string;
 };
 
@@ -139,7 +140,10 @@ export type AssessResponse = {
 export type HomeSet = { set: CardSet; cover?: Flashcard };
 
 export type Home = {
+  /** The live streak; streak_today says whether today already counts. */
   streak_days: number;
+  streak_today: boolean;
+  streak_longest: number;
   practiced_today: number;
   total_cards: number;
   suggested_count: number;

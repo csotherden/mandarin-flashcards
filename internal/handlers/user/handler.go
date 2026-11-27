@@ -21,4 +21,5 @@ func (h *Handler) Register(router *mux.Router) {
 	router.HandleFunc("/user/profile", h.GetProfile).Methods(http.MethodGet)
 	router.HandleFunc("/user/preferences", h.GetPreferences).Methods(http.MethodGet)
 	router.HandleFunc("/user/preferences", h.UpdatePreferences).Methods(http.MethodPut)
+	router.HandleFunc("/user/timezone", h.UpdateTimezone).Methods(http.MethodPut)
 }

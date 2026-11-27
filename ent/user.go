@@ -32,6 +32,14 @@ type User struct {
 	PasswordSalt string `json:"-"`
 	// RefreshTokenID holds the value of the "refresh_token_id" field.
 	RefreshTokenID *string `json:"-"`
+	// Timezone holds the value of the "timezone" field.
+	Timezone string `json:"timezone,omitempty"`
+	// StreakCurrent holds the value of the "streak_current" field.
+	StreakCurrent int `json:"streak_current,omitempty"`
+	// StreakLongest holds the value of the "streak_longest" field.
+	StreakLongest int `json:"streak_longest,omitempty"`
+	// StreakLastDay holds the value of the "streak_last_day" field.
+	StreakLastDay *string `json:"streak_last_day,omitempty"`
 	// Preferences holds the value of the "preferences" field.
 	Preferences models.Preferences `json:"preferences,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -120,7 +128,9 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldPreferences:
 			values[i] = new([]byte)
-		case user.FieldEmail, user.FieldPasswordHash, user.FieldPasswordSalt, user.FieldRefreshTokenID:
+		case user.FieldStreakCurrent, user.FieldStreakLongest:
+			values[i] = new(sql.NullInt64)
+		case user.FieldEmail, user.FieldPasswordHash, user.FieldPasswordSalt, user.FieldRefreshTokenID, user.FieldTimezone, user.FieldStreakLastDay:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -183,6 +193,31 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.RefreshTokenID = new(string)
 				*_m.RefreshTokenID = value.String
+			}
+		case user.FieldTimezone:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field timezone", values[i])
+			} else if value.Valid {
+				_m.Timezone = value.String
+			}
+		case user.FieldStreakCurrent:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field streak_current", values[i])
+			} else if value.Valid {
+				_m.StreakCurrent = int(value.Int64)
+			}
+		case user.FieldStreakLongest:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field streak_longest", values[i])
+			} else if value.Valid {
+				_m.StreakLongest = int(value.Int64)
+			}
+		case user.FieldStreakLastDay:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field streak_last_day", values[i])
+			} else if value.Valid {
+				_m.StreakLastDay = new(string)
+				*_m.StreakLastDay = value.String
 			}
 		case user.FieldPreferences:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -272,6 +307,20 @@ func (_m *User) String() string {
 	builder.WriteString("password_salt=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("refresh_token_id=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("timezone=")
+	builder.WriteString(_m.Timezone)
+	builder.WriteString(", ")
+	builder.WriteString("streak_current=")
+	builder.WriteString(fmt.Sprintf("%v", _m.StreakCurrent))
+	builder.WriteString(", ")
+	builder.WriteString("streak_longest=")
+	builder.WriteString(fmt.Sprintf("%v", _m.StreakLongest))
+	builder.WriteString(", ")
+	if v := _m.StreakLastDay; v != nil {
+		builder.WriteString("streak_last_day=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("preferences=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Preferences))

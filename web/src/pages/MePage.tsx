@@ -9,7 +9,7 @@ export function MePage() {
   const [home, setHome] = useState<Home | null>(null);
 
   useEffect(() => {
-    api<Home>(`/api/home?tz_offset=${new Date().getTimezoneOffset()}`).then(setHome).catch(() => undefined);
+    api<Home>("/api/home").then(setHome).catch(() => undefined);
   }, []);
 
   return (
@@ -21,9 +21,9 @@ export function MePage() {
       </div>
       {home && (
         <div className="mt-3 grid grid-cols-3 gap-3">
-          <Stat value={home.streak_days} label="day streak" />
+          <Stat value={home.streak_days} label={home.streak_today || home.streak_days === 0 ? "day streak" : "day streak, practice today"} />
+          <Stat value={home.streak_longest} label="longest streak" />
           <Stat value={home.total_cards} label="cards" />
-          <Stat value={home.sets.length} label="sets" />
         </div>
       )}
       <button type="button" className="btn-ghost mt-6 h-12 w-full" onClick={logout}>

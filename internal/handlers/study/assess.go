@@ -2,6 +2,7 @@ package study
 
 import (
 	"errors"
+	"github.com/csotherden/mandarin-flashcards/internal/streak"
 	"io"
 	"net/http"
 
@@ -139,6 +140,10 @@ func (h *Handler) Assess(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		handlerutils.RespondWithError(w, h.logger, http.StatusInternalServerError, handlerutils.CodeNotSet, "Could not save the grade", err)
 		return
+	}
+	if err := streak.Record(r.Context(), h.db, userID, log.CreatedAt); err != nil {
+		// The grade is saved; a missed streak update is fixed by the next grade today.
+		h.logger.Warn("Could not update the streak", zap.Error(err))
 	}
 	handlerutils.RespondWithJSON(w, h.logger, http.StatusOK, models.AssessResponse{
 		Result:     present.CardResult(log),

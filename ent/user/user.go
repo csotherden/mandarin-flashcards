@@ -28,6 +28,14 @@ const (
 	FieldPasswordSalt = "password_salt"
 	// FieldRefreshTokenID holds the string denoting the refresh_token_id field in the database.
 	FieldRefreshTokenID = "refresh_token_id"
+	// FieldTimezone holds the string denoting the timezone field in the database.
+	FieldTimezone = "timezone"
+	// FieldStreakCurrent holds the string denoting the streak_current field in the database.
+	FieldStreakCurrent = "streak_current"
+	// FieldStreakLongest holds the string denoting the streak_longest field in the database.
+	FieldStreakLongest = "streak_longest"
+	// FieldStreakLastDay holds the string denoting the streak_last_day field in the database.
+	FieldStreakLastDay = "streak_last_day"
 	// FieldPreferences holds the string denoting the preferences field in the database.
 	FieldPreferences = "preferences"
 	// EdgeCategories holds the string denoting the categories edge name in mutations.
@@ -97,6 +105,10 @@ var Columns = []string{
 	FieldPasswordHash,
 	FieldPasswordSalt,
 	FieldRefreshTokenID,
+	FieldTimezone,
+	FieldStreakCurrent,
+	FieldStreakLongest,
+	FieldStreakLastDay,
 	FieldPreferences,
 }
 
@@ -123,6 +135,16 @@ var (
 	PasswordHashValidator func(string) error
 	// PasswordSaltValidator is a validator for the "password_salt" field. It is called by the builders before save.
 	PasswordSaltValidator func(string) error
+	// DefaultTimezone holds the default value on creation for the "timezone" field.
+	DefaultTimezone string
+	// TimezoneValidator is a validator for the "timezone" field. It is called by the builders before save.
+	TimezoneValidator func(string) error
+	// DefaultStreakCurrent holds the default value on creation for the "streak_current" field.
+	DefaultStreakCurrent int
+	// DefaultStreakLongest holds the default value on creation for the "streak_longest" field.
+	DefaultStreakLongest int
+	// StreakLastDayValidator is a validator for the "streak_last_day" field. It is called by the builders before save.
+	StreakLastDayValidator func(string) error
 	// DefaultPreferences holds the default value on creation for the "preferences" field.
 	DefaultPreferences models.Preferences
 	// DefaultID holds the default value on creation for the "id" field.
@@ -165,6 +187,26 @@ func ByPasswordSalt(opts ...sql.OrderTermOption) OrderOption {
 // ByRefreshTokenID orders the results by the refresh_token_id field.
 func ByRefreshTokenID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRefreshTokenID, opts...).ToFunc()
+}
+
+// ByTimezone orders the results by the timezone field.
+func ByTimezone(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTimezone, opts...).ToFunc()
+}
+
+// ByStreakCurrent orders the results by the streak_current field.
+func ByStreakCurrent(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStreakCurrent, opts...).ToFunc()
+}
+
+// ByStreakLongest orders the results by the streak_longest field.
+func ByStreakLongest(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStreakLongest, opts...).ToFunc()
+}
+
+// ByStreakLastDay orders the results by the streak_last_day field.
+func ByStreakLastDay(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStreakLastDay, opts...).ToFunc()
 }
 
 // ByCategoriesCount orders the results by categories count.

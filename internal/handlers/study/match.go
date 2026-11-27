@@ -1,6 +1,8 @@
 package study
 
 import (
+	"github.com/csotherden/mandarin-flashcards/internal/streak"
+	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/csotherden/mandarin-flashcards/ent"
@@ -69,6 +71,10 @@ func (h *Handler) Match(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		handlerutils.RespondWithError(w, h.logger, http.StatusInternalServerError, handlerutils.CodeNotSet, "Could not record the match", err)
 		return
+	}
+	if err := streak.Record(r.Context(), h.db, userID, log.CreatedAt); err != nil {
+		// The grade is saved; a missed streak update is fixed by the next grade today.
+		h.logger.Warn("Could not update the streak", zap.Error(err))
 	}
 	handlerutils.RespondWithJSON(w, h.logger, http.StatusCreated, present.CardResult(log))
 }
