@@ -49,12 +49,12 @@ export function TodayPage() {
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-7">
-      <header className="flex items-center justify-between">
+      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <div className="flex items-center gap-3 whitespace-nowrap text-lg font-bold lg:hidden">
           <BrandMark />
           Mandarin Cards
         </div>
-        <h1 className="hidden text-3xl font-extrabold lg:block">Today</h1>
+        <h1 className="sr-only lg:not-sr-only lg:text-3xl lg:font-extrabold">Today</h1>
         <StreakBadge days={home.streak_days} today={home.streak_today} />
       </header>
 
@@ -82,8 +82,8 @@ export function TodayPage() {
           </div>
         </section>
       ) : (
-        <div className="grid gap-7 lg:grid-cols-[1.15fr_1fr] lg:items-start">
-          <div className="grid gap-3.5">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-7 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3.5">
             <section className="relative overflow-hidden rounded-[28px] bg-hero p-6 text-white lg:p-8">
               <Icon name="star" className="absolute right-5 top-5 text-5xl text-gold" />
               <p className="text-sm font-semibold uppercase tracking-[0.08em] text-white/85">Today's practice</p>
@@ -128,9 +128,9 @@ export function TodayPage() {
           <div className="grid grid-cols-[minmax(0,1fr)] gap-7">
             {(home.saved_sessions.length > 0 || home.sets.some((item) => item.set.card_count > 0)) && (
               <section>
-                <div className="mb-3 flex items-baseline justify-between">
+                <div className="mb-1 flex items-center justify-between">
                   <h2 className="font-bold">Quick start</h2>
-                  <Link to="/sets" className="link text-sm">All sets</Link>
+                  <Link to="/sets" className="link tap text-sm">All sets</Link>
                 </div>
                 <div className="no-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5 pb-1 lg:mx-0 lg:grid lg:grid-cols-3 lg:px-0">
                   {home.saved_sessions.map((saved) => (
@@ -139,9 +139,11 @@ export function TodayPage() {
                         type="button"
                         aria-label={`Remove ${saved.title}`}
                         onClick={() => forget(saved.id, saved.title)}
-                        className="absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full bg-white/90 text-sm text-muted shadow-card"
+                        className="absolute right-0.5 top-0.5 z-10 grid h-11 w-11 place-items-center"
                       >
-                        <Icon name="close" />
+                        <span className="grid h-7 w-7 place-items-center rounded-full bg-white/90 text-sm text-muted shadow-card">
+                          <Icon name="close" />
+                        </span>
                       </button>
                       <button type="button" className="block w-full text-left" disabled={!!busy || saved.card_count === 0} onClick={() => go(`l-${saved.id}`, { kind: "lesson", lessonId: saved.id }, 10)}>
                         <div className="grid h-[84px] place-items-center rounded-2xl bg-ink text-3xl text-gold"><Icon name="star" /></div>
@@ -161,9 +163,9 @@ export function TodayPage() {
 
             {home.slipped.length > 0 && (
               <section>
-                <div className="mb-3 flex items-baseline justify-between">
+                <div className="mb-1 flex items-center justify-between">
                   <h2 className="font-bold">Words that slipped</h2>
-                  <button type="button" className="link text-sm" disabled={!!busy} onClick={() => go("slipped", { kind: "all" }, home.slipped.length, "hanzi_speak")}>
+                  <button type="button" className="link tap text-sm" disabled={!!busy} onClick={() => go("slipped", { kind: "all" }, home.slipped.length, "hanzi_speak")}>
                     Practice these
                   </button>
                 </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../api";
 import { Icon } from "../components/Icon";
@@ -55,10 +55,10 @@ export function ToneLessonPage() {
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
       <header className="mx-auto flex w-full max-w-2xl items-center gap-4 px-5 pt-5">
-        <Link to="/tones" aria-label="Back to tones" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-lg shadow-card">
+        <Link to="/tones" aria-label="Back to tones" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-lg shadow-card">
           <Icon name="close" />
         </Link>
-        <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={typeof step === "number" ? step : step === "done" ? total : 0}>
+        <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-line" role="progressbar" aria-label="Lesson progress" aria-valuemin={0} aria-valuemax={total} aria-valuenow={typeof step === "number" ? step : step === "done" ? total : 0}>
           <div
             className="h-full rounded-full bg-crimson transition-all duration-500"
             style={{ width: `${Math.max(4, ((typeof step === "number" ? step : step === "done" ? total : 0) / total) * 100)}%` }}
@@ -102,9 +102,9 @@ function Learn({ lesson, practice, onStart }: { lesson: ToneLesson; practice: bo
 
       {lesson.tone > 0 && (
         <div className="surface mt-5 flex items-center gap-4 p-4">
-          <div className="grid shrink-0 text-right text-xs font-semibold text-muted" style={{ gridTemplateRows: "repeat(2, 1fr)" }}>
+          <div className="flex h-24 shrink-0 flex-col justify-between py-1.5 text-right text-xs font-semibold text-muted" aria-hidden>
             <span>high</span>
-            <span className="self-end">low</span>
+            <span>low</span>
           </div>
           <ToneContour contour={lesson.contour} tone={lesson.tone} className="h-24 w-36 shrink-0" />
           <p className="text-sm text-muted">{lesson.contour ? `Pitch path ${lesson.contour.join("-")} on a 1 (low) to 5 (high) scale.` : "No contour of its own: short, light, mid height."}</p>
@@ -170,9 +170,18 @@ function Say({ lesson, index, onXP, onError, onNext }: { lesson: ToneLesson; ind
   const expected = tonesOf(item.tonal_pinyin);
   const score = result ? Math.round(result.overall_score) : 0;
   const full = result ? tierPoints(result.xp_tier, "hanzi_speak") : 0;
+  const micRef = useRef<HTMLButtonElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (result) nextRef.current?.focus({ preventScroll: true });
+    else micRef.current?.focus({ preventScroll: true });
+  }, [result]);
 
   return (
     <div className="flex min-h-[70vh] flex-col">
+      <h1 className="sr-only">
+        {lesson.title}: say {item.hanzi}, word {index + 1} of {lesson.items.length}
+      </h1>
       <section className="rounded-[32px] bg-white p-6 text-center shadow-float">
         <p className="break-words font-hanzi text-[clamp(4rem,18vw,7rem)] font-bold leading-none">{item.hanzi}</p>
         <Pinyin tonal={item.tonal_pinyin} plain={item.pinyin} spaced className="mt-3 block text-2xl font-bold" />
@@ -183,10 +192,10 @@ function Say({ lesson, index, onXP, onError, onNext }: { lesson: ToneLesson; ind
           ))}
         </div>
         <div className="mt-3 flex justify-center gap-2">
-          <button type="button" className="btn-soft h-10" onClick={() => speakChinese(item.hanzi, 0.9)}>
+          <button type="button" className="btn-soft h-11" onClick={() => speakChinese(item.hanzi, 0.9)}>
             <Icon name="volume" /> Listen
           </button>
-          <button type="button" className="btn-soft h-10" onClick={() => speakChinese(item.hanzi, 0.6)}>
+          <button type="button" className="btn-soft h-11" onClick={() => speakChinese(item.hanzi, 0.6)}>
             <Icon name="volume" /> Slow
           </button>
         </div>
@@ -234,7 +243,8 @@ function Say({ lesson, index, onXP, onError, onNext }: { lesson: ToneLesson; ind
             <span className="w-24" />
             <button
               type="button"
-              aria-label={recording ? "Release to grade" : "Hold to speak"}
+              ref={micRef}
+              aria-label={recording ? "Release to grade" : "Hold to speak (or hold Space)"}
               disabled={busy}
               {...bind}
               className={`mic grid h-24 w-24 shrink-0 place-items-center rounded-full text-4xl text-white shadow-[0_12px_28px_rgba(200,16,46,.35)] transition ${recording ? "scale-110 bg-maroon ring-8 ring-crimson/25" : "bg-crimson"}`}
@@ -248,7 +258,7 @@ function Say({ lesson, index, onXP, onError, onNext }: { lesson: ToneLesson; ind
         ) : (
           <div className="grid grid-cols-[auto_1fr] gap-3">
             <button type="button" className="btn-ghost h-14" onClick={() => setResult(null)}>Try again</button>
-            <button type="button" className="btn-primary h-14 text-lg" onClick={onNext}>
+            <button ref={nextRef} type="button" className="btn-primary h-14 text-lg" onClick={onNext}>
               {last ? "Finish" : "Next"} <Icon name="right" />
             </button>
           </div>

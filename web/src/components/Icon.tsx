@@ -43,6 +43,7 @@ const paths: Record<string, ReactElement> = {
   edit: <path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4" strokeLinejoin="round" />,
   trash: <path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" strokeLinecap="round" strokeLinejoin="round" />,
   back: <path d="M15 5 8 12l7 7" strokeLinecap="round" strokeLinejoin="round" />,
+  logout: <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" strokeLinecap="round" strokeLinejoin="round" />,
   "star-outline": <path d="M12 3.5l2.6 5.5 6 .7-4.4 4.1 1.1 5.9L12 16.8l-5.3 2.9 1.1-5.9-4.4-4.1 6-.7z" strokeLinejoin="round" />,
 };
 

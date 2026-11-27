@@ -202,7 +202,7 @@ export function CardPage() {
   return (
     <div className="min-w-0">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <button type="button" className="flex items-center gap-1 font-semibold text-muted" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/cards"))}>
+        <button type="button" className="flex min-h-11 items-center gap-1 font-semibold text-muted" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/cards"))}>
           <Icon name="back" /> Back
         </button>
         {savedNote && (
@@ -244,7 +244,7 @@ export function CardPage() {
                 onChange={(event) => setSearch(event.target.value)}
                 onKeyDown={(event) => event.key === "Enter" && (event.preventDefault(), void searchImages())}
               />
-              <button type="button" className="btn-soft shrink-0" onClick={searchImages} disabled={busy === "search"}>
+              <button type="button" className="btn-soft min-h-11 shrink-0" onClick={searchImages} disabled={busy === "search"} aria-label="Search photos">
                 <Icon name="search" /> <span className="hidden sm:inline">Search</span>
               </button>
             </div>
@@ -349,7 +349,7 @@ export function CardPage() {
             {busy === "save" ? "Saving…" : id ? "Save changes" : "Save card"}
           </button>
           {id && (
-            <button type="button" className="mx-auto flex items-center gap-1.5 text-sm font-semibold text-muted" onClick={remove}>
+            <button type="button" className="mx-auto flex min-h-11 items-center gap-1.5 px-3 text-sm font-semibold text-muted" onClick={remove}>
               <Icon name="trash" /> Delete card
             </button>
           )}

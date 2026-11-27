@@ -37,13 +37,17 @@ select {
     @apply text-xs font-bold uppercase tracking-[0.06em] text-muted;
   }
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full bg-[#F1EEEA] px-3.5 py-2 text-sm font-semibold text-ink transition;
+    @apply inline-flex min-h-11 items-center gap-1.5 rounded-full bg-[#F1EEEA] px-3.5 py-2 text-sm font-semibold text-ink transition;
   }
   .chip-on {
     @apply bg-crimson text-white;
   }
   .link {
     @apply font-semibold text-crimson;
+  }
+  /* A standalone text link or button with a 44px touch target (WCAG 2.5.5). */
+  .tap {
+    @apply inline-flex min-h-11 items-center;
   }
 }
 

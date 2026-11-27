@@ -92,7 +92,7 @@ export function GeneratePage() {
 
   return (
     <div className="mx-auto max-w-xl">
-      <button type="button" className="mb-4 flex items-center gap-1 font-semibold text-muted" onClick={() => navigate(-1)}>
+      <button type="button" className="mb-2 flex min-h-11 items-center gap-1 font-semibold text-muted" onClick={() => navigate(-1)}>
         <Icon name="back" /> Back
       </button>
       <h1 className="text-2xl font-extrabold lg:text-3xl">{target ? `More for ${target.title}` : "Generate a set"}</h1>

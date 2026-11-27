@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { Icon } from "../components/Icon";
@@ -27,8 +28,14 @@ export function MePage() {
           <Stat value={home.total_cards} label="cards" />
         </div>
       )}
+      <h2 className="mb-2 mt-7 font-bold">Keep learning</h2>
+      <div className="surface divide-y divide-line">
+        <MeLink to="/tones" glyph="声" title="Tone practice" detail={home ? (home.tones_next ? `Intro to tones · ${home.tones_completed} of ${home.tones_total} done` : "Revisit any tones lesson") : ""} />
+        <MeLink to="/library" glyph="书" title="Library" detail="Ready-made sets to practice or add" />
+        <MeLink to="/cards" glyph="卡" title="Your cards" detail={home ? `${home.total_cards} cards` : ""} />
+      </div>
       <button type="button" className="btn-ghost mt-6 h-12 w-full" onClick={logout}>
-        <Icon name="back" /> Sign out
+        <Icon name="logout" /> Sign out
       </button>
     </div>
   );
@@ -40,5 +47,20 @@ function Stat({ value, label }: { value: number; label: string }) {
       <b className="block text-3xl font-extrabold">{value}</b>
       <span className="text-sm text-muted">{label}</span>
     </div>
+  );
+}
+
+function MeLink({ to, glyph, title, detail }: { to: string; glyph: string; title: string; detail: string }) {
+  return (
+    <Link to={to} className="flex items-center gap-3 px-4 py-3">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ink font-hanzi text-lg font-bold text-gold" aria-hidden>
+        {glyph}
+      </span>
+      <span className="min-w-0 flex-1">
+        <b className="block">{title}</b>
+        <span className="block truncate text-sm text-muted">{detail}</span>
+      </span>
+      <Icon name="right" className="shrink-0 text-lg text-muted" />
+    </Link>
   );
 }

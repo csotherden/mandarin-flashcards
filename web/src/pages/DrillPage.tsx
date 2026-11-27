@@ -6,6 +6,7 @@ import { Icon } from "../components/Icon";
 import { markSyllable, Pinyin, toneLabel } from "../components/Pinyin";
 import { useRecorder } from "../recorder";
 import { speakChinese, unlockSpeech } from "../speech";
+import { modeTitle } from "../session";
 import type { AssessResponse, CardResult, Flashcard, Session, StudyMode } from "../types";
 import { tierLabel, tierPoints } from "../xp";
 
@@ -71,11 +72,12 @@ export function DrillPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
-      <header className="mx-auto flex w-full max-w-2xl items-center gap-4 px-5 pt-5">
-        <button type="button" aria-label="End session" onClick={exit} className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-lg shadow-card">
+      <header className={`mx-auto flex w-full ${match ? "max-w-2xl" : "max-w-xl"} items-center gap-4 px-5 pt-5`}>
+        <h1 className="sr-only">{modeTitle(session.attempt.mode)} practice</h1>
+        <button type="button" aria-label="End session" onClick={exit} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-lg shadow-card">
           <Icon name="close" />
         </button>
-        <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={match ? graded : index}>
+        <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-line" role="progressbar" aria-label="Session progress" aria-valuemin={0} aria-valuemax={total} aria-valuenow={match ? graded : index}>
           <div className="h-full rounded-full bg-crimson transition-all duration-500" style={{ width: `${Math.max(4, progress * 100)}%` }} />
         </div>
         <span className="shrink-0 text-sm font-bold text-muted">
@@ -158,9 +160,29 @@ function SpeakRound({
   }
 
   const flipped = result !== null;
+  const micRef = useRef<HTMLButtonElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
+  // Keep keyboard focus where the next action is: Next after a grade, the mic for a new take.
+  useEffect(() => {
+    if (result) nextRef.current?.focus({ preventScroll: true });
+    else micRef.current?.focus({ preventScroll: true });
+  }, [result, card.id]);
+  const announce = result
+    ? `${result.assessable ? `Score ${Math.round(result.result.overall_score)}` : "Not graded"}, ${tierLabel(result.result.xp_tier ?? "")}.${result.result.xp_earned ? ` Plus ${result.result.xp_earned} XP.` : ""} ${card.hanzi}, ${card.pinyin}, ${card.english}. ${(result.result.syllables ?? [])
+        .filter((s) => s.status !== "ok")
+        .map((s) => `${s.character}: ${s.heard_tone && s.heard_tone !== s.expected_tone ? `heard ${toneLabel(s.heard_tone)} tone, expected ${toneLabel(s.expected_tone)}` : "needs work"}`)
+        .join(". ")}`
+    : recording
+      ? "Recording"
+      : busy
+        ? "Grading"
+        : "";
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 pb-8 pt-6">
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col px-5 pb-8 pt-6">
+      <p className="sr-only" role="status" aria-live="polite">
+        {announce}
+      </p>
       {/* A small stack behind the card shows how many are left. */}
       <div className="relative">
         {remaining > 1 && <div className="absolute inset-x-6 -bottom-3 h-full rounded-[32px] bg-white/60 shadow-card" aria-hidden />}
@@ -211,7 +233,8 @@ function SpeakRound({
             </button>
             <button
               type="button"
-              aria-label={recording ? "Release to grade" : "Hold to speak"}
+              ref={micRef}
+              aria-label={recording ? "Release to grade" : "Hold to speak (or hold Space)"}
               className={`mic grid h-24 w-24 shrink-0 place-items-center rounded-full text-4xl text-white shadow-[0_12px_28px_rgba(200,16,46,.35)] transition ${recording ? "scale-110 bg-maroon ring-8 ring-crimson/25" : "bg-crimson"}`}
               {...bind}
               disabled={busy}
@@ -225,7 +248,7 @@ function SpeakRound({
         ) : (
           <div className="grid grid-cols-[auto_1fr] gap-3">
             <button type="button" className="btn-ghost h-14" onClick={() => setResult(null)}>Try again</button>
-            <button type="button" className="btn-primary h-14 text-lg" onClick={onNext}>
+            <button ref={nextRef} type="button" className="btn-primary h-14 text-lg" onClick={onNext}>
               {remaining === 0 ? "Finish" : "Next card"} <Icon name="right" />
             </button>
           </div>
@@ -282,10 +305,10 @@ function Back({ card, result, mode }: { card: Flashcard; result: AssessResponse;
       )}
       {result.result.coaching_tip && <p className="mt-4 rounded-2xl bg-black/15 p-3 text-[15px] leading-6">{result.result.coaching_tip}</p>}
       <div className="mt-4 flex gap-2">
-        <button type="button" className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-white/15 font-semibold" onClick={() => speakChinese(card.hanzi, 1)}>
+        <button type="button" className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-white/15 font-semibold" onClick={() => speakChinese(card.hanzi, 1)}>
           <Icon name="volume" /> Listen
         </button>
-        <button type="button" className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-white/15 font-semibold" onClick={() => speakChinese(card.hanzi, 0.7)}>
+        <button type="button" className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-white/15 font-semibold" onClick={() => speakChinese(card.hanzi, 0.7)}>
           <Icon name="volume" /> Slow
         </button>
       </div>

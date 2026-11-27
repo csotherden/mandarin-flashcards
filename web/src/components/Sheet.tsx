@@ -22,7 +22,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
       <div className="rise relative max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-[28px] bg-canvas p-5 pb-8 lg:rounded-[28px]">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-extrabold">{title}</h2>
-          <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-xl bg-white shadow-card" aria-label="Close">
+          <button type="button" onClick={onClose} className="grid h-11 w-11 place-items-center rounded-xl bg-white shadow-card" aria-label="Close">
             <Icon name="close" />
           </button>
         </div>

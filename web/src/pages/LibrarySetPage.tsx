@@ -65,7 +65,7 @@ export function LibrarySetPage() {
 
   return (
     <div>
-      <Link to={welcome ? "/welcome" : "/library"} className="mb-4 flex w-fit items-center gap-1 font-semibold text-muted">
+      <Link to={welcome ? "/welcome" : "/library"} className="mb-2 flex min-h-11 w-fit items-center gap-1 font-semibold text-muted">
         <Icon name="back" /> {welcome ? "Back" : "Library"}
       </Link>
 
@@ -109,11 +109,11 @@ export function LibrarySetPage() {
               <Icon name="play" /> {busy === "start" ? "Starting…" : "Start lesson"}
             </button>
             {set.imported_set_id ? (
-              <Link to={`/sets/${set.imported_set_id}`} className="mt-3 block text-center font-semibold text-white underline underline-offset-4">
+              <Link to={`/sets/${set.imported_set_id}`} className="mt-1 flex min-h-11 items-center justify-center font-semibold text-white underline underline-offset-4">
                 Open your copy
               </Link>
             ) : (
-              <button type="button" disabled={!!busy} onClick={add} className="mt-3 block w-full text-center font-semibold text-white underline underline-offset-4">
+              <button type="button" disabled={!!busy} onClick={add} className="mt-1 block min-h-11 w-full text-center font-semibold text-white underline underline-offset-4">
                 {busy === "add" ? "Adding…" : "Just add it to my library"}
               </button>
             )}

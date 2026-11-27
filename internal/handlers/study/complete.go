@@ -1,6 +1,7 @@
 package study
 
 import (
+	"github.com/csotherden/mandarin-flashcards/internal/models"
 	"net/http"
 	"time"
 
@@ -34,18 +35,7 @@ func (h *Handler) Complete(w http.ResponseWriter, r *http.Request) {
 			handlerutils.RespondWithError(w, h.logger, http.StatusInternalServerError, handlerutils.CodeNotSet, "Could not finish the drill", err)
 			return
 		}
-		scores := map[string]float64{}
-		for _, result := range current.Results {
-			scores[result.FlashcardID.String()] = result.OverallScore
-		}
-		var sum float64
-		for _, cardID := range attempt.CardIds {
-			sum += scores[cardID.String()]
-		}
-		overall := 0.0
-		if len(attempt.CardIds) > 0 {
-			overall = sum / float64(len(attempt.CardIds))
-		}
+		overall := SessionScore(current.Results)
 		now := time.Now()
 		attempt, err = h.db.LessonAttempt.UpdateOneID(attempt.ID).
 			SetOverallScore(overall).
@@ -62,4 +52,17 @@ func (h *Handler) Complete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	handlerutils.RespondWithJSON(w, h.logger, http.StatusOK, body)
+}
+
+// SessionScore is the average of the cards actually graded (each card's latest take). Cards that
+// were skipped, or never reached because the session ended early, don't count as zeros.
+func SessionScore(results []models.CardResult) float64 {
+	if len(results) == 0 {
+		return 0
+	}
+	var sum float64
+	for _, r := range results {
+		sum += r.OverallScore
+	}
+	return sum / float64(len(results))
 }

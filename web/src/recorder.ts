@@ -1,4 +1,4 @@
-import { useRef, useState, type PointerEvent } from "react";
+import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { unlockSpeech } from "./speech";
 
 function mimeType() {
@@ -16,8 +16,8 @@ export function useRecorder(onTake: (audio: Blob) => void, onError: (message: st
   const recorder = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
 
-  async function pointerDown(event: PointerEvent<HTMLButtonElement>) {
-    event.preventDefault();
+  async function start() {
+    if (holding.current) return;
     unlockSpeech();
     onError("");
     holding.current = true;
@@ -46,17 +46,36 @@ export function useRecorder(onTake: (audio: Blob) => void, onError: (message: st
     }
   }
 
-  function pointerUp() {
+  function stop() {
     holding.current = false;
     if (recorder.current && recorder.current.state === "recording") recorder.current.stop();
     setRecording(false);
   }
 
-  /** Spread onto the mic button. */
+  const isHoldKey = (event: KeyboardEvent) => event.key === " " || event.key === "Enter";
+
+  /**
+   * Spread onto the mic button. Press and hold with a pointer, or hold Space or Enter while the
+   * button has focus (keyboard users record the same way).
+   */
   const bind = {
-    onPointerDown: pointerDown,
-    onPointerUp: pointerUp,
-    onPointerCancel: pointerUp,
+    onPointerDown: (event: PointerEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      void start();
+    },
+    onPointerUp: stop,
+    onPointerCancel: stop,
+    onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => {
+      if (!isHoldKey(event)) return;
+      event.preventDefault();
+      if (!event.repeat) void start();
+    },
+    onKeyUp: (event: KeyboardEvent<HTMLButtonElement>) => {
+      if (!isHoldKey(event)) return;
+      event.preventDefault();
+      stop();
+    },
+    onBlur: stop,
     onContextMenu: (event: { preventDefault: () => void }) => event.preventDefault(),
   };
   return { recording, bind };

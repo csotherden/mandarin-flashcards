@@ -30,7 +30,7 @@ export function TonesPage() {
             : "Four tones and a neutral one. Learn how each sounds, then say real words and see which tone the grader hears."}
         </p>
         <div className="mt-4 flex items-center gap-3">
-          <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/20" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={data.completed}>
+          <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/20" role="progressbar" aria-label="Tutorial progress" aria-valuemin={0} aria-valuemax={total} aria-valuenow={data.completed}>
             <div className="h-full rounded-full bg-gold" style={{ width: `${(data.completed / total) * 100}%` }} />
           </div>
           <span className="text-sm font-bold">
@@ -44,7 +44,7 @@ export function TonesPage() {
         )}
       </section>
 
-      <ol className="mt-6 grid gap-3">
+      <ol className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-3">
         {data.lessons.map((lesson) => {
           const isNext = lesson.key === data.next;
           return (

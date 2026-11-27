@@ -148,7 +148,7 @@ export function AddPage() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-extrabold lg:text-3xl">Add cards</h1>
-        <button type="button" className="link" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}>
+        <button type="button" className="link tap px-2" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}>
           Done
         </button>
       </div>
@@ -163,7 +163,7 @@ export function AddPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:[grid-template-areas:'input_preview'_'opts_preview']">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:grid-rows-[auto_1fr] lg:[grid-template-areas:'input_preview'_'opts_preview']">
         <form onSubmit={submit} className="lg:[grid-area:input]">
           <div className="flex gap-2 rounded-[20px] bg-white p-1.5 shadow-card">
             <input
@@ -267,7 +267,7 @@ export function AddPage() {
             <button type="button" className="btn-primary mt-5 h-14 w-full text-[17px]" disabled={status !== "idle"} onClick={save}>
               {status === "saving" ? "Saving…" : "Save & add next"}
             </button>
-            <button type="button" className="mt-3 block w-full text-center text-sm font-semibold text-muted underline underline-offset-4" onClick={editAll}>
+            <button type="button" className="mt-1 block min-h-11 w-full text-center text-sm font-semibold text-muted underline underline-offset-4" onClick={editAll}>
               Edit all details
             </button>
           </div>
@@ -316,10 +316,10 @@ function Carousel({ photos, index, onIndex }: { photos: ImageCandidate[]; index:
     >
       <img src={current.full_url} alt="" draggable={false} className="h-full w-full object-cover" />
       <span className="absolute right-3 top-3 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-semibold text-white">{index + 1} / {n}</span>
-      <button type="button" aria-label="Previous photo" onClick={() => go(-1)} className="absolute left-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-card">
+      <button type="button" aria-label="Previous photo" onClick={() => go(-1)} className="absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-card">
         <Icon name="left" />
       </button>
-      <button type="button" aria-label="Next photo" onClick={() => go(1)} className="absolute right-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-card">
+      <button type="button" aria-label="Next photo" onClick={() => go(1)} className="absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-card">
         <Icon name="right" />
       </button>
       <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5">
@@ -327,7 +327,7 @@ function Carousel({ photos, index, onIndex }: { photos: ImageCandidate[]; index:
           <span key={item.id} className={`h-[7px] rounded-full transition-all ${i === index ? "w-[18px] bg-white" : "w-[7px] bg-white/60"}`} />
         ))}
       </div>
-      <p className="absolute bottom-2 left-3 hidden text-[10px] text-white/80 sm:block">
+      <p className="absolute bottom-2 left-3 hidden rounded bg-ink/50 px-1.5 text-xs text-white sm:block">
         Photo: {current.photographer_name} / Unsplash
       </p>
     </div>

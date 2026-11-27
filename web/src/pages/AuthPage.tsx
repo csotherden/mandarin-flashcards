@@ -34,8 +34,18 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
         <h2 className="text-5xl font-extrabold leading-tight">Say it.<br />Hear which tone slipped.</h2>
         <p className="mt-4 max-w-md text-lg text-white/90">Picture cards for the words that keep getting away, graded syllable by syllable.</p>
       </section>
-      <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 lg:min-h-0">
-        <div className="flex items-center gap-3 text-lg font-bold">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 pb-10 lg:min-h-0 lg:justify-center lg:pb-0">
+        <div className="relative -mx-6 overflow-hidden bg-hero px-6 pb-7 pt-10 text-white lg:hidden">
+          <span className="absolute -right-6 -top-8 font-hanzi text-[9rem] font-black leading-none text-white/10" aria-hidden>
+            卡
+          </span>
+          <div className="flex items-center gap-3 text-lg font-bold">
+            <BrandMark />
+            Mandarin Cards
+          </div>
+          <p className="mt-4 text-2xl font-extrabold leading-tight">Say it. Hear which tone slipped.</p>
+        </div>
+        <div className="hidden items-center gap-3 text-lg font-bold lg:flex">
           <BrandMark />
           Mandarin Cards
         </div>
@@ -55,11 +65,11 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
             {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
           </button>
         </form>
-        <p className="mt-5 text-muted">
+        <p className="mt-3 text-muted">
           {mode === "login" ? (
-            <>New here? <Link className="link" to="/register">Create an account</Link></>
+            <>New here? <Link className="link tap" to="/register">Create an account</Link></>
           ) : (
-            <>Have an account? <Link className="link" to="/login">Sign in</Link></>
+            <>Have an account? <Link className="link tap" to="/login">Sign in</Link></>
           )}
         </p>
       </div>

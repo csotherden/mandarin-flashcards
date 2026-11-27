@@ -48,10 +48,11 @@ export function SetPage() {
 
   if (!detail) return <p className="text-muted">{error || "Loading…"}</p>;
   const ids = detail.cards.map((card) => card.id);
+  const removeCard = (card: Flashcard) => save(ids.filter((cardID) => cardID !== card.id));
 
   return (
     <div>
-      <Link to="/sets" className="mb-4 flex w-fit items-center gap-1 font-semibold text-muted">
+      <Link to="/sets" className="mb-2 flex min-h-11 w-fit items-center gap-1 font-semibold text-muted">
         <Icon name="back" /> Sets
       </Link>
       <div className="mb-5 flex items-start justify-between gap-3">
@@ -59,7 +60,7 @@ export function SetPage() {
           <h1 className="break-words text-2xl font-extrabold lg:text-3xl">{detail.title}</h1>
           <p className="text-muted">{detail.cards.length} {detail.cards.length === 1 ? "card" : "cards"}</p>
         </div>
-        <button type="button" aria-label="Edit set" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white shadow-card" onClick={() => setEditing(true)}>
+        <button type="button" aria-label="Edit set" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white shadow-card" onClick={() => setEditing(true)}>
           <Icon name="edit" />
         </button>
       </div>
@@ -75,7 +76,7 @@ export function SetPage() {
           <Icon name="spark" /> Generate more
         </Link>
       </div>
-      <button type="button" className="link mt-3 text-sm" onClick={() => setPicking(true)}>
+      <button type="button" className="link tap mt-1 text-sm" onClick={() => setPicking(true)}>
         Add cards you already have
       </button>
 
@@ -97,10 +98,12 @@ export function SetPage() {
             <button
               type="button"
               aria-label={`Remove ${card.hanzi} from this set`}
-              className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-sm text-muted shadow-card"
-              onClick={() => save(ids.filter((cardID) => cardID !== card.id))}
+              className="absolute right-0.5 top-0.5 grid h-11 w-11 place-items-center"
+              onClick={() => removeCard(card)}
             >
-              <Icon name="close" />
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-white/90 text-sm text-muted shadow-card">
+                <Icon name="close" />
+              </span>
             </button>
           </li>
         ))}

@@ -16,7 +16,7 @@ export function LibraryPage() {
 
   return (
     <div>
-      <Link to="/sets" className="mb-4 flex w-fit items-center gap-1 font-semibold text-muted">
+      <Link to="/sets" className="mb-2 flex min-h-11 w-fit items-center gap-1 font-semibold text-muted">
         <Icon name="back" /> Sets
       </Link>
       <h1 className="text-2xl font-extrabold lg:text-3xl">Library</h1>

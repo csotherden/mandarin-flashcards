@@ -73,7 +73,7 @@ export function WelcomePage() {
             </span>
           </Link>
         </div>
-        <Link to="/" className="mt-5 block text-center font-semibold text-muted underline underline-offset-4">
+        <Link to="/" className="mt-3 flex min-h-11 items-center justify-center font-semibold text-muted underline underline-offset-4">
           Skip for now
         </Link>
       </section>
