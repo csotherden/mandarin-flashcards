@@ -65,13 +65,16 @@ export function TodayPage() {
           <Icon name="star" className="absolute right-5 top-5 text-5xl text-gold" />
           <p className="text-sm font-semibold uppercase tracking-[0.08em] text-white/85">Welcome</p>
           <h2 className="mt-1.5 pr-14 text-3xl font-extrabold leading-tight lg:text-4xl">Make your first cards</h2>
-          <p className="mt-2 text-white/90">Type a word in hanzi, English or pinyin, or describe a theme and get a whole set.</p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <Link to="/add" className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white text-lg font-extrabold text-maroon">
+          <p className="mt-2 text-white/90">Start with a ready-made set and a lesson, or build your own from words you choose.</p>
+          <Link to="/library" className="mt-5 flex h-14 items-center justify-center gap-2 rounded-2xl bg-white text-lg font-extrabold text-maroon">
+            <Icon name="play" /> Pick a set and start
+          </Link>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <Link to="/add" className="flex h-12 items-center justify-center gap-2 rounded-2xl border-2 border-white/80 font-extrabold text-white">
               <Icon name="plus" /> Add a word
             </Link>
-            <Link to="/sets/generate" className="flex h-14 items-center justify-center gap-2 rounded-2xl border-2 border-white/80 text-lg font-extrabold text-white">
-              <Icon name="spark" /> Generate a set
+            <Link to="/sets/generate" className="flex h-12 items-center justify-center gap-2 rounded-2xl border-2 border-white/80 font-extrabold text-white">
+              <Icon name="spark" /> Generate
             </Link>
           </div>
         </section>

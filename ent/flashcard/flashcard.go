@@ -37,6 +37,8 @@ const (
 	FieldImageObjectKey = "image_object_key"
 	// FieldUnsplashAttribution holds the string denoting the unsplash_attribution field in the database.
 	FieldUnsplashAttribution = "unsplash_attribution"
+	// FieldLibraryCardID holds the string denoting the library_card_id field in the database.
+	FieldLibraryCardID = "library_card_id"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeCategories holds the string denoting the categories edge name in mutations.
@@ -96,6 +98,7 @@ var Columns = []string{
 	FieldImageURL,
 	FieldImageObjectKey,
 	FieldUnsplashAttribution,
+	FieldLibraryCardID,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "flashcards"
@@ -223,6 +226,11 @@ func ByImageURL(opts ...sql.OrderTermOption) OrderOption {
 // ByImageObjectKey orders the results by the image_object_key field.
 func ByImageObjectKey(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldImageObjectKey, opts...).ToFunc()
+}
+
+// ByLibraryCardID orders the results by the library_card_id field.
+func ByLibraryCardID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLibraryCardID, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.

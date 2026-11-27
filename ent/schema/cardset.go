@@ -30,6 +30,11 @@ func (CardSet) Fields() []ent.Field {
 		field.String("description").
 			Default("").
 			MaxLen(500),
+		// The library set this was imported from, if any. A plain id, not an edge: the copy is
+		// the user's own and outlives changes to the library.
+		field.UUID("library_set_id", uuid.UUID{}).
+			Optional().
+			Nillable(),
 	}
 }
 

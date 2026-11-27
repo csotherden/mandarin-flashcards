@@ -23,6 +23,8 @@ const (
 	FieldTitle = "title"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldLibrarySetID holds the string denoting the library_set_id field in the database.
+	FieldLibrarySetID = "library_set_id"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeMemberships holds the string denoting the memberships edge name in mutations.
@@ -59,6 +61,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldTitle,
 	FieldDescription,
+	FieldLibrarySetID,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "sets"
@@ -131,6 +134,11 @@ func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByLibrarySetID orders the results by the library_set_id field.
+func ByLibrarySetID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLibrarySetID, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.

@@ -81,6 +81,30 @@ func (f LessonAttemptFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LessonAttemptMutation", m)
 }
 
+// The LibraryCardFunc type is an adapter to allow the use of ordinary
+// function as LibraryCard mutator.
+type LibraryCardFunc func(context.Context, *ent.LibraryCardMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LibraryCardFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LibraryCardMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LibraryCardMutation", m)
+}
+
+// The LibrarySetFunc type is an adapter to allow the use of ordinary
+// function as LibrarySet mutator.
+type LibrarySetFunc func(context.Context, *ent.LibrarySetMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LibrarySetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LibrarySetMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LibrarySetMutation", m)
+}
+
 // The SetFlashcardFunc type is an adapter to allow the use of ordinary
 // function as SetFlashcard mutator.
 type SetFlashcardFunc func(context.Context, *ent.SetFlashcardMutation) (ent.Value, error)

@@ -17,6 +17,8 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/flashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/lesson"
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/librarycard"
+	"github.com/csotherden/mandarin-flashcards/ent/libraryset"
 	"github.com/csotherden/mandarin-flashcards/ent/predicate"
 	"github.com/csotherden/mandarin-flashcards/ent/setflashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
@@ -40,6 +42,8 @@ const (
 	TypeFlashcard      = "Flashcard"
 	TypeLesson         = "Lesson"
 	TypeLessonAttempt  = "LessonAttempt"
+	TypeLibraryCard    = "LibraryCard"
+	TypeLibrarySet     = "LibrarySet"
 	TypeSetFlashcard   = "SetFlashcard"
 	TypeUser           = "User"
 	TypeXPAward        = "XPAward"
@@ -1303,6 +1307,7 @@ type CardSetMutation struct {
 	updated_at         *time.Time
 	title              *string
 	description        *string
+	library_set_id     *uuid.UUID
 	clearedFields      map[string]struct{}
 	owner              *uuid.UUID
 	clearedowner       bool
@@ -1565,6 +1570,55 @@ func (m *CardSetMutation) ResetDescription() {
 	m.description = nil
 }
 
+// SetLibrarySetID sets the "library_set_id" field.
+func (m *CardSetMutation) SetLibrarySetID(u uuid.UUID) {
+	m.library_set_id = &u
+}
+
+// LibrarySetID returns the value of the "library_set_id" field in the mutation.
+func (m *CardSetMutation) LibrarySetID() (r uuid.UUID, exists bool) {
+	v := m.library_set_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLibrarySetID returns the old "library_set_id" field's value of the CardSet entity.
+// If the CardSet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CardSetMutation) OldLibrarySetID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLibrarySetID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLibrarySetID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLibrarySetID: %w", err)
+	}
+	return oldValue.LibrarySetID, nil
+}
+
+// ClearLibrarySetID clears the value of the "library_set_id" field.
+func (m *CardSetMutation) ClearLibrarySetID() {
+	m.library_set_id = nil
+	m.clearedFields[cardset.FieldLibrarySetID] = struct{}{}
+}
+
+// LibrarySetIDCleared returns if the "library_set_id" field was cleared in this mutation.
+func (m *CardSetMutation) LibrarySetIDCleared() bool {
+	_, ok := m.clearedFields[cardset.FieldLibrarySetID]
+	return ok
+}
+
+// ResetLibrarySetID resets all changes to the "library_set_id" field.
+func (m *CardSetMutation) ResetLibrarySetID() {
+	m.library_set_id = nil
+	delete(m.clearedFields, cardset.FieldLibrarySetID)
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by id.
 func (m *CardSetMutation) SetOwnerID(id uuid.UUID) {
 	m.owner = &id
@@ -1746,7 +1800,7 @@ func (m *CardSetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CardSetMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
 		fields = append(fields, cardset.FieldCreatedAt)
 	}
@@ -1758,6 +1812,9 @@ func (m *CardSetMutation) Fields() []string {
 	}
 	if m.description != nil {
 		fields = append(fields, cardset.FieldDescription)
+	}
+	if m.library_set_id != nil {
+		fields = append(fields, cardset.FieldLibrarySetID)
 	}
 	return fields
 }
@@ -1775,6 +1832,8 @@ func (m *CardSetMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case cardset.FieldDescription:
 		return m.Description()
+	case cardset.FieldLibrarySetID:
+		return m.LibrarySetID()
 	}
 	return nil, false
 }
@@ -1792,6 +1851,8 @@ func (m *CardSetMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldTitle(ctx)
 	case cardset.FieldDescription:
 		return m.OldDescription(ctx)
+	case cardset.FieldLibrarySetID:
+		return m.OldLibrarySetID(ctx)
 	}
 	return nil, fmt.Errorf("unknown CardSet field %s", name)
 }
@@ -1829,6 +1890,13 @@ func (m *CardSetMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDescription(v)
 		return nil
+	case cardset.FieldLibrarySetID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLibrarySetID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown CardSet field %s", name)
 }
@@ -1858,7 +1926,11 @@ func (m *CardSetMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CardSetMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(cardset.FieldLibrarySetID) {
+		fields = append(fields, cardset.FieldLibrarySetID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1871,6 +1943,11 @@ func (m *CardSetMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CardSetMutation) ClearField(name string) error {
+	switch name {
+	case cardset.FieldLibrarySetID:
+		m.ClearLibrarySetID()
+		return nil
+	}
 	return fmt.Errorf("unknown CardSet nullable field %s", name)
 }
 
@@ -1889,6 +1966,9 @@ func (m *CardSetMutation) ResetField(name string) error {
 		return nil
 	case cardset.FieldDescription:
 		m.ResetDescription()
+		return nil
+	case cardset.FieldLibrarySetID:
+		m.ResetLibrarySetID()
 		return nil
 	}
 	return fmt.Errorf("unknown CardSet field %s", name)
@@ -2685,6 +2765,7 @@ type FlashcardMutation struct {
 	image_url               *string
 	image_object_key        *string
 	unsplash_attribution    **models.UnsplashAttribution
+	library_card_id         *uuid.UUID
 	clearedFields           map[string]struct{}
 	owner                   *uuid.UUID
 	clearedowner            bool
@@ -3231,6 +3312,55 @@ func (m *FlashcardMutation) ResetUnsplashAttribution() {
 	delete(m.clearedFields, flashcard.FieldUnsplashAttribution)
 }
 
+// SetLibraryCardID sets the "library_card_id" field.
+func (m *FlashcardMutation) SetLibraryCardID(u uuid.UUID) {
+	m.library_card_id = &u
+}
+
+// LibraryCardID returns the value of the "library_card_id" field in the mutation.
+func (m *FlashcardMutation) LibraryCardID() (r uuid.UUID, exists bool) {
+	v := m.library_card_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLibraryCardID returns the old "library_card_id" field's value of the Flashcard entity.
+// If the Flashcard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FlashcardMutation) OldLibraryCardID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLibraryCardID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLibraryCardID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLibraryCardID: %w", err)
+	}
+	return oldValue.LibraryCardID, nil
+}
+
+// ClearLibraryCardID clears the value of the "library_card_id" field.
+func (m *FlashcardMutation) ClearLibraryCardID() {
+	m.library_card_id = nil
+	m.clearedFields[flashcard.FieldLibraryCardID] = struct{}{}
+}
+
+// LibraryCardIDCleared returns if the "library_card_id" field was cleared in this mutation.
+func (m *FlashcardMutation) LibraryCardIDCleared() bool {
+	_, ok := m.clearedFields[flashcard.FieldLibraryCardID]
+	return ok
+}
+
+// ResetLibraryCardID resets all changes to the "library_card_id" field.
+func (m *FlashcardMutation) ResetLibraryCardID() {
+	m.library_card_id = nil
+	delete(m.clearedFields, flashcard.FieldLibraryCardID)
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by id.
 func (m *FlashcardMutation) SetOwnerID(id uuid.UUID) {
 	m.owner = &id
@@ -3520,7 +3650,7 @@ func (m *FlashcardMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FlashcardMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, flashcard.FieldCreatedAt)
 	}
@@ -3554,6 +3684,9 @@ func (m *FlashcardMutation) Fields() []string {
 	if m.unsplash_attribution != nil {
 		fields = append(fields, flashcard.FieldUnsplashAttribution)
 	}
+	if m.library_card_id != nil {
+		fields = append(fields, flashcard.FieldLibraryCardID)
+	}
 	return fields
 }
 
@@ -3584,6 +3717,8 @@ func (m *FlashcardMutation) Field(name string) (ent.Value, bool) {
 		return m.ImageObjectKey()
 	case flashcard.FieldUnsplashAttribution:
 		return m.UnsplashAttribution()
+	case flashcard.FieldLibraryCardID:
+		return m.LibraryCardID()
 	}
 	return nil, false
 }
@@ -3615,6 +3750,8 @@ func (m *FlashcardMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldImageObjectKey(ctx)
 	case flashcard.FieldUnsplashAttribution:
 		return m.OldUnsplashAttribution(ctx)
+	case flashcard.FieldLibraryCardID:
+		return m.OldLibraryCardID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Flashcard field %s", name)
 }
@@ -3701,6 +3838,13 @@ func (m *FlashcardMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUnsplashAttribution(v)
 		return nil
+	case flashcard.FieldLibraryCardID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLibraryCardID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Flashcard field %s", name)
 }
@@ -3737,6 +3881,9 @@ func (m *FlashcardMutation) ClearedFields() []string {
 	if m.FieldCleared(flashcard.FieldUnsplashAttribution) {
 		fields = append(fields, flashcard.FieldUnsplashAttribution)
 	}
+	if m.FieldCleared(flashcard.FieldLibraryCardID) {
+		fields = append(fields, flashcard.FieldLibraryCardID)
+	}
 	return fields
 }
 
@@ -3756,6 +3903,9 @@ func (m *FlashcardMutation) ClearField(name string) error {
 		return nil
 	case flashcard.FieldUnsplashAttribution:
 		m.ClearUnsplashAttribution()
+		return nil
+	case flashcard.FieldLibraryCardID:
+		m.ClearLibraryCardID()
 		return nil
 	}
 	return fmt.Errorf("unknown Flashcard nullable field %s", name)
@@ -3797,6 +3947,9 @@ func (m *FlashcardMutation) ResetField(name string) error {
 		return nil
 	case flashcard.FieldUnsplashAttribution:
 		m.ResetUnsplashAttribution()
+		return nil
+	case flashcard.FieldLibraryCardID:
+		m.ResetLibraryCardID()
 		return nil
 	}
 	return fmt.Errorf("unknown Flashcard field %s", name)
@@ -5866,6 +6019,1973 @@ func (m *LessonAttemptMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown LessonAttempt edge %s", name)
+}
+
+// LibraryCardMutation represents an operation that mutates the LibraryCard nodes in the graph.
+type LibraryCardMutation struct {
+	config
+	op                      Op
+	typ                     string
+	id                      *uuid.UUID
+	created_at              *time.Time
+	updated_at              *time.Time
+	sort_order              *int
+	addsort_order           *int
+	hanzi                   *string
+	pinyin                  *string
+	tonal_pinyin            *string
+	english                 *string
+	example_sentence_hanzi  *string
+	example_sentence_pinyin *string
+	image_url               *string
+	unsplash_attribution    **models.UnsplashAttribution
+	categories              *[]string
+	appendcategories        []string
+	clearedFields           map[string]struct{}
+	set                     *uuid.UUID
+	clearedset              bool
+	done                    bool
+	oldValue                func(context.Context) (*LibraryCard, error)
+	predicates              []predicate.LibraryCard
+}
+
+var _ ent.Mutation = (*LibraryCardMutation)(nil)
+
+// librarycardOption allows management of the mutation configuration using functional options.
+type librarycardOption func(*LibraryCardMutation)
+
+// newLibraryCardMutation creates new mutation for the LibraryCard entity.
+func newLibraryCardMutation(c config, op Op, opts ...librarycardOption) *LibraryCardMutation {
+	m := &LibraryCardMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLibraryCard,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLibraryCardID sets the ID field of the mutation.
+func withLibraryCardID(id uuid.UUID) librarycardOption {
+	return func(m *LibraryCardMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LibraryCard
+		)
+		m.oldValue = func(ctx context.Context) (*LibraryCard, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LibraryCard.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLibraryCard sets the old LibraryCard of the mutation.
+func withLibraryCard(node *LibraryCard) librarycardOption {
+	return func(m *LibraryCardMutation) {
+		m.oldValue = func(context.Context) (*LibraryCard, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LibraryCardMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LibraryCardMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LibraryCard entities.
+func (m *LibraryCardMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LibraryCardMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LibraryCardMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LibraryCard.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LibraryCardMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LibraryCardMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LibraryCardMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *LibraryCardMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *LibraryCardMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *LibraryCardMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetSetID sets the "set_id" field.
+func (m *LibraryCardMutation) SetSetID(u uuid.UUID) {
+	m.set = &u
+}
+
+// GetSetID returns the value of the "set_id" field in the mutation.
+func (m *LibraryCardMutation) GetSetID() (r uuid.UUID, exists bool) {
+	v := m.set
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSetID returns the old "set_id" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldSetID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSetID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSetID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSetID: %w", err)
+	}
+	return oldValue.SetID, nil
+}
+
+// ResetSetID resets all changes to the "set_id" field.
+func (m *LibraryCardMutation) ResetSetID() {
+	m.set = nil
+}
+
+// SetSortOrder sets the "sort_order" field.
+func (m *LibraryCardMutation) SetSortOrder(i int) {
+	m.sort_order = &i
+	m.addsort_order = nil
+}
+
+// SortOrder returns the value of the "sort_order" field in the mutation.
+func (m *LibraryCardMutation) SortOrder() (r int, exists bool) {
+	v := m.sort_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSortOrder returns the old "sort_order" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldSortOrder(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSortOrder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSortOrder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSortOrder: %w", err)
+	}
+	return oldValue.SortOrder, nil
+}
+
+// AddSortOrder adds i to the "sort_order" field.
+func (m *LibraryCardMutation) AddSortOrder(i int) {
+	if m.addsort_order != nil {
+		*m.addsort_order += i
+	} else {
+		m.addsort_order = &i
+	}
+}
+
+// AddedSortOrder returns the value that was added to the "sort_order" field in this mutation.
+func (m *LibraryCardMutation) AddedSortOrder() (r int, exists bool) {
+	v := m.addsort_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSortOrder resets all changes to the "sort_order" field.
+func (m *LibraryCardMutation) ResetSortOrder() {
+	m.sort_order = nil
+	m.addsort_order = nil
+}
+
+// SetHanzi sets the "hanzi" field.
+func (m *LibraryCardMutation) SetHanzi(s string) {
+	m.hanzi = &s
+}
+
+// Hanzi returns the value of the "hanzi" field in the mutation.
+func (m *LibraryCardMutation) Hanzi() (r string, exists bool) {
+	v := m.hanzi
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHanzi returns the old "hanzi" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldHanzi(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHanzi is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHanzi requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHanzi: %w", err)
+	}
+	return oldValue.Hanzi, nil
+}
+
+// ResetHanzi resets all changes to the "hanzi" field.
+func (m *LibraryCardMutation) ResetHanzi() {
+	m.hanzi = nil
+}
+
+// SetPinyin sets the "pinyin" field.
+func (m *LibraryCardMutation) SetPinyin(s string) {
+	m.pinyin = &s
+}
+
+// Pinyin returns the value of the "pinyin" field in the mutation.
+func (m *LibraryCardMutation) Pinyin() (r string, exists bool) {
+	v := m.pinyin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPinyin returns the old "pinyin" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldPinyin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPinyin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPinyin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPinyin: %w", err)
+	}
+	return oldValue.Pinyin, nil
+}
+
+// ResetPinyin resets all changes to the "pinyin" field.
+func (m *LibraryCardMutation) ResetPinyin() {
+	m.pinyin = nil
+}
+
+// SetTonalPinyin sets the "tonal_pinyin" field.
+func (m *LibraryCardMutation) SetTonalPinyin(s string) {
+	m.tonal_pinyin = &s
+}
+
+// TonalPinyin returns the value of the "tonal_pinyin" field in the mutation.
+func (m *LibraryCardMutation) TonalPinyin() (r string, exists bool) {
+	v := m.tonal_pinyin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTonalPinyin returns the old "tonal_pinyin" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldTonalPinyin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTonalPinyin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTonalPinyin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTonalPinyin: %w", err)
+	}
+	return oldValue.TonalPinyin, nil
+}
+
+// ResetTonalPinyin resets all changes to the "tonal_pinyin" field.
+func (m *LibraryCardMutation) ResetTonalPinyin() {
+	m.tonal_pinyin = nil
+}
+
+// SetEnglish sets the "english" field.
+func (m *LibraryCardMutation) SetEnglish(s string) {
+	m.english = &s
+}
+
+// English returns the value of the "english" field in the mutation.
+func (m *LibraryCardMutation) English() (r string, exists bool) {
+	v := m.english
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnglish returns the old "english" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldEnglish(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnglish is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnglish requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnglish: %w", err)
+	}
+	return oldValue.English, nil
+}
+
+// ResetEnglish resets all changes to the "english" field.
+func (m *LibraryCardMutation) ResetEnglish() {
+	m.english = nil
+}
+
+// SetExampleSentenceHanzi sets the "example_sentence_hanzi" field.
+func (m *LibraryCardMutation) SetExampleSentenceHanzi(s string) {
+	m.example_sentence_hanzi = &s
+}
+
+// ExampleSentenceHanzi returns the value of the "example_sentence_hanzi" field in the mutation.
+func (m *LibraryCardMutation) ExampleSentenceHanzi() (r string, exists bool) {
+	v := m.example_sentence_hanzi
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExampleSentenceHanzi returns the old "example_sentence_hanzi" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldExampleSentenceHanzi(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExampleSentenceHanzi is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExampleSentenceHanzi requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExampleSentenceHanzi: %w", err)
+	}
+	return oldValue.ExampleSentenceHanzi, nil
+}
+
+// ResetExampleSentenceHanzi resets all changes to the "example_sentence_hanzi" field.
+func (m *LibraryCardMutation) ResetExampleSentenceHanzi() {
+	m.example_sentence_hanzi = nil
+}
+
+// SetExampleSentencePinyin sets the "example_sentence_pinyin" field.
+func (m *LibraryCardMutation) SetExampleSentencePinyin(s string) {
+	m.example_sentence_pinyin = &s
+}
+
+// ExampleSentencePinyin returns the value of the "example_sentence_pinyin" field in the mutation.
+func (m *LibraryCardMutation) ExampleSentencePinyin() (r string, exists bool) {
+	v := m.example_sentence_pinyin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExampleSentencePinyin returns the old "example_sentence_pinyin" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldExampleSentencePinyin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExampleSentencePinyin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExampleSentencePinyin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExampleSentencePinyin: %w", err)
+	}
+	return oldValue.ExampleSentencePinyin, nil
+}
+
+// ResetExampleSentencePinyin resets all changes to the "example_sentence_pinyin" field.
+func (m *LibraryCardMutation) ResetExampleSentencePinyin() {
+	m.example_sentence_pinyin = nil
+}
+
+// SetImageURL sets the "image_url" field.
+func (m *LibraryCardMutation) SetImageURL(s string) {
+	m.image_url = &s
+}
+
+// ImageURL returns the value of the "image_url" field in the mutation.
+func (m *LibraryCardMutation) ImageURL() (r string, exists bool) {
+	v := m.image_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImageURL returns the old "image_url" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldImageURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImageURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImageURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImageURL: %w", err)
+	}
+	return oldValue.ImageURL, nil
+}
+
+// ResetImageURL resets all changes to the "image_url" field.
+func (m *LibraryCardMutation) ResetImageURL() {
+	m.image_url = nil
+}
+
+// SetUnsplashAttribution sets the "unsplash_attribution" field.
+func (m *LibraryCardMutation) SetUnsplashAttribution(ma *models.UnsplashAttribution) {
+	m.unsplash_attribution = &ma
+}
+
+// UnsplashAttribution returns the value of the "unsplash_attribution" field in the mutation.
+func (m *LibraryCardMutation) UnsplashAttribution() (r *models.UnsplashAttribution, exists bool) {
+	v := m.unsplash_attribution
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUnsplashAttribution returns the old "unsplash_attribution" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldUnsplashAttribution(ctx context.Context) (v *models.UnsplashAttribution, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUnsplashAttribution is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUnsplashAttribution requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUnsplashAttribution: %w", err)
+	}
+	return oldValue.UnsplashAttribution, nil
+}
+
+// ClearUnsplashAttribution clears the value of the "unsplash_attribution" field.
+func (m *LibraryCardMutation) ClearUnsplashAttribution() {
+	m.unsplash_attribution = nil
+	m.clearedFields[librarycard.FieldUnsplashAttribution] = struct{}{}
+}
+
+// UnsplashAttributionCleared returns if the "unsplash_attribution" field was cleared in this mutation.
+func (m *LibraryCardMutation) UnsplashAttributionCleared() bool {
+	_, ok := m.clearedFields[librarycard.FieldUnsplashAttribution]
+	return ok
+}
+
+// ResetUnsplashAttribution resets all changes to the "unsplash_attribution" field.
+func (m *LibraryCardMutation) ResetUnsplashAttribution() {
+	m.unsplash_attribution = nil
+	delete(m.clearedFields, librarycard.FieldUnsplashAttribution)
+}
+
+// SetCategories sets the "categories" field.
+func (m *LibraryCardMutation) SetCategories(s []string) {
+	m.categories = &s
+	m.appendcategories = nil
+}
+
+// Categories returns the value of the "categories" field in the mutation.
+func (m *LibraryCardMutation) Categories() (r []string, exists bool) {
+	v := m.categories
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCategories returns the old "categories" field's value of the LibraryCard entity.
+// If the LibraryCard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibraryCardMutation) OldCategories(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCategories is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCategories requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCategories: %w", err)
+	}
+	return oldValue.Categories, nil
+}
+
+// AppendCategories adds s to the "categories" field.
+func (m *LibraryCardMutation) AppendCategories(s []string) {
+	m.appendcategories = append(m.appendcategories, s...)
+}
+
+// AppendedCategories returns the list of values that were appended to the "categories" field in this mutation.
+func (m *LibraryCardMutation) AppendedCategories() ([]string, bool) {
+	if len(m.appendcategories) == 0 {
+		return nil, false
+	}
+	return m.appendcategories, true
+}
+
+// ClearCategories clears the value of the "categories" field.
+func (m *LibraryCardMutation) ClearCategories() {
+	m.categories = nil
+	m.appendcategories = nil
+	m.clearedFields[librarycard.FieldCategories] = struct{}{}
+}
+
+// CategoriesCleared returns if the "categories" field was cleared in this mutation.
+func (m *LibraryCardMutation) CategoriesCleared() bool {
+	_, ok := m.clearedFields[librarycard.FieldCategories]
+	return ok
+}
+
+// ResetCategories resets all changes to the "categories" field.
+func (m *LibraryCardMutation) ResetCategories() {
+	m.categories = nil
+	m.appendcategories = nil
+	delete(m.clearedFields, librarycard.FieldCategories)
+}
+
+// ClearSet clears the "set" edge to the LibrarySet entity.
+func (m *LibraryCardMutation) ClearSet() {
+	m.clearedset = true
+	m.clearedFields[librarycard.FieldSetID] = struct{}{}
+}
+
+// SetCleared reports if the "set" edge to the LibrarySet entity was cleared.
+func (m *LibraryCardMutation) SetCleared() bool {
+	return m.clearedset
+}
+
+// SetIDs returns the "set" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SetID instead. It exists only for internal usage by the builders.
+func (m *LibraryCardMutation) SetIDs() (ids []uuid.UUID) {
+	if id := m.set; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSet resets all changes to the "set" edge.
+func (m *LibraryCardMutation) ResetSet() {
+	m.set = nil
+	m.clearedset = false
+}
+
+// Where appends a list predicates to the LibraryCardMutation builder.
+func (m *LibraryCardMutation) Where(ps ...predicate.LibraryCard) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LibraryCardMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LibraryCardMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LibraryCard, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LibraryCardMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LibraryCardMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LibraryCard).
+func (m *LibraryCardMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LibraryCardMutation) Fields() []string {
+	fields := make([]string, 0, 13)
+	if m.created_at != nil {
+		fields = append(fields, librarycard.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, librarycard.FieldUpdatedAt)
+	}
+	if m.set != nil {
+		fields = append(fields, librarycard.FieldSetID)
+	}
+	if m.sort_order != nil {
+		fields = append(fields, librarycard.FieldSortOrder)
+	}
+	if m.hanzi != nil {
+		fields = append(fields, librarycard.FieldHanzi)
+	}
+	if m.pinyin != nil {
+		fields = append(fields, librarycard.FieldPinyin)
+	}
+	if m.tonal_pinyin != nil {
+		fields = append(fields, librarycard.FieldTonalPinyin)
+	}
+	if m.english != nil {
+		fields = append(fields, librarycard.FieldEnglish)
+	}
+	if m.example_sentence_hanzi != nil {
+		fields = append(fields, librarycard.FieldExampleSentenceHanzi)
+	}
+	if m.example_sentence_pinyin != nil {
+		fields = append(fields, librarycard.FieldExampleSentencePinyin)
+	}
+	if m.image_url != nil {
+		fields = append(fields, librarycard.FieldImageURL)
+	}
+	if m.unsplash_attribution != nil {
+		fields = append(fields, librarycard.FieldUnsplashAttribution)
+	}
+	if m.categories != nil {
+		fields = append(fields, librarycard.FieldCategories)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LibraryCardMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case librarycard.FieldCreatedAt:
+		return m.CreatedAt()
+	case librarycard.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case librarycard.FieldSetID:
+		return m.GetSetID()
+	case librarycard.FieldSortOrder:
+		return m.SortOrder()
+	case librarycard.FieldHanzi:
+		return m.Hanzi()
+	case librarycard.FieldPinyin:
+		return m.Pinyin()
+	case librarycard.FieldTonalPinyin:
+		return m.TonalPinyin()
+	case librarycard.FieldEnglish:
+		return m.English()
+	case librarycard.FieldExampleSentenceHanzi:
+		return m.ExampleSentenceHanzi()
+	case librarycard.FieldExampleSentencePinyin:
+		return m.ExampleSentencePinyin()
+	case librarycard.FieldImageURL:
+		return m.ImageURL()
+	case librarycard.FieldUnsplashAttribution:
+		return m.UnsplashAttribution()
+	case librarycard.FieldCategories:
+		return m.Categories()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LibraryCardMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case librarycard.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case librarycard.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case librarycard.FieldSetID:
+		return m.OldSetID(ctx)
+	case librarycard.FieldSortOrder:
+		return m.OldSortOrder(ctx)
+	case librarycard.FieldHanzi:
+		return m.OldHanzi(ctx)
+	case librarycard.FieldPinyin:
+		return m.OldPinyin(ctx)
+	case librarycard.FieldTonalPinyin:
+		return m.OldTonalPinyin(ctx)
+	case librarycard.FieldEnglish:
+		return m.OldEnglish(ctx)
+	case librarycard.FieldExampleSentenceHanzi:
+		return m.OldExampleSentenceHanzi(ctx)
+	case librarycard.FieldExampleSentencePinyin:
+		return m.OldExampleSentencePinyin(ctx)
+	case librarycard.FieldImageURL:
+		return m.OldImageURL(ctx)
+	case librarycard.FieldUnsplashAttribution:
+		return m.OldUnsplashAttribution(ctx)
+	case librarycard.FieldCategories:
+		return m.OldCategories(ctx)
+	}
+	return nil, fmt.Errorf("unknown LibraryCard field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LibraryCardMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case librarycard.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case librarycard.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case librarycard.FieldSetID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSetID(v)
+		return nil
+	case librarycard.FieldSortOrder:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSortOrder(v)
+		return nil
+	case librarycard.FieldHanzi:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHanzi(v)
+		return nil
+	case librarycard.FieldPinyin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPinyin(v)
+		return nil
+	case librarycard.FieldTonalPinyin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTonalPinyin(v)
+		return nil
+	case librarycard.FieldEnglish:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnglish(v)
+		return nil
+	case librarycard.FieldExampleSentenceHanzi:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExampleSentenceHanzi(v)
+		return nil
+	case librarycard.FieldExampleSentencePinyin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExampleSentencePinyin(v)
+		return nil
+	case librarycard.FieldImageURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImageURL(v)
+		return nil
+	case librarycard.FieldUnsplashAttribution:
+		v, ok := value.(*models.UnsplashAttribution)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUnsplashAttribution(v)
+		return nil
+	case librarycard.FieldCategories:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCategories(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LibraryCard field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LibraryCardMutation) AddedFields() []string {
+	var fields []string
+	if m.addsort_order != nil {
+		fields = append(fields, librarycard.FieldSortOrder)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LibraryCardMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case librarycard.FieldSortOrder:
+		return m.AddedSortOrder()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LibraryCardMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case librarycard.FieldSortOrder:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSortOrder(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LibraryCard numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LibraryCardMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(librarycard.FieldUnsplashAttribution) {
+		fields = append(fields, librarycard.FieldUnsplashAttribution)
+	}
+	if m.FieldCleared(librarycard.FieldCategories) {
+		fields = append(fields, librarycard.FieldCategories)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LibraryCardMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LibraryCardMutation) ClearField(name string) error {
+	switch name {
+	case librarycard.FieldUnsplashAttribution:
+		m.ClearUnsplashAttribution()
+		return nil
+	case librarycard.FieldCategories:
+		m.ClearCategories()
+		return nil
+	}
+	return fmt.Errorf("unknown LibraryCard nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LibraryCardMutation) ResetField(name string) error {
+	switch name {
+	case librarycard.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case librarycard.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case librarycard.FieldSetID:
+		m.ResetSetID()
+		return nil
+	case librarycard.FieldSortOrder:
+		m.ResetSortOrder()
+		return nil
+	case librarycard.FieldHanzi:
+		m.ResetHanzi()
+		return nil
+	case librarycard.FieldPinyin:
+		m.ResetPinyin()
+		return nil
+	case librarycard.FieldTonalPinyin:
+		m.ResetTonalPinyin()
+		return nil
+	case librarycard.FieldEnglish:
+		m.ResetEnglish()
+		return nil
+	case librarycard.FieldExampleSentenceHanzi:
+		m.ResetExampleSentenceHanzi()
+		return nil
+	case librarycard.FieldExampleSentencePinyin:
+		m.ResetExampleSentencePinyin()
+		return nil
+	case librarycard.FieldImageURL:
+		m.ResetImageURL()
+		return nil
+	case librarycard.FieldUnsplashAttribution:
+		m.ResetUnsplashAttribution()
+		return nil
+	case librarycard.FieldCategories:
+		m.ResetCategories()
+		return nil
+	}
+	return fmt.Errorf("unknown LibraryCard field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LibraryCardMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.set != nil {
+		edges = append(edges, librarycard.EdgeSet)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LibraryCardMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case librarycard.EdgeSet:
+		if id := m.set; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LibraryCardMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LibraryCardMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LibraryCardMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedset {
+		edges = append(edges, librarycard.EdgeSet)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LibraryCardMutation) EdgeCleared(name string) bool {
+	switch name {
+	case librarycard.EdgeSet:
+		return m.clearedset
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LibraryCardMutation) ClearEdge(name string) error {
+	switch name {
+	case librarycard.EdgeSet:
+		m.ClearSet()
+		return nil
+	}
+	return fmt.Errorf("unknown LibraryCard unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LibraryCardMutation) ResetEdge(name string) error {
+	switch name {
+	case librarycard.EdgeSet:
+		m.ResetSet()
+		return nil
+	}
+	return fmt.Errorf("unknown LibraryCard edge %s", name)
+}
+
+// LibrarySetMutation represents an operation that mutates the LibrarySet nodes in the graph.
+type LibrarySetMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	created_at    *time.Time
+	updated_at    *time.Time
+	slug          *string
+	title         *string
+	description   *string
+	level         *string
+	sort_order    *int
+	addsort_order *int
+	published     *bool
+	clearedFields map[string]struct{}
+	cards         map[uuid.UUID]struct{}
+	removedcards  map[uuid.UUID]struct{}
+	clearedcards  bool
+	done          bool
+	oldValue      func(context.Context) (*LibrarySet, error)
+	predicates    []predicate.LibrarySet
+}
+
+var _ ent.Mutation = (*LibrarySetMutation)(nil)
+
+// librarysetOption allows management of the mutation configuration using functional options.
+type librarysetOption func(*LibrarySetMutation)
+
+// newLibrarySetMutation creates new mutation for the LibrarySet entity.
+func newLibrarySetMutation(c config, op Op, opts ...librarysetOption) *LibrarySetMutation {
+	m := &LibrarySetMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLibrarySet,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLibrarySetID sets the ID field of the mutation.
+func withLibrarySetID(id uuid.UUID) librarysetOption {
+	return func(m *LibrarySetMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LibrarySet
+		)
+		m.oldValue = func(ctx context.Context) (*LibrarySet, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LibrarySet.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLibrarySet sets the old LibrarySet of the mutation.
+func withLibrarySet(node *LibrarySet) librarysetOption {
+	return func(m *LibrarySetMutation) {
+		m.oldValue = func(context.Context) (*LibrarySet, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LibrarySetMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LibrarySetMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LibrarySet entities.
+func (m *LibrarySetMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LibrarySetMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LibrarySetMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LibrarySet.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LibrarySetMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LibrarySetMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LibrarySet entity.
+// If the LibrarySet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibrarySetMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LibrarySetMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *LibrarySetMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *LibrarySetMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the LibrarySet entity.
+// If the LibrarySet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibrarySetMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *LibrarySetMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetSlug sets the "slug" field.
+func (m *LibrarySetMutation) SetSlug(s string) {
+	m.slug = &s
+}
+
+// Slug returns the value of the "slug" field in the mutation.
+func (m *LibrarySetMutation) Slug() (r string, exists bool) {
+	v := m.slug
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlug returns the old "slug" field's value of the LibrarySet entity.
+// If the LibrarySet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibrarySetMutation) OldSlug(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlug is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlug requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlug: %w", err)
+	}
+	return oldValue.Slug, nil
+}
+
+// ResetSlug resets all changes to the "slug" field.
+func (m *LibrarySetMutation) ResetSlug() {
+	m.slug = nil
+}
+
+// SetTitle sets the "title" field.
+func (m *LibrarySetMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *LibrarySetMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the LibrarySet entity.
+// If the LibrarySet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibrarySetMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *LibrarySetMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *LibrarySetMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *LibrarySetMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the LibrarySet entity.
+// If the LibrarySet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibrarySetMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *LibrarySetMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetLevel sets the "level" field.
+func (m *LibrarySetMutation) SetLevel(s string) {
+	m.level = &s
+}
+
+// Level returns the value of the "level" field in the mutation.
+func (m *LibrarySetMutation) Level() (r string, exists bool) {
+	v := m.level
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLevel returns the old "level" field's value of the LibrarySet entity.
+// If the LibrarySet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibrarySetMutation) OldLevel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLevel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLevel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLevel: %w", err)
+	}
+	return oldValue.Level, nil
+}
+
+// ResetLevel resets all changes to the "level" field.
+func (m *LibrarySetMutation) ResetLevel() {
+	m.level = nil
+}
+
+// SetSortOrder sets the "sort_order" field.
+func (m *LibrarySetMutation) SetSortOrder(i int) {
+	m.sort_order = &i
+	m.addsort_order = nil
+}
+
+// SortOrder returns the value of the "sort_order" field in the mutation.
+func (m *LibrarySetMutation) SortOrder() (r int, exists bool) {
+	v := m.sort_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSortOrder returns the old "sort_order" field's value of the LibrarySet entity.
+// If the LibrarySet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibrarySetMutation) OldSortOrder(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSortOrder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSortOrder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSortOrder: %w", err)
+	}
+	return oldValue.SortOrder, nil
+}
+
+// AddSortOrder adds i to the "sort_order" field.
+func (m *LibrarySetMutation) AddSortOrder(i int) {
+	if m.addsort_order != nil {
+		*m.addsort_order += i
+	} else {
+		m.addsort_order = &i
+	}
+}
+
+// AddedSortOrder returns the value that was added to the "sort_order" field in this mutation.
+func (m *LibrarySetMutation) AddedSortOrder() (r int, exists bool) {
+	v := m.addsort_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSortOrder resets all changes to the "sort_order" field.
+func (m *LibrarySetMutation) ResetSortOrder() {
+	m.sort_order = nil
+	m.addsort_order = nil
+}
+
+// SetPublished sets the "published" field.
+func (m *LibrarySetMutation) SetPublished(b bool) {
+	m.published = &b
+}
+
+// Published returns the value of the "published" field in the mutation.
+func (m *LibrarySetMutation) Published() (r bool, exists bool) {
+	v := m.published
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublished returns the old "published" field's value of the LibrarySet entity.
+// If the LibrarySet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LibrarySetMutation) OldPublished(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublished is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublished requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublished: %w", err)
+	}
+	return oldValue.Published, nil
+}
+
+// ResetPublished resets all changes to the "published" field.
+func (m *LibrarySetMutation) ResetPublished() {
+	m.published = nil
+}
+
+// AddCardIDs adds the "cards" edge to the LibraryCard entity by ids.
+func (m *LibrarySetMutation) AddCardIDs(ids ...uuid.UUID) {
+	if m.cards == nil {
+		m.cards = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.cards[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCards clears the "cards" edge to the LibraryCard entity.
+func (m *LibrarySetMutation) ClearCards() {
+	m.clearedcards = true
+}
+
+// CardsCleared reports if the "cards" edge to the LibraryCard entity was cleared.
+func (m *LibrarySetMutation) CardsCleared() bool {
+	return m.clearedcards
+}
+
+// RemoveCardIDs removes the "cards" edge to the LibraryCard entity by IDs.
+func (m *LibrarySetMutation) RemoveCardIDs(ids ...uuid.UUID) {
+	if m.removedcards == nil {
+		m.removedcards = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.cards, ids[i])
+		m.removedcards[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCards returns the removed IDs of the "cards" edge to the LibraryCard entity.
+func (m *LibrarySetMutation) RemovedCardsIDs() (ids []uuid.UUID) {
+	for id := range m.removedcards {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CardsIDs returns the "cards" edge IDs in the mutation.
+func (m *LibrarySetMutation) CardsIDs() (ids []uuid.UUID) {
+	for id := range m.cards {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCards resets all changes to the "cards" edge.
+func (m *LibrarySetMutation) ResetCards() {
+	m.cards = nil
+	m.clearedcards = false
+	m.removedcards = nil
+}
+
+// Where appends a list predicates to the LibrarySetMutation builder.
+func (m *LibrarySetMutation) Where(ps ...predicate.LibrarySet) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LibrarySetMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LibrarySetMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LibrarySet, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LibrarySetMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LibrarySetMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LibrarySet).
+func (m *LibrarySetMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LibrarySetMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, libraryset.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, libraryset.FieldUpdatedAt)
+	}
+	if m.slug != nil {
+		fields = append(fields, libraryset.FieldSlug)
+	}
+	if m.title != nil {
+		fields = append(fields, libraryset.FieldTitle)
+	}
+	if m.description != nil {
+		fields = append(fields, libraryset.FieldDescription)
+	}
+	if m.level != nil {
+		fields = append(fields, libraryset.FieldLevel)
+	}
+	if m.sort_order != nil {
+		fields = append(fields, libraryset.FieldSortOrder)
+	}
+	if m.published != nil {
+		fields = append(fields, libraryset.FieldPublished)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LibrarySetMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case libraryset.FieldCreatedAt:
+		return m.CreatedAt()
+	case libraryset.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case libraryset.FieldSlug:
+		return m.Slug()
+	case libraryset.FieldTitle:
+		return m.Title()
+	case libraryset.FieldDescription:
+		return m.Description()
+	case libraryset.FieldLevel:
+		return m.Level()
+	case libraryset.FieldSortOrder:
+		return m.SortOrder()
+	case libraryset.FieldPublished:
+		return m.Published()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LibrarySetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case libraryset.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case libraryset.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case libraryset.FieldSlug:
+		return m.OldSlug(ctx)
+	case libraryset.FieldTitle:
+		return m.OldTitle(ctx)
+	case libraryset.FieldDescription:
+		return m.OldDescription(ctx)
+	case libraryset.FieldLevel:
+		return m.OldLevel(ctx)
+	case libraryset.FieldSortOrder:
+		return m.OldSortOrder(ctx)
+	case libraryset.FieldPublished:
+		return m.OldPublished(ctx)
+	}
+	return nil, fmt.Errorf("unknown LibrarySet field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LibrarySetMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case libraryset.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case libraryset.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case libraryset.FieldSlug:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlug(v)
+		return nil
+	case libraryset.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case libraryset.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case libraryset.FieldLevel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLevel(v)
+		return nil
+	case libraryset.FieldSortOrder:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSortOrder(v)
+		return nil
+	case libraryset.FieldPublished:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublished(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LibrarySet field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LibrarySetMutation) AddedFields() []string {
+	var fields []string
+	if m.addsort_order != nil {
+		fields = append(fields, libraryset.FieldSortOrder)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LibrarySetMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case libraryset.FieldSortOrder:
+		return m.AddedSortOrder()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LibrarySetMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case libraryset.FieldSortOrder:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSortOrder(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LibrarySet numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LibrarySetMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LibrarySetMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LibrarySetMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown LibrarySet nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LibrarySetMutation) ResetField(name string) error {
+	switch name {
+	case libraryset.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case libraryset.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case libraryset.FieldSlug:
+		m.ResetSlug()
+		return nil
+	case libraryset.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case libraryset.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case libraryset.FieldLevel:
+		m.ResetLevel()
+		return nil
+	case libraryset.FieldSortOrder:
+		m.ResetSortOrder()
+		return nil
+	case libraryset.FieldPublished:
+		m.ResetPublished()
+		return nil
+	}
+	return fmt.Errorf("unknown LibrarySet field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LibrarySetMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cards != nil {
+		edges = append(edges, libraryset.EdgeCards)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LibrarySetMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case libraryset.EdgeCards:
+		ids := make([]ent.Value, 0, len(m.cards))
+		for id := range m.cards {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LibrarySetMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedcards != nil {
+		edges = append(edges, libraryset.EdgeCards)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LibrarySetMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case libraryset.EdgeCards:
+		ids := make([]ent.Value, 0, len(m.removedcards))
+		for id := range m.removedcards {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LibrarySetMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedcards {
+		edges = append(edges, libraryset.EdgeCards)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LibrarySetMutation) EdgeCleared(name string) bool {
+	switch name {
+	case libraryset.EdgeCards:
+		return m.clearedcards
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LibrarySetMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown LibrarySet unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LibrarySetMutation) ResetEdge(name string) error {
+	switch name {
+	case libraryset.EdgeCards:
+		m.ResetCards()
+		return nil
+	}
+	return fmt.Errorf("unknown LibrarySet edge %s", name)
 }
 
 // SetFlashcardMutation represents an operation that mutates the SetFlashcard nodes in the graph.

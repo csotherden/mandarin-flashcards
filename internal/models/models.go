@@ -352,3 +352,43 @@ type GenerateSetResponse struct {
 	Cards   []FlashcardResponse `json:"cards"`
 	Skipped []string            `json:"skipped"`
 }
+
+// LibrarySetResponse is a set in the global library, as browsed. ImportedSetID is the
+// viewer's own copy, when they have one.
+type LibrarySetResponse struct {
+	ID            uuid.UUID  `json:"id"`
+	Slug          string     `json:"slug"`
+	Title         string     `json:"title"`
+	Description   string     `json:"description"`
+	Level         string     `json:"level"`
+	CardCount     int        `json:"card_count"`
+	CoverURL      string     `json:"cover_url"`
+	Preview       []string   `json:"preview"`
+	ImportedSetID *uuid.UUID `json:"imported_set_id,omitempty"`
+}
+
+type LibraryCardResponse struct {
+	ID                    uuid.UUID            `json:"id"`
+	Hanzi                 string               `json:"hanzi"`
+	Pinyin                string               `json:"pinyin"`
+	TonalPinyin           string               `json:"tonal_pinyin"`
+	English               string               `json:"english"`
+	ExampleSentenceHanzi  string               `json:"example_sentence_hanzi"`
+	ExampleSentencePinyin string               `json:"example_sentence_pinyin"`
+	ImageURL              string               `json:"image_url"`
+	UnsplashAttribution   *UnsplashAttribution `json:"unsplash_attribution,omitempty"`
+	// Owned is true when the viewer already has this word (importing reuses their card).
+	Owned bool `json:"owned"`
+}
+
+type LibrarySetDetail struct {
+	LibrarySetResponse
+	Cards []LibraryCardResponse `json:"cards"`
+}
+
+// LibraryImportResponse is the viewer's copy of a library set after importing it.
+type LibraryImportResponse struct {
+	Set      SetResponse `json:"set"`
+	Created  bool        `json:"created"`
+	NewCards int         `json:"new_cards"`
+}

@@ -70,6 +70,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Size: 120},
 		{Name: "description", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "library_set_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// SetsTable holds the schema information for the "sets" table.
@@ -80,7 +81,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "sets_users_card_sets",
-				Columns:    []*schema.Column{SetsColumns[5]},
+				Columns:    []*schema.Column{SetsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -89,7 +90,7 @@ var (
 			{
 				Name:    "cardset_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{SetsColumns[5]},
+				Columns: []*schema.Column{SetsColumns[6]},
 			},
 		},
 	}
@@ -137,6 +138,7 @@ var (
 		{Name: "image_url", Type: field.TypeString, Size: 2048, Default: ""},
 		{Name: "image_object_key", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "unsplash_attribution", Type: field.TypeJSON, Nullable: true},
+		{Name: "library_card_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// FlashcardsTable holds the schema information for the "flashcards" table.
@@ -147,7 +149,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "flashcards_users_flashcards",
-				Columns:    []*schema.Column{FlashcardsColumns[12]},
+				Columns:    []*schema.Column{FlashcardsColumns[13]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -156,12 +158,12 @@ var (
 			{
 				Name:    "flashcard_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{FlashcardsColumns[12]},
+				Columns: []*schema.Column{FlashcardsColumns[13]},
 			},
 			{
 				Name:    "flashcard_hanzi_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{FlashcardsColumns[3], FlashcardsColumns[12]},
+				Columns: []*schema.Column{FlashcardsColumns[3], FlashcardsColumns[13]},
 			},
 		},
 	}
@@ -239,6 +241,62 @@ var (
 				Columns: []*schema.Column{LessonAttemptsColumns[9]},
 			},
 		},
+	}
+	// LibraryCardsColumns holds the columns for the "library_cards" table.
+	LibraryCardsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "sort_order", Type: field.TypeInt, Default: 0},
+		{Name: "hanzi", Type: field.TypeString, Size: 64},
+		{Name: "pinyin", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "tonal_pinyin", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "english", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "example_sentence_hanzi", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "example_sentence_pinyin", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "image_url", Type: field.TypeString, Size: 2048, Default: ""},
+		{Name: "unsplash_attribution", Type: field.TypeJSON, Nullable: true},
+		{Name: "categories", Type: field.TypeJSON, Nullable: true},
+		{Name: "set_id", Type: field.TypeUUID},
+	}
+	// LibraryCardsTable holds the schema information for the "library_cards" table.
+	LibraryCardsTable = &schema.Table{
+		Name:       "library_cards",
+		Columns:    LibraryCardsColumns,
+		PrimaryKey: []*schema.Column{LibraryCardsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "library_cards_library_sets_cards",
+				Columns:    []*schema.Column{LibraryCardsColumns[13]},
+				RefColumns: []*schema.Column{LibrarySetsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "librarycard_set_id_hanzi",
+				Unique:  true,
+				Columns: []*schema.Column{LibraryCardsColumns[13], LibraryCardsColumns[4]},
+			},
+		},
+	}
+	// LibrarySetsColumns holds the columns for the "library_sets" table.
+	LibrarySetsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "slug", Type: field.TypeString, Unique: true, Size: 80},
+		{Name: "title", Type: field.TypeString, Size: 120},
+		{Name: "description", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "level", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "sort_order", Type: field.TypeInt, Default: 0},
+		{Name: "published", Type: field.TypeBool, Default: true},
+	}
+	// LibrarySetsTable holds the schema information for the "library_sets" table.
+	LibrarySetsTable = &schema.Table{
+		Name:       "library_sets",
+		Columns:    LibrarySetsColumns,
+		PrimaryKey: []*schema.Column{LibrarySetsColumns[0]},
 	}
 	// SetFlashcardsColumns holds the columns for the "set_flashcards" table.
 	SetFlashcardsColumns = []*schema.Column{
@@ -424,6 +482,8 @@ var (
 		FlashcardsTable,
 		LessonsTable,
 		LessonAttemptsTable,
+		LibraryCardsTable,
+		LibrarySetsTable,
 		SetFlashcardsTable,
 		UsersTable,
 		XpAwardsTable,
@@ -446,6 +506,7 @@ func init() {
 	LessonsTable.ForeignKeys[0].RefTable = UsersTable
 	LessonAttemptsTable.ForeignKeys[0].RefTable = LessonsTable
 	LessonAttemptsTable.ForeignKeys[1].RefTable = UsersTable
+	LibraryCardsTable.ForeignKeys[0].RefTable = LibrarySetsTable
 	SetFlashcardsTable.ForeignKeys[0].RefTable = SetsTable
 	SetFlashcardsTable.ForeignKeys[1].RefTable = FlashcardsTable
 	SetFlashcardsTable.Annotation = &entsql.Annotation{

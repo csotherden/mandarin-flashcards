@@ -106,6 +106,11 @@ func ImageObjectKey(v string) predicate.Flashcard {
 	return predicate.Flashcard(sql.FieldEQ(FieldImageObjectKey, v))
 }
 
+// LibraryCardID applies equality check predicate on the "library_card_id" field. It's identical to LibraryCardIDEQ.
+func LibraryCardID(v uuid.UUID) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldEQ(FieldLibraryCardID, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Flashcard {
 	return predicate.Flashcard(sql.FieldEQ(FieldCreatedAt, v))
@@ -724,6 +729,56 @@ func UnsplashAttributionIsNil() predicate.Flashcard {
 // UnsplashAttributionNotNil applies the NotNil predicate on the "unsplash_attribution" field.
 func UnsplashAttributionNotNil() predicate.Flashcard {
 	return predicate.Flashcard(sql.FieldNotNull(FieldUnsplashAttribution))
+}
+
+// LibraryCardIDEQ applies the EQ predicate on the "library_card_id" field.
+func LibraryCardIDEQ(v uuid.UUID) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldEQ(FieldLibraryCardID, v))
+}
+
+// LibraryCardIDNEQ applies the NEQ predicate on the "library_card_id" field.
+func LibraryCardIDNEQ(v uuid.UUID) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldNEQ(FieldLibraryCardID, v))
+}
+
+// LibraryCardIDIn applies the In predicate on the "library_card_id" field.
+func LibraryCardIDIn(vs ...uuid.UUID) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldIn(FieldLibraryCardID, vs...))
+}
+
+// LibraryCardIDNotIn applies the NotIn predicate on the "library_card_id" field.
+func LibraryCardIDNotIn(vs ...uuid.UUID) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldNotIn(FieldLibraryCardID, vs...))
+}
+
+// LibraryCardIDGT applies the GT predicate on the "library_card_id" field.
+func LibraryCardIDGT(v uuid.UUID) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldGT(FieldLibraryCardID, v))
+}
+
+// LibraryCardIDGTE applies the GTE predicate on the "library_card_id" field.
+func LibraryCardIDGTE(v uuid.UUID) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldGTE(FieldLibraryCardID, v))
+}
+
+// LibraryCardIDLT applies the LT predicate on the "library_card_id" field.
+func LibraryCardIDLT(v uuid.UUID) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldLT(FieldLibraryCardID, v))
+}
+
+// LibraryCardIDLTE applies the LTE predicate on the "library_card_id" field.
+func LibraryCardIDLTE(v uuid.UUID) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldLTE(FieldLibraryCardID, v))
+}
+
+// LibraryCardIDIsNil applies the IsNil predicate on the "library_card_id" field.
+func LibraryCardIDIsNil() predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldIsNull(FieldLibraryCardID))
+}
+
+// LibraryCardIDNotNil applies the NotNil predicate on the "library_card_id" field.
+func LibraryCardIDNotNil() predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldNotNull(FieldLibraryCardID))
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.

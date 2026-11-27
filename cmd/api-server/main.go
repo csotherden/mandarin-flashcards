@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -18,6 +19,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent"
 	"github.com/csotherden/mandarin-flashcards/internal/auth"
 	"github.com/csotherden/mandarin-flashcards/internal/database"
+	"github.com/csotherden/mandarin-flashcards/internal/library"
 	"github.com/csotherden/mandarin-flashcards/internal/logging"
 	"github.com/csotherden/mandarin-flashcards/internal/server"
 	"github.com/joho/godotenv"
@@ -46,8 +48,9 @@ func envBool(name string) (bool, bool) {
 }
 
 func init() {
-	var envFile string
+	var envFile, libraryFile string
 	flag.StringVar(&envFile, "env", ".env", "env file path")
+	flag.StringVar(&libraryFile, "library-load", "", "load global library sets from this JSON file (- for stdin), then exit")
 	flag.Parse()
 
 	if err := godotenv.Load(envFile); err != nil {
@@ -102,6 +105,10 @@ func init() {
 		}
 	}
 
+	if libraryFile != "" {
+		os.Exit(loadLibrary(libraryFile))
+	}
+
 	srv, err = server.NewServer(config, logger, client, sqlDB)
 	if err != nil {
 		logger.Fatal("Failed to create server", zap.Error(err))
@@ -129,4 +136,27 @@ func main() {
 		logger.Fatal("Server forced to shutdown", zap.Error(err))
 	}
 	logger.Info("Server gracefully stopped")
+}
+
+// loadLibrary runs `api-server -library-load file.json` (or - for stdin): it makes the global
+// library match the file, set by set, and exits. Safe to rerun; sets are matched by slug.
+func loadLibrary(path string) int {
+	in := os.Stdin
+	if path != "-" {
+		f, err := os.Open(path)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return 1
+		}
+		defer f.Close()
+		in = f
+	}
+	res, err := library.Load(context.Background(), client, in)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
+	fmt.Printf("library loaded: sets %d new, %d updated; cards %d new, %d updated, %d removed\n",
+		res.SetsCreated, res.SetsUpdated, res.CardsCreated, res.CardsUpdated, res.CardsRemoved)
+	return 0
 }

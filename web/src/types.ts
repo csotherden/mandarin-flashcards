@@ -172,3 +172,34 @@ export type SessionSource =
   | { kind: "lesson"; lessonId: string }
   | { kind: "missed"; attemptId: string };
 
+
+/** A set in the global library. imported_set_id is the viewer's own copy, if they have one. */
+export type LibrarySet = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  level: string;
+  card_count: number;
+  cover_url: string;
+  preview: string[];
+  imported_set_id?: string;
+};
+
+export type LibraryCard = {
+  id: string;
+  hanzi: string;
+  pinyin: string;
+  tonal_pinyin: string;
+  english: string;
+  example_sentence_hanzi: string;
+  example_sentence_pinyin: string;
+  image_url: string;
+  unsplash_attribution?: Attribution;
+  /** The viewer already has this word; importing reuses their card. */
+  owned: boolean;
+};
+
+export type LibrarySetDetail = LibrarySet & { cards: LibraryCard[] };
+
+export type LibraryImport = { set: CardSet; created: boolean; new_cards: number };

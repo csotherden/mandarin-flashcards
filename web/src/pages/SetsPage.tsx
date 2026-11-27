@@ -35,7 +35,12 @@ export function SetsPage() {
   return (
     <div>
       <h1 className="mb-4 text-2xl font-extrabold lg:text-3xl">Sets</h1>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Link to="/library" className="surface p-5">
+          <Icon name="cards" className="float-right text-2xl text-crimson" />
+          <b className="block text-xl font-extrabold">Browse the library</b>
+          <span className="mt-1 block text-muted">Ready-made sets to practice or make your own.</span>
+        </Link>
         <Link to="/sets/generate" className="relative overflow-hidden rounded-[24px] bg-hero p-5 text-white">
           <Icon name="spark" className="absolute right-4 top-4 text-3xl text-gold" />
           <b className="block pr-10 text-xl font-extrabold">Generate a set</b>

@@ -10,7 +10,8 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  if (user) return <Navigate to="/" replace />;
+  // A new account starts with a lesson offer rather than an empty Today.
+  if (user) return <Navigate to={mode === "register" ? "/welcome" : "/"} replace />;
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();

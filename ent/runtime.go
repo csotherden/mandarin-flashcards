@@ -11,6 +11,8 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/flashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/lesson"
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/librarycard"
+	"github.com/csotherden/mandarin-flashcards/ent/libraryset"
 	"github.com/csotherden/mandarin-flashcards/ent/schema"
 	"github.com/csotherden/mandarin-flashcards/ent/setflashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
@@ -281,6 +283,158 @@ func init() {
 	lessonattemptDescID := lessonattemptFields[0].Descriptor()
 	// lessonattempt.DefaultID holds the default value on creation for the id field.
 	lessonattempt.DefaultID = lessonattemptDescID.Default.(func() uuid.UUID)
+	librarycardMixin := schema.LibraryCard{}.Mixin()
+	librarycardMixinFields0 := librarycardMixin[0].Fields()
+	_ = librarycardMixinFields0
+	librarycardFields := schema.LibraryCard{}.Fields()
+	_ = librarycardFields
+	// librarycardDescCreatedAt is the schema descriptor for created_at field.
+	librarycardDescCreatedAt := librarycardMixinFields0[0].Descriptor()
+	// librarycard.DefaultCreatedAt holds the default value on creation for the created_at field.
+	librarycard.DefaultCreatedAt = librarycardDescCreatedAt.Default.(func() time.Time)
+	// librarycardDescUpdatedAt is the schema descriptor for updated_at field.
+	librarycardDescUpdatedAt := librarycardMixinFields0[1].Descriptor()
+	// librarycard.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	librarycard.DefaultUpdatedAt = librarycardDescUpdatedAt.Default.(func() time.Time)
+	// librarycard.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	librarycard.UpdateDefaultUpdatedAt = librarycardDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// librarycardDescSortOrder is the schema descriptor for sort_order field.
+	librarycardDescSortOrder := librarycardFields[2].Descriptor()
+	// librarycard.DefaultSortOrder holds the default value on creation for the sort_order field.
+	librarycard.DefaultSortOrder = librarycardDescSortOrder.Default.(int)
+	// librarycardDescHanzi is the schema descriptor for hanzi field.
+	librarycardDescHanzi := librarycardFields[3].Descriptor()
+	// librarycard.HanziValidator is a validator for the "hanzi" field. It is called by the builders before save.
+	librarycard.HanziValidator = func() func(string) error {
+		validators := librarycardDescHanzi.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(hanzi string) error {
+			for _, fn := range fns {
+				if err := fn(hanzi); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// librarycardDescPinyin is the schema descriptor for pinyin field.
+	librarycardDescPinyin := librarycardFields[4].Descriptor()
+	// librarycard.DefaultPinyin holds the default value on creation for the pinyin field.
+	librarycard.DefaultPinyin = librarycardDescPinyin.Default.(string)
+	// librarycard.PinyinValidator is a validator for the "pinyin" field. It is called by the builders before save.
+	librarycard.PinyinValidator = librarycardDescPinyin.Validators[0].(func(string) error)
+	// librarycardDescTonalPinyin is the schema descriptor for tonal_pinyin field.
+	librarycardDescTonalPinyin := librarycardFields[5].Descriptor()
+	// librarycard.DefaultTonalPinyin holds the default value on creation for the tonal_pinyin field.
+	librarycard.DefaultTonalPinyin = librarycardDescTonalPinyin.Default.(string)
+	// librarycard.TonalPinyinValidator is a validator for the "tonal_pinyin" field. It is called by the builders before save.
+	librarycard.TonalPinyinValidator = librarycardDescTonalPinyin.Validators[0].(func(string) error)
+	// librarycardDescEnglish is the schema descriptor for english field.
+	librarycardDescEnglish := librarycardFields[6].Descriptor()
+	// librarycard.DefaultEnglish holds the default value on creation for the english field.
+	librarycard.DefaultEnglish = librarycardDescEnglish.Default.(string)
+	// librarycard.EnglishValidator is a validator for the "english" field. It is called by the builders before save.
+	librarycard.EnglishValidator = librarycardDescEnglish.Validators[0].(func(string) error)
+	// librarycardDescExampleSentenceHanzi is the schema descriptor for example_sentence_hanzi field.
+	librarycardDescExampleSentenceHanzi := librarycardFields[7].Descriptor()
+	// librarycard.DefaultExampleSentenceHanzi holds the default value on creation for the example_sentence_hanzi field.
+	librarycard.DefaultExampleSentenceHanzi = librarycardDescExampleSentenceHanzi.Default.(string)
+	// librarycard.ExampleSentenceHanziValidator is a validator for the "example_sentence_hanzi" field. It is called by the builders before save.
+	librarycard.ExampleSentenceHanziValidator = librarycardDescExampleSentenceHanzi.Validators[0].(func(string) error)
+	// librarycardDescExampleSentencePinyin is the schema descriptor for example_sentence_pinyin field.
+	librarycardDescExampleSentencePinyin := librarycardFields[8].Descriptor()
+	// librarycard.DefaultExampleSentencePinyin holds the default value on creation for the example_sentence_pinyin field.
+	librarycard.DefaultExampleSentencePinyin = librarycardDescExampleSentencePinyin.Default.(string)
+	// librarycard.ExampleSentencePinyinValidator is a validator for the "example_sentence_pinyin" field. It is called by the builders before save.
+	librarycard.ExampleSentencePinyinValidator = librarycardDescExampleSentencePinyin.Validators[0].(func(string) error)
+	// librarycardDescImageURL is the schema descriptor for image_url field.
+	librarycardDescImageURL := librarycardFields[9].Descriptor()
+	// librarycard.DefaultImageURL holds the default value on creation for the image_url field.
+	librarycard.DefaultImageURL = librarycardDescImageURL.Default.(string)
+	// librarycard.ImageURLValidator is a validator for the "image_url" field. It is called by the builders before save.
+	librarycard.ImageURLValidator = librarycardDescImageURL.Validators[0].(func(string) error)
+	// librarycardDescID is the schema descriptor for id field.
+	librarycardDescID := librarycardFields[0].Descriptor()
+	// librarycard.DefaultID holds the default value on creation for the id field.
+	librarycard.DefaultID = librarycardDescID.Default.(func() uuid.UUID)
+	librarysetMixin := schema.LibrarySet{}.Mixin()
+	librarysetMixinFields0 := librarysetMixin[0].Fields()
+	_ = librarysetMixinFields0
+	librarysetFields := schema.LibrarySet{}.Fields()
+	_ = librarysetFields
+	// librarysetDescCreatedAt is the schema descriptor for created_at field.
+	librarysetDescCreatedAt := librarysetMixinFields0[0].Descriptor()
+	// libraryset.DefaultCreatedAt holds the default value on creation for the created_at field.
+	libraryset.DefaultCreatedAt = librarysetDescCreatedAt.Default.(func() time.Time)
+	// librarysetDescUpdatedAt is the schema descriptor for updated_at field.
+	librarysetDescUpdatedAt := librarysetMixinFields0[1].Descriptor()
+	// libraryset.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	libraryset.DefaultUpdatedAt = librarysetDescUpdatedAt.Default.(func() time.Time)
+	// libraryset.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	libraryset.UpdateDefaultUpdatedAt = librarysetDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// librarysetDescSlug is the schema descriptor for slug field.
+	librarysetDescSlug := librarysetFields[1].Descriptor()
+	// libraryset.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
+	libraryset.SlugValidator = func() func(string) error {
+		validators := librarysetDescSlug.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(slug string) error {
+			for _, fn := range fns {
+				if err := fn(slug); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// librarysetDescTitle is the schema descriptor for title field.
+	librarysetDescTitle := librarysetFields[2].Descriptor()
+	// libraryset.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	libraryset.TitleValidator = func() func(string) error {
+		validators := librarysetDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// librarysetDescDescription is the schema descriptor for description field.
+	librarysetDescDescription := librarysetFields[3].Descriptor()
+	// libraryset.DefaultDescription holds the default value on creation for the description field.
+	libraryset.DefaultDescription = librarysetDescDescription.Default.(string)
+	// libraryset.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	libraryset.DescriptionValidator = librarysetDescDescription.Validators[0].(func(string) error)
+	// librarysetDescLevel is the schema descriptor for level field.
+	librarysetDescLevel := librarysetFields[4].Descriptor()
+	// libraryset.DefaultLevel holds the default value on creation for the level field.
+	libraryset.DefaultLevel = librarysetDescLevel.Default.(string)
+	// libraryset.LevelValidator is a validator for the "level" field. It is called by the builders before save.
+	libraryset.LevelValidator = librarysetDescLevel.Validators[0].(func(string) error)
+	// librarysetDescSortOrder is the schema descriptor for sort_order field.
+	librarysetDescSortOrder := librarysetFields[5].Descriptor()
+	// libraryset.DefaultSortOrder holds the default value on creation for the sort_order field.
+	libraryset.DefaultSortOrder = librarysetDescSortOrder.Default.(int)
+	// librarysetDescPublished is the schema descriptor for published field.
+	librarysetDescPublished := librarysetFields[6].Descriptor()
+	// libraryset.DefaultPublished holds the default value on creation for the published field.
+	libraryset.DefaultPublished = librarysetDescPublished.Default.(bool)
+	// librarysetDescID is the schema descriptor for id field.
+	librarysetDescID := librarysetFields[0].Descriptor()
+	// libraryset.DefaultID holds the default value on creation for the id field.
+	libraryset.DefaultID = librarysetDescID.Default.(func() uuid.UUID)
 	setflashcardMixin := schema.SetFlashcard{}.Mixin()
 	setflashcardMixinFields0 := setflashcardMixin[0].Fields()
 	_ = setflashcardMixinFields0

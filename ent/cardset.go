@@ -27,6 +27,8 @@ type CardSet struct {
 	Title string `json:"title,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
+	// LibrarySetID holds the value of the "library_set_id" field.
+	LibrarySetID *uuid.UUID `json:"library_set_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardSetQuery when eager-loading is set.
 	Edges        CardSetEdges `json:"edges"`
@@ -81,6 +83,8 @@ func (*CardSet) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case cardset.FieldLibrarySetID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case cardset.FieldTitle, cardset.FieldDescription:
 			values[i] = new(sql.NullString)
 		case cardset.FieldCreatedAt, cardset.FieldUpdatedAt:
@@ -133,6 +137,13 @@ func (_m *CardSet) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
 				_m.Description = value.String
+			}
+		case cardset.FieldLibrarySetID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field library_set_id", values[i])
+			} else if value.Valid {
+				_m.LibrarySetID = new(uuid.UUID)
+				*_m.LibrarySetID = *value.S.(*uuid.UUID)
 			}
 		case cardset.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -203,6 +214,11 @@ func (_m *CardSet) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	if v := _m.LibrarySetID; v != nil {
+		builder.WriteString("library_set_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -7,11 +7,14 @@ import { CardPage } from "./pages/CardPage";
 import { CardsPage } from "./pages/CardsPage";
 import { DrillPage } from "./pages/DrillPage";
 import { GeneratePage } from "./pages/GeneratePage";
+import { LibraryPage } from "./pages/LibraryPage";
+import { LibrarySetPage } from "./pages/LibrarySetPage";
 import { MePage } from "./pages/MePage";
 import { SetPage } from "./pages/SetPage";
 import { SetsPage } from "./pages/SetsPage";
 import { SummaryPage } from "./pages/SummaryPage";
 import { TodayPage } from "./pages/TodayPage";
+import { WelcomePage } from "./pages/WelcomePage";
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { user, ready } = useAuth();
@@ -40,6 +43,9 @@ export function App() {
         <Route path="/sets" element={<SetsPage />} />
         <Route path="/sets/generate" element={<GeneratePage />} />
         <Route path="/sets/:id" element={<SetPage />} />
+        <Route path="/library" element={<LibraryPage />} />
+        <Route path="/library/:id" element={<LibrarySetPage />} />
+        <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/me" element={<MePage />} />
         {/* Lessons became quick starts on Today. */}
         <Route path="/lessons/*" element={<Navigate to="/" replace />} />

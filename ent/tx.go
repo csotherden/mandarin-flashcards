@@ -24,6 +24,10 @@ type Tx struct {
 	Lesson *LessonClient
 	// LessonAttempt is the client for interacting with the LessonAttempt builders.
 	LessonAttempt *LessonAttemptClient
+	// LibraryCard is the client for interacting with the LibraryCard builders.
+	LibraryCard *LibraryCardClient
+	// LibrarySet is the client for interacting with the LibrarySet builders.
+	LibrarySet *LibrarySetClient
 	// SetFlashcard is the client for interacting with the SetFlashcard builders.
 	SetFlashcard *SetFlashcardClient
 	// User is the client for interacting with the User builders.
@@ -167,6 +171,8 @@ func (tx *Tx) init() {
 	tx.Flashcard = NewFlashcardClient(tx.config)
 	tx.Lesson = NewLessonClient(tx.config)
 	tx.LessonAttempt = NewLessonAttemptClient(tx.config)
+	tx.LibraryCard = NewLibraryCardClient(tx.config)
+	tx.LibrarySet = NewLibrarySetClient(tx.config)
 	tx.SetFlashcard = NewSetFlashcardClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.XPAward = NewXPAwardClient(tx.config)

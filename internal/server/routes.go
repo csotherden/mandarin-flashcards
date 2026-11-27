@@ -11,6 +11,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/internal/handlers/home"
 	"github.com/csotherden/mandarin-flashcards/internal/handlers/images"
 	"github.com/csotherden/mandarin-flashcards/internal/handlers/lesson"
+	"github.com/csotherden/mandarin-flashcards/internal/handlers/libraryhandler"
 	"github.com/csotherden/mandarin-flashcards/internal/handlers/study"
 	userhandler "github.com/csotherden/mandarin-flashcards/internal/handlers/user"
 	"github.com/csotherden/mandarin-flashcards/internal/middleware"
@@ -34,6 +35,7 @@ func (s *Server) setupRoutes() {
 	generate.NewHandler(s.db, s.coach, s.photos, cards, s.llmLimit, s.logger).Register(protected)
 	images.NewHandler(s.photos, s.imgLimit, s.logger).Register(protected)
 	cardset.NewHandler(s.db, s.logger).Register(protected)
+	libraryhandler.NewHandler(s.db, s.logger).Register(protected)
 	lesson.NewHandler(s.db, s.logger).Register(protected)
 	study.NewHandler(s.db, s.tones, s.coach, s.gradeLimit, s.logger).Register(protected)
 }

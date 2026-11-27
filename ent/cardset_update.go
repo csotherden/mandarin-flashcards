@@ -66,6 +66,26 @@ func (_u *CardSetUpdate) SetNillableDescription(v *string) *CardSetUpdate {
 	return _u
 }
 
+// SetLibrarySetID sets the "library_set_id" field.
+func (_u *CardSetUpdate) SetLibrarySetID(v uuid.UUID) *CardSetUpdate {
+	_u.mutation.SetLibrarySetID(v)
+	return _u
+}
+
+// SetNillableLibrarySetID sets the "library_set_id" field if the given value is not nil.
+func (_u *CardSetUpdate) SetNillableLibrarySetID(v *uuid.UUID) *CardSetUpdate {
+	if v != nil {
+		_u.SetLibrarySetID(*v)
+	}
+	return _u
+}
+
+// ClearLibrarySetID clears the value of the "library_set_id" field.
+func (_u *CardSetUpdate) ClearLibrarySetID() *CardSetUpdate {
+	_u.mutation.ClearLibrarySetID()
+	return _u
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CardSetUpdate) SetOwnerID(id uuid.UUID) *CardSetUpdate {
 	_u.mutation.SetOwnerID(id)
@@ -234,6 +254,12 @@ func (_u *CardSetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(cardset.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.LibrarySetID(); ok {
+		_spec.SetField(cardset.FieldLibrarySetID, field.TypeUUID, value)
+	}
+	if _u.mutation.LibrarySetIDCleared() {
+		_spec.ClearField(cardset.FieldLibrarySetID, field.TypeUUID)
 	}
 	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -405,6 +431,26 @@ func (_u *CardSetUpdateOne) SetNillableDescription(v *string) *CardSetUpdateOne 
 	if v != nil {
 		_u.SetDescription(*v)
 	}
+	return _u
+}
+
+// SetLibrarySetID sets the "library_set_id" field.
+func (_u *CardSetUpdateOne) SetLibrarySetID(v uuid.UUID) *CardSetUpdateOne {
+	_u.mutation.SetLibrarySetID(v)
+	return _u
+}
+
+// SetNillableLibrarySetID sets the "library_set_id" field if the given value is not nil.
+func (_u *CardSetUpdateOne) SetNillableLibrarySetID(v *uuid.UUID) *CardSetUpdateOne {
+	if v != nil {
+		_u.SetLibrarySetID(*v)
+	}
+	return _u
+}
+
+// ClearLibrarySetID clears the value of the "library_set_id" field.
+func (_u *CardSetUpdateOne) ClearLibrarySetID() *CardSetUpdateOne {
+	_u.mutation.ClearLibrarySetID()
 	return _u
 }
 
@@ -606,6 +652,12 @@ func (_u *CardSetUpdateOne) sqlSave(ctx context.Context) (_node *CardSet, err er
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(cardset.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.LibrarySetID(); ok {
+		_spec.SetField(cardset.FieldLibrarySetID, field.TypeUUID, value)
+	}
+	if _u.mutation.LibrarySetIDCleared() {
+		_spec.ClearField(cardset.FieldLibrarySetID, field.TypeUUID)
 	}
 	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

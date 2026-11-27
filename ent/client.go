@@ -22,6 +22,8 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/flashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/lesson"
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/librarycard"
+	"github.com/csotherden/mandarin-flashcards/ent/libraryset"
 	"github.com/csotherden/mandarin-flashcards/ent/setflashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
@@ -44,6 +46,10 @@ type Client struct {
 	Lesson *LessonClient
 	// LessonAttempt is the client for interacting with the LessonAttempt builders.
 	LessonAttempt *LessonAttemptClient
+	// LibraryCard is the client for interacting with the LibraryCard builders.
+	LibraryCard *LibraryCardClient
+	// LibrarySet is the client for interacting with the LibrarySet builders.
+	LibrarySet *LibrarySetClient
 	// SetFlashcard is the client for interacting with the SetFlashcard builders.
 	SetFlashcard *SetFlashcardClient
 	// User is the client for interacting with the User builders.
@@ -67,6 +73,8 @@ func (c *Client) init() {
 	c.Flashcard = NewFlashcardClient(c.config)
 	c.Lesson = NewLessonClient(c.config)
 	c.LessonAttempt = NewLessonAttemptClient(c.config)
+	c.LibraryCard = NewLibraryCardClient(c.config)
+	c.LibrarySet = NewLibrarySetClient(c.config)
 	c.SetFlashcard = NewSetFlashcardClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.XPAward = NewXPAwardClient(c.config)
@@ -168,6 +176,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Flashcard:      NewFlashcardClient(cfg),
 		Lesson:         NewLessonClient(cfg),
 		LessonAttempt:  NewLessonAttemptClient(cfg),
+		LibraryCard:    NewLibraryCardClient(cfg),
+		LibrarySet:     NewLibrarySetClient(cfg),
 		SetFlashcard:   NewSetFlashcardClient(cfg),
 		User:           NewUserClient(cfg),
 		XPAward:        NewXPAwardClient(cfg),
@@ -196,6 +206,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Flashcard:      NewFlashcardClient(cfg),
 		Lesson:         NewLessonClient(cfg),
 		LessonAttempt:  NewLessonAttemptClient(cfg),
+		LibraryCard:    NewLibraryCardClient(cfg),
+		LibrarySet:     NewLibrarySetClient(cfg),
 		SetFlashcard:   NewSetFlashcardClient(cfg),
 		User:           NewUserClient(cfg),
 		XPAward:        NewXPAwardClient(cfg),
@@ -229,7 +241,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.CardAttemptLog, c.CardSet, c.Category, c.Flashcard, c.Lesson, c.LessonAttempt,
-		c.SetFlashcard, c.User, c.XPAward,
+		c.LibraryCard, c.LibrarySet, c.SetFlashcard, c.User, c.XPAward,
 	} {
 		n.Use(hooks...)
 	}
@@ -240,7 +252,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.CardAttemptLog, c.CardSet, c.Category, c.Flashcard, c.Lesson, c.LessonAttempt,
-		c.SetFlashcard, c.User, c.XPAward,
+		c.LibraryCard, c.LibrarySet, c.SetFlashcard, c.User, c.XPAward,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -261,6 +273,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Lesson.mutate(ctx, m)
 	case *LessonAttemptMutation:
 		return c.LessonAttempt.mutate(ctx, m)
+	case *LibraryCardMutation:
+		return c.LibraryCard.mutate(ctx, m)
+	case *LibrarySetMutation:
+		return c.LibrarySet.mutate(ctx, m)
 	case *SetFlashcardMutation:
 		return c.SetFlashcard.mutate(ctx, m)
 	case *UserMutation:
@@ -1390,6 +1406,304 @@ func (c *LessonAttemptClient) mutate(ctx context.Context, m *LessonAttemptMutati
 	}
 }
 
+// LibraryCardClient is a client for the LibraryCard schema.
+type LibraryCardClient struct {
+	config
+}
+
+// NewLibraryCardClient returns a client for the LibraryCard from the given config.
+func NewLibraryCardClient(c config) *LibraryCardClient {
+	return &LibraryCardClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `librarycard.Hooks(f(g(h())))`.
+func (c *LibraryCardClient) Use(hooks ...Hook) {
+	c.hooks.LibraryCard = append(c.hooks.LibraryCard, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `librarycard.Intercept(f(g(h())))`.
+func (c *LibraryCardClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LibraryCard = append(c.inters.LibraryCard, interceptors...)
+}
+
+// Create returns a builder for creating a LibraryCard entity.
+func (c *LibraryCardClient) Create() *LibraryCardCreate {
+	mutation := newLibraryCardMutation(c.config, OpCreate)
+	return &LibraryCardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LibraryCard entities.
+func (c *LibraryCardClient) CreateBulk(builders ...*LibraryCardCreate) *LibraryCardCreateBulk {
+	return &LibraryCardCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LibraryCardClient) MapCreateBulk(slice any, setFunc func(*LibraryCardCreate, int)) *LibraryCardCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LibraryCardCreateBulk{err: fmt.Errorf("calling to LibraryCardClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LibraryCardCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LibraryCardCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LibraryCard.
+func (c *LibraryCardClient) Update() *LibraryCardUpdate {
+	mutation := newLibraryCardMutation(c.config, OpUpdate)
+	return &LibraryCardUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LibraryCardClient) UpdateOne(_m *LibraryCard) *LibraryCardUpdateOne {
+	mutation := newLibraryCardMutation(c.config, OpUpdateOne, withLibraryCard(_m))
+	return &LibraryCardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LibraryCardClient) UpdateOneID(id uuid.UUID) *LibraryCardUpdateOne {
+	mutation := newLibraryCardMutation(c.config, OpUpdateOne, withLibraryCardID(id))
+	return &LibraryCardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LibraryCard.
+func (c *LibraryCardClient) Delete() *LibraryCardDelete {
+	mutation := newLibraryCardMutation(c.config, OpDelete)
+	return &LibraryCardDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LibraryCardClient) DeleteOne(_m *LibraryCard) *LibraryCardDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LibraryCardClient) DeleteOneID(id uuid.UUID) *LibraryCardDeleteOne {
+	builder := c.Delete().Where(librarycard.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LibraryCardDeleteOne{builder}
+}
+
+// Query returns a query builder for LibraryCard.
+func (c *LibraryCardClient) Query() *LibraryCardQuery {
+	return &LibraryCardQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLibraryCard},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LibraryCard entity by its id.
+func (c *LibraryCardClient) Get(ctx context.Context, id uuid.UUID) (*LibraryCard, error) {
+	return c.Query().Where(librarycard.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LibraryCardClient) GetX(ctx context.Context, id uuid.UUID) *LibraryCard {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySet queries the set edge of a LibraryCard.
+func (c *LibraryCardClient) QuerySet(_m *LibraryCard) *LibrarySetQuery {
+	query := (&LibrarySetClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(librarycard.Table, librarycard.FieldID, id),
+			sqlgraph.To(libraryset.Table, libraryset.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, librarycard.SetTable, librarycard.SetColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *LibraryCardClient) Hooks() []Hook {
+	return c.hooks.LibraryCard
+}
+
+// Interceptors returns the client interceptors.
+func (c *LibraryCardClient) Interceptors() []Interceptor {
+	return c.inters.LibraryCard
+}
+
+func (c *LibraryCardClient) mutate(ctx context.Context, m *LibraryCardMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LibraryCardCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LibraryCardUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LibraryCardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LibraryCardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LibraryCard mutation op: %q", m.Op())
+	}
+}
+
+// LibrarySetClient is a client for the LibrarySet schema.
+type LibrarySetClient struct {
+	config
+}
+
+// NewLibrarySetClient returns a client for the LibrarySet from the given config.
+func NewLibrarySetClient(c config) *LibrarySetClient {
+	return &LibrarySetClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `libraryset.Hooks(f(g(h())))`.
+func (c *LibrarySetClient) Use(hooks ...Hook) {
+	c.hooks.LibrarySet = append(c.hooks.LibrarySet, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `libraryset.Intercept(f(g(h())))`.
+func (c *LibrarySetClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LibrarySet = append(c.inters.LibrarySet, interceptors...)
+}
+
+// Create returns a builder for creating a LibrarySet entity.
+func (c *LibrarySetClient) Create() *LibrarySetCreate {
+	mutation := newLibrarySetMutation(c.config, OpCreate)
+	return &LibrarySetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LibrarySet entities.
+func (c *LibrarySetClient) CreateBulk(builders ...*LibrarySetCreate) *LibrarySetCreateBulk {
+	return &LibrarySetCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LibrarySetClient) MapCreateBulk(slice any, setFunc func(*LibrarySetCreate, int)) *LibrarySetCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LibrarySetCreateBulk{err: fmt.Errorf("calling to LibrarySetClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LibrarySetCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LibrarySetCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LibrarySet.
+func (c *LibrarySetClient) Update() *LibrarySetUpdate {
+	mutation := newLibrarySetMutation(c.config, OpUpdate)
+	return &LibrarySetUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LibrarySetClient) UpdateOne(_m *LibrarySet) *LibrarySetUpdateOne {
+	mutation := newLibrarySetMutation(c.config, OpUpdateOne, withLibrarySet(_m))
+	return &LibrarySetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LibrarySetClient) UpdateOneID(id uuid.UUID) *LibrarySetUpdateOne {
+	mutation := newLibrarySetMutation(c.config, OpUpdateOne, withLibrarySetID(id))
+	return &LibrarySetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LibrarySet.
+func (c *LibrarySetClient) Delete() *LibrarySetDelete {
+	mutation := newLibrarySetMutation(c.config, OpDelete)
+	return &LibrarySetDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LibrarySetClient) DeleteOne(_m *LibrarySet) *LibrarySetDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LibrarySetClient) DeleteOneID(id uuid.UUID) *LibrarySetDeleteOne {
+	builder := c.Delete().Where(libraryset.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LibrarySetDeleteOne{builder}
+}
+
+// Query returns a query builder for LibrarySet.
+func (c *LibrarySetClient) Query() *LibrarySetQuery {
+	return &LibrarySetQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLibrarySet},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LibrarySet entity by its id.
+func (c *LibrarySetClient) Get(ctx context.Context, id uuid.UUID) (*LibrarySet, error) {
+	return c.Query().Where(libraryset.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LibrarySetClient) GetX(ctx context.Context, id uuid.UUID) *LibrarySet {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCards queries the cards edge of a LibrarySet.
+func (c *LibrarySetClient) QueryCards(_m *LibrarySet) *LibraryCardQuery {
+	query := (&LibraryCardClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(libraryset.Table, libraryset.FieldID, id),
+			sqlgraph.To(librarycard.Table, librarycard.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, libraryset.CardsTable, libraryset.CardsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *LibrarySetClient) Hooks() []Hook {
+	return c.hooks.LibrarySet
+}
+
+// Interceptors returns the client interceptors.
+func (c *LibrarySetClient) Interceptors() []Interceptor {
+	return c.inters.LibrarySet
+}
+
+func (c *LibrarySetClient) mutate(ctx context.Context, m *LibrarySetMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LibrarySetCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LibrarySetUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LibrarySetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LibrarySetDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LibrarySet mutation op: %q", m.Op())
+	}
+}
+
 // SetFlashcardClient is a client for the SetFlashcard schema.
 type SetFlashcardClient struct {
 	config
@@ -1953,10 +2267,10 @@ func (c *XPAwardClient) mutate(ctx context.Context, m *XPAwardMutation) (Value, 
 type (
 	hooks struct {
 		CardAttemptLog, CardSet, Category, Flashcard, Lesson, LessonAttempt,
-		SetFlashcard, User, XPAward []ent.Hook
+		LibraryCard, LibrarySet, SetFlashcard, User, XPAward []ent.Hook
 	}
 	inters struct {
 		CardAttemptLog, CardSet, Category, Flashcard, Lesson, LessonAttempt,
-		SetFlashcard, User, XPAward []ent.Interceptor
+		LibraryCard, LibrarySet, SetFlashcard, User, XPAward []ent.Interceptor
 	}
 )

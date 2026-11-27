@@ -72,6 +72,20 @@ func (_c *CardSetCreate) SetNillableDescription(v *string) *CardSetCreate {
 	return _c
 }
 
+// SetLibrarySetID sets the "library_set_id" field.
+func (_c *CardSetCreate) SetLibrarySetID(v uuid.UUID) *CardSetCreate {
+	_c.mutation.SetLibrarySetID(v)
+	return _c
+}
+
+// SetNillableLibrarySetID sets the "library_set_id" field if the given value is not nil.
+func (_c *CardSetCreate) SetNillableLibrarySetID(v *uuid.UUID) *CardSetCreate {
+	if v != nil {
+		_c.SetLibrarySetID(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *CardSetCreate) SetID(v uuid.UUID) *CardSetCreate {
 	_c.mutation.SetID(v)
@@ -257,6 +271,10 @@ func (_c *CardSetCreate) createSpec() (*CardSet, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(cardset.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if value, ok := _c.mutation.LibrarySetID(); ok {
+		_spec.SetField(cardset.FieldLibrarySetID, field.TypeUUID, value)
+		_node.LibrarySetID = &value
 	}
 	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

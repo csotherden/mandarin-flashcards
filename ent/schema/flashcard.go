@@ -49,6 +49,10 @@ func (Flashcard) Fields() []ent.Field {
 			MaxLen(512),
 		field.JSON("unsplash_attribution", &models.UnsplashAttribution{}).
 			Optional(),
+		// The library card this was imported from, if any (provenance only).
+		field.UUID("library_card_id", uuid.UUID{}).
+			Optional().
+			Nillable(),
 	}
 }
 

@@ -76,6 +76,11 @@ func Description(v string) predicate.CardSet {
 	return predicate.CardSet(sql.FieldEQ(FieldDescription, v))
 }
 
+// LibrarySetID applies equality check predicate on the "library_set_id" field. It's identical to LibrarySetIDEQ.
+func LibrarySetID(v uuid.UUID) predicate.CardSet {
+	return predicate.CardSet(sql.FieldEQ(FieldLibrarySetID, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.CardSet {
 	return predicate.CardSet(sql.FieldEQ(FieldCreatedAt, v))
@@ -284,6 +289,56 @@ func DescriptionEqualFold(v string) predicate.CardSet {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.CardSet {
 	return predicate.CardSet(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// LibrarySetIDEQ applies the EQ predicate on the "library_set_id" field.
+func LibrarySetIDEQ(v uuid.UUID) predicate.CardSet {
+	return predicate.CardSet(sql.FieldEQ(FieldLibrarySetID, v))
+}
+
+// LibrarySetIDNEQ applies the NEQ predicate on the "library_set_id" field.
+func LibrarySetIDNEQ(v uuid.UUID) predicate.CardSet {
+	return predicate.CardSet(sql.FieldNEQ(FieldLibrarySetID, v))
+}
+
+// LibrarySetIDIn applies the In predicate on the "library_set_id" field.
+func LibrarySetIDIn(vs ...uuid.UUID) predicate.CardSet {
+	return predicate.CardSet(sql.FieldIn(FieldLibrarySetID, vs...))
+}
+
+// LibrarySetIDNotIn applies the NotIn predicate on the "library_set_id" field.
+func LibrarySetIDNotIn(vs ...uuid.UUID) predicate.CardSet {
+	return predicate.CardSet(sql.FieldNotIn(FieldLibrarySetID, vs...))
+}
+
+// LibrarySetIDGT applies the GT predicate on the "library_set_id" field.
+func LibrarySetIDGT(v uuid.UUID) predicate.CardSet {
+	return predicate.CardSet(sql.FieldGT(FieldLibrarySetID, v))
+}
+
+// LibrarySetIDGTE applies the GTE predicate on the "library_set_id" field.
+func LibrarySetIDGTE(v uuid.UUID) predicate.CardSet {
+	return predicate.CardSet(sql.FieldGTE(FieldLibrarySetID, v))
+}
+
+// LibrarySetIDLT applies the LT predicate on the "library_set_id" field.
+func LibrarySetIDLT(v uuid.UUID) predicate.CardSet {
+	return predicate.CardSet(sql.FieldLT(FieldLibrarySetID, v))
+}
+
+// LibrarySetIDLTE applies the LTE predicate on the "library_set_id" field.
+func LibrarySetIDLTE(v uuid.UUID) predicate.CardSet {
+	return predicate.CardSet(sql.FieldLTE(FieldLibrarySetID, v))
+}
+
+// LibrarySetIDIsNil applies the IsNil predicate on the "library_set_id" field.
+func LibrarySetIDIsNil() predicate.CardSet {
+	return predicate.CardSet(sql.FieldIsNull(FieldLibrarySetID))
+}
+
+// LibrarySetIDNotNil applies the NotNil predicate on the "library_set_id" field.
+func LibrarySetIDNotNil() predicate.CardSet {
+	return predicate.CardSet(sql.FieldNotNull(FieldLibrarySetID))
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.

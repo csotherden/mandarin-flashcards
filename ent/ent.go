@@ -18,6 +18,8 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/flashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/lesson"
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
+	"github.com/csotherden/mandarin-flashcards/ent/librarycard"
+	"github.com/csotherden/mandarin-flashcards/ent/libraryset"
 	"github.com/csotherden/mandarin-flashcards/ent/setflashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
@@ -87,6 +89,8 @@ func checkColumn(t, c string) error {
 			flashcard.Table:      flashcard.ValidColumn,
 			lesson.Table:         lesson.ValidColumn,
 			lessonattempt.Table:  lessonattempt.ValidColumn,
+			librarycard.Table:    librarycard.ValidColumn,
+			libraryset.Table:     libraryset.ValidColumn,
 			setflashcard.Table:   setflashcard.ValidColumn,
 			user.Table:           user.ValidColumn,
 			xpaward.Table:        xpaward.ValidColumn,

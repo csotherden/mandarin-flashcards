@@ -165,6 +165,20 @@ func (_c *FlashcardCreate) SetUnsplashAttribution(v *models.UnsplashAttribution)
 	return _c
 }
 
+// SetLibraryCardID sets the "library_card_id" field.
+func (_c *FlashcardCreate) SetLibraryCardID(v uuid.UUID) *FlashcardCreate {
+	_c.mutation.SetLibraryCardID(v)
+	return _c
+}
+
+// SetNillableLibraryCardID sets the "library_card_id" field if the given value is not nil.
+func (_c *FlashcardCreate) SetNillableLibraryCardID(v *uuid.UUID) *FlashcardCreate {
+	if v != nil {
+		_c.SetLibraryCardID(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *FlashcardCreate) SetID(v uuid.UUID) *FlashcardCreate {
 	_c.mutation.SetID(v)
@@ -473,6 +487,10 @@ func (_c *FlashcardCreate) createSpec() (*Flashcard, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UnsplashAttribution(); ok {
 		_spec.SetField(flashcard.FieldUnsplashAttribution, field.TypeJSON, value)
 		_node.UnsplashAttribution = value
+	}
+	if value, ok := _c.mutation.LibraryCardID(); ok {
+		_spec.SetField(flashcard.FieldLibraryCardID, field.TypeUUID, value)
+		_node.LibraryCardID = &value
 	}
 	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

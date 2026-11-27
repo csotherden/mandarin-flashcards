@@ -171,6 +171,26 @@ func (_u *FlashcardUpdate) ClearUnsplashAttribution() *FlashcardUpdate {
 	return _u
 }
 
+// SetLibraryCardID sets the "library_card_id" field.
+func (_u *FlashcardUpdate) SetLibraryCardID(v uuid.UUID) *FlashcardUpdate {
+	_u.mutation.SetLibraryCardID(v)
+	return _u
+}
+
+// SetNillableLibraryCardID sets the "library_card_id" field if the given value is not nil.
+func (_u *FlashcardUpdate) SetNillableLibraryCardID(v *uuid.UUID) *FlashcardUpdate {
+	if v != nil {
+		_u.SetLibraryCardID(*v)
+	}
+	return _u
+}
+
+// ClearLibraryCardID clears the value of the "library_card_id" field.
+func (_u *FlashcardUpdate) ClearLibraryCardID() *FlashcardUpdate {
+	_u.mutation.ClearLibraryCardID()
+	return _u
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *FlashcardUpdate) SetOwnerID(id uuid.UUID) *FlashcardUpdate {
 	_u.mutation.SetOwnerID(id)
@@ -468,6 +488,12 @@ func (_u *FlashcardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.UnsplashAttributionCleared() {
 		_spec.ClearField(flashcard.FieldUnsplashAttribution, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.LibraryCardID(); ok {
+		_spec.SetField(flashcard.FieldLibraryCardID, field.TypeUUID, value)
+	}
+	if _u.mutation.LibraryCardIDCleared() {
+		_spec.ClearField(flashcard.FieldLibraryCardID, field.TypeUUID)
 	}
 	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -834,6 +860,26 @@ func (_u *FlashcardUpdateOne) ClearUnsplashAttribution() *FlashcardUpdateOne {
 	return _u
 }
 
+// SetLibraryCardID sets the "library_card_id" field.
+func (_u *FlashcardUpdateOne) SetLibraryCardID(v uuid.UUID) *FlashcardUpdateOne {
+	_u.mutation.SetLibraryCardID(v)
+	return _u
+}
+
+// SetNillableLibraryCardID sets the "library_card_id" field if the given value is not nil.
+func (_u *FlashcardUpdateOne) SetNillableLibraryCardID(v *uuid.UUID) *FlashcardUpdateOne {
+	if v != nil {
+		_u.SetLibraryCardID(*v)
+	}
+	return _u
+}
+
+// ClearLibraryCardID clears the value of the "library_card_id" field.
+func (_u *FlashcardUpdateOne) ClearLibraryCardID() *FlashcardUpdateOne {
+	_u.mutation.ClearLibraryCardID()
+	return _u
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *FlashcardUpdateOne) SetOwnerID(id uuid.UUID) *FlashcardUpdateOne {
 	_u.mutation.SetOwnerID(id)
@@ -1161,6 +1207,12 @@ func (_u *FlashcardUpdateOne) sqlSave(ctx context.Context) (_node *Flashcard, er
 	}
 	if _u.mutation.UnsplashAttributionCleared() {
 		_spec.ClearField(flashcard.FieldUnsplashAttribution, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.LibraryCardID(); ok {
+		_spec.SetField(flashcard.FieldLibraryCardID, field.TypeUUID, value)
+	}
+	if _u.mutation.LibraryCardIDCleared() {
+		_spec.ClearField(flashcard.FieldLibraryCardID, field.TypeUUID)
 	}
 	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

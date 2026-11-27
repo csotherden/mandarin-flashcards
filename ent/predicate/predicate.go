@@ -24,6 +24,12 @@ type Lesson func(*sql.Selector)
 // LessonAttempt is the predicate function for lessonattempt builders.
 type LessonAttempt func(*sql.Selector)
 
+// LibraryCard is the predicate function for librarycard builders.
+type LibraryCard func(*sql.Selector)
+
+// LibrarySet is the predicate function for libraryset builders.
+type LibrarySet func(*sql.Selector)
+
 // SetFlashcard is the predicate function for setflashcard builders.
 type SetFlashcard func(*sql.Selector)
 

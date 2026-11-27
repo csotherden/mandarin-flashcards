@@ -43,6 +43,8 @@ type Flashcard struct {
 	ImageObjectKey *string `json:"image_object_key,omitempty"`
 	// UnsplashAttribution holds the value of the "unsplash_attribution" field.
 	UnsplashAttribution *models.UnsplashAttribution `json:"unsplash_attribution,omitempty"`
+	// LibraryCardID holds the value of the "library_card_id" field.
+	LibraryCardID *uuid.UUID `json:"library_card_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FlashcardQuery when eager-loading is set.
 	Edges        FlashcardEdges `json:"edges"`
@@ -119,6 +121,8 @@ func (*Flashcard) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case flashcard.FieldLibraryCardID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case flashcard.FieldUnsplashAttribution:
 			values[i] = new([]byte)
 		case flashcard.FieldHanzi, flashcard.FieldPinyin, flashcard.FieldTonalPinyin, flashcard.FieldEnglish, flashcard.FieldExampleSentenceHanzi, flashcard.FieldExampleSentencePinyin, flashcard.FieldImageURL, flashcard.FieldImageObjectKey:
@@ -218,6 +222,13 @@ func (_m *Flashcard) assignValues(columns []string, values []any) error {
 				if err := json.Unmarshal(*value, &_m.UnsplashAttribution); err != nil {
 					return fmt.Errorf("unmarshal field unsplash_attribution: %w", err)
 				}
+			}
+		case flashcard.FieldLibraryCardID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field library_card_id", values[i])
+			} else if value.Valid {
+				_m.LibraryCardID = new(uuid.UUID)
+				*_m.LibraryCardID = *value.S.(*uuid.UUID)
 			}
 		case flashcard.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -321,6 +332,11 @@ func (_m *Flashcard) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("unsplash_attribution=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UnsplashAttribution))
+	builder.WriteString(", ")
+	if v := _m.LibraryCardID; v != nil {
+		builder.WriteString("library_card_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }
