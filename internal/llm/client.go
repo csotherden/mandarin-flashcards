@@ -142,7 +142,14 @@ Keys:
 - english: a short English meaning.
 - example_sentence_hanzi: one short, everyday sentence using the word.
 - example_sentence_pinyin: that sentence's pinyin with tone marks.
-- image_search: a short, concrete English photo query. For abstract words pick a physical scene a photo can show, such as "convenience store" for 方便.
+- image_search: a short English photo search query for the card's picture. The picture is the learner's main clue, so it must show this word and nothing a learner could mistake for a related word that is likely to be another card. Follow the rules below.
+
+Rules for image_search:
+- One subject, shown on its own: the thing itself, not a scene around it. For 西红柿 (tomato), "single ripe red tomato on white background", not "cutting board with chopped tomato and salad ingredients", which could be a card for cooking, salad, chopping or lettuce.
+- For people and family words, show only the person the word names, with a visible cue that sets them apart from related words (husband vs wife vs couple, son vs daughter vs father or mother, grandmother vs grandfather). For 老公 (husband), "smiling groom in a suit, portrait"; for 老婆 (wife), "smiling bride in a wedding dress, portrait"; for 女儿 (daughter), "portrait of a young girl"; for 儿子 (son), "portrait of a young boy". Never pair people ("married couple cooking", "father and daughter painting").
+- Leave out other people, objects and activities that are themselves likely cards: other family members, other foods, kitchens, cooking.
+- For actions, one person doing only that action ("woman running on a track" for 跑步).
+- For abstract words and adjectives, pick one concrete subject that clearly shows the idea and no other likely card: for 累 (tired), "exhausted man yawning, portrait"; for 高 (tall), "very tall skyscraper against blue sky".
 
 When the input is English, choose the word native speakers use in everyday conversation: the informal, spoken word, not the formal or written one. For example "husband" is 老公 (not 丈夫), "wife" is 老婆 (not 妻子), and "dad" or "father" is 爸爸 (not 父亲). Use the formal word only when the English itself is formal or technical.
 
