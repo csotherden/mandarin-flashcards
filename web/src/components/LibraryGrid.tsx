@@ -23,7 +23,7 @@ export function LibraryGrid({ sets, compact = false, from }: { sets: LibrarySet[
             </div>
             <div className="min-w-0 flex-1 py-0.5 sm:px-1 sm:pb-1">
               <div className="flex items-start justify-between gap-2">
-                <b className="block truncate text-[17px]">{set.title}</b>
+                <b className="block min-w-0 text-[17px] leading-snug">{set.title}</b>
                 {set.level && <span className="shrink-0 rounded-full bg-[#F1EEEA] px-2 py-0.5 text-xs font-semibold text-muted">{set.level}</span>}
               </div>
               <p className="truncate font-hanzi text-lg text-ink">{set.preview.join(" · ")}</p>
