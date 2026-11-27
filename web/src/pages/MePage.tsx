@@ -20,9 +20,10 @@ export function MePage() {
         <p className="mt-1 break-all font-semibold">{user?.email}</p>
       </div>
       {home && (
-        <div className="mt-3 grid grid-cols-3 gap-3">
+        <div className="mt-3 grid grid-cols-2 gap-3">
           <Stat value={home.streak_days} label={home.streak_today || home.streak_days === 0 ? "day streak" : "day streak, practice today"} />
           <Stat value={home.streak_longest} label="longest streak" />
+          <Stat value={home.xp_total} label="total XP" />
           <Stat value={home.total_cards} label="cards" />
         </div>
       )}

@@ -1,8 +1,6 @@
 package study
 
 import (
-	"github.com/csotherden/mandarin-flashcards/internal/streak"
-	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/csotherden/mandarin-flashcards/ent"
@@ -12,6 +10,9 @@ import (
 	"github.com/csotherden/mandarin-flashcards/internal/middleware"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
 	"github.com/csotherden/mandarin-flashcards/internal/present"
+	"github.com/csotherden/mandarin-flashcards/internal/streak"
+	"github.com/csotherden/mandarin-flashcards/internal/xp"
+	"go.uber.org/zap"
 )
 
 func (h *Handler) Match(w http.ResponseWriter, r *http.Request) {
@@ -75,6 +76,13 @@ func (h *Handler) Match(w http.ResponseWriter, r *http.Request) {
 	if err := streak.Record(r.Context(), h.db, userID, log.CreatedAt); err != nil {
 		// The grade is saved; a missed streak update is fixed by the next grade today.
 		h.logger.Warn("Could not update the streak", zap.Error(err))
+	}
+	if card, err := h.db.Flashcard.Get(r.Context(), req.FlashcardID); err != nil {
+		h.logger.Warn("Could not load the matched card for XP", zap.Error(err))
+	} else if earned, err := xp.Award(r.Context(), h.db, userID, log, card.Hanzi, xp.MatchTier(req.Correct, req.MismatchCount, score), score); err != nil {
+		h.logger.Warn("Could not award XP", zap.Error(err))
+	} else {
+		log.XpEarned, log.XpTier = earned.Earned, earned.Tier
 	}
 	handlerutils.RespondWithJSON(w, h.logger, http.StatusCreated, present.CardResult(log))
 }

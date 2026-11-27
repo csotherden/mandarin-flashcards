@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"github.com/csotherden/mandarin-flashcards/internal/streak"
 	"net/http"
 
 	"github.com/csotherden/mandarin-flashcards/ent"
@@ -9,6 +8,7 @@ import (
 	appauth "github.com/csotherden/mandarin-flashcards/internal/auth"
 	"github.com/csotherden/mandarin-flashcards/internal/handlerutils"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
+	"github.com/csotherden/mandarin-flashcards/internal/streak"
 )
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {

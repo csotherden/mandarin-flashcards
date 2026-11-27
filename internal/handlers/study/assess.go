@@ -2,7 +2,6 @@ package study
 
 import (
 	"errors"
-	"github.com/csotherden/mandarin-flashcards/internal/streak"
 	"io"
 	"net/http"
 
@@ -15,7 +14,9 @@ import (
 	"github.com/csotherden/mandarin-flashcards/internal/middleware"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
 	"github.com/csotherden/mandarin-flashcards/internal/present"
+	"github.com/csotherden/mandarin-flashcards/internal/streak"
 	"github.com/csotherden/mandarin-flashcards/internal/toneperfect"
+	"github.com/csotherden/mandarin-flashcards/internal/xp"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -145,9 +146,17 @@ func (h *Handler) Assess(w http.ResponseWriter, r *http.Request) {
 		// The grade is saved; a missed streak update is fixed by the next grade today.
 		h.logger.Warn("Could not update the streak", zap.Error(err))
 	}
+	earned, err := xp.Award(r.Context(), h.db, userID, log, card.Hanzi, xp.SpeakTier(grade.Assessable, grade.Overall, grade.Syllables), grade.Overall)
+	if err != nil {
+		// The grade stands; XP for it is lost rather than failing the take.
+		h.logger.Warn("Could not award XP", zap.Error(err))
+	} else {
+		log.XpEarned, log.XpTier = earned.Earned, earned.Tier
+	}
 	handlerutils.RespondWithJSON(w, h.logger, http.StatusOK, models.AssessResponse{
 		Result:     present.CardResult(log),
 		Assessable: grade.Assessable,
 		Reason:     grade.Reason,
+		XPTotal:    earned.Total,
 	})
 }

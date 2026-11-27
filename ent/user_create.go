@@ -17,6 +17,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/lesson"
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
+	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
 	"github.com/google/uuid"
 )
@@ -126,6 +127,20 @@ func (_c *UserCreate) SetStreakLongest(v int) *UserCreate {
 func (_c *UserCreate) SetNillableStreakLongest(v *int) *UserCreate {
 	if v != nil {
 		_c.SetStreakLongest(*v)
+	}
+	return _c
+}
+
+// SetXpTotal sets the "xp_total" field.
+func (_c *UserCreate) SetXpTotal(v int) *UserCreate {
+	_c.mutation.SetXpTotal(v)
+	return _c
+}
+
+// SetNillableXpTotal sets the "xp_total" field if the given value is not nil.
+func (_c *UserCreate) SetNillableXpTotal(v *int) *UserCreate {
+	if v != nil {
+		_c.SetXpTotal(*v)
 	}
 	return _c
 }
@@ -262,6 +277,21 @@ func (_c *UserCreate) AddCardAttemptLogs(v ...*CardAttemptLog) *UserCreate {
 	return _c.AddCardAttemptLogIDs(ids...)
 }
 
+// AddXpAwardIDs adds the "xp_awards" edge to the XPAward entity by IDs.
+func (_c *UserCreate) AddXpAwardIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddXpAwardIDs(ids...)
+	return _c
+}
+
+// AddXpAwards adds the "xp_awards" edges to the XPAward entity.
+func (_c *UserCreate) AddXpAwards(v ...*XPAward) *UserCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddXpAwardIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_c *UserCreate) Mutation() *UserMutation {
 	return _c.mutation
@@ -316,6 +346,10 @@ func (_c *UserCreate) defaults() {
 	if _, ok := _c.mutation.StreakLongest(); !ok {
 		v := user.DefaultStreakLongest
 		_c.mutation.SetStreakLongest(v)
+	}
+	if _, ok := _c.mutation.XpTotal(); !ok {
+		v := user.DefaultXpTotal
+		_c.mutation.SetXpTotal(v)
 	}
 	if _, ok := _c.mutation.Preferences(); !ok {
 		v := user.DefaultPreferences
@@ -372,6 +406,9 @@ func (_c *UserCreate) check() error {
 	}
 	if _, ok := _c.mutation.StreakLongest(); !ok {
 		return &ValidationError{Name: "streak_longest", err: errors.New(`ent: missing required field "User.streak_longest"`)}
+	}
+	if _, ok := _c.mutation.XpTotal(); !ok {
+		return &ValidationError{Name: "xp_total", err: errors.New(`ent: missing required field "User.xp_total"`)}
 	}
 	if v, ok := _c.mutation.StreakLastDay(); ok {
 		if err := user.StreakLastDayValidator(v); err != nil {
@@ -451,6 +488,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.StreakLongest(); ok {
 		_spec.SetField(user.FieldStreakLongest, field.TypeInt, value)
 		_node.StreakLongest = value
+	}
+	if value, ok := _c.mutation.XpTotal(); ok {
+		_spec.SetField(user.FieldXpTotal, field.TypeInt, value)
+		_node.XpTotal = value
 	}
 	if value, ok := _c.mutation.StreakLastDay(); ok {
 		_spec.SetField(user.FieldStreakLastDay, field.TypeString, value)
@@ -549,6 +590,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(cardattemptlog.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.XpAwardsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.XpAwardsTable,
+			Columns: []string{user.XpAwardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(xpaward.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

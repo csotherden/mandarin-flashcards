@@ -107,6 +107,34 @@ func (_c *CardAttemptLogCreate) SetNillableLlmCoachingTip(v *string) *CardAttemp
 	return _c
 }
 
+// SetXpEarned sets the "xp_earned" field.
+func (_c *CardAttemptLogCreate) SetXpEarned(v int) *CardAttemptLogCreate {
+	_c.mutation.SetXpEarned(v)
+	return _c
+}
+
+// SetNillableXpEarned sets the "xp_earned" field if the given value is not nil.
+func (_c *CardAttemptLogCreate) SetNillableXpEarned(v *int) *CardAttemptLogCreate {
+	if v != nil {
+		_c.SetXpEarned(*v)
+	}
+	return _c
+}
+
+// SetXpTier sets the "xp_tier" field.
+func (_c *CardAttemptLogCreate) SetXpTier(v string) *CardAttemptLogCreate {
+	_c.mutation.SetXpTier(v)
+	return _c
+}
+
+// SetNillableXpTier sets the "xp_tier" field if the given value is not nil.
+func (_c *CardAttemptLogCreate) SetNillableXpTier(v *string) *CardAttemptLogCreate {
+	if v != nil {
+		_c.SetXpTier(*v)
+	}
+	return _c
+}
+
 // SetUserID sets the "user_id" field.
 func (_c *CardAttemptLogCreate) SetUserID(v uuid.UUID) *CardAttemptLogCreate {
 	_c.mutation.SetUserID(v)
@@ -207,6 +235,14 @@ func (_c *CardAttemptLogCreate) defaults() {
 		v := cardattemptlog.DefaultOverallScore
 		_c.mutation.SetOverallScore(v)
 	}
+	if _, ok := _c.mutation.XpEarned(); !ok {
+		v := cardattemptlog.DefaultXpEarned
+		_c.mutation.SetXpEarned(v)
+	}
+	if _, ok := _c.mutation.XpTier(); !ok {
+		v := cardattemptlog.DefaultXpTier
+		_c.mutation.SetXpTier(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := cardattemptlog.DefaultID()
 		_c.mutation.SetID(v)
@@ -231,6 +267,12 @@ func (_c *CardAttemptLogCreate) check() error {
 	}
 	if _, ok := _c.mutation.OverallScore(); !ok {
 		return &ValidationError{Name: "overall_score", err: errors.New(`ent: missing required field "CardAttemptLog.overall_score"`)}
+	}
+	if _, ok := _c.mutation.XpEarned(); !ok {
+		return &ValidationError{Name: "xp_earned", err: errors.New(`ent: missing required field "CardAttemptLog.xp_earned"`)}
+	}
+	if _, ok := _c.mutation.XpTier(); !ok {
+		return &ValidationError{Name: "xp_tier", err: errors.New(`ent: missing required field "CardAttemptLog.xp_tier"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "CardAttemptLog.user_id"`)}
@@ -312,6 +354,14 @@ func (_c *CardAttemptLogCreate) createSpec() (*CardAttemptLog, *sqlgraph.CreateS
 	if value, ok := _c.mutation.LlmCoachingTip(); ok {
 		_spec.SetField(cardattemptlog.FieldLlmCoachingTip, field.TypeString, value)
 		_node.LlmCoachingTip = &value
+	}
+	if value, ok := _c.mutation.XpEarned(); ok {
+		_spec.SetField(cardattemptlog.FieldXpEarned, field.TypeInt, value)
+		_node.XpEarned = value
+	}
+	if value, ok := _c.mutation.XpTier(); ok {
+		_spec.SetField(cardattemptlog.FieldXpTier, field.TypeString, value)
+		_node.XpTier = value
 	}
 	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

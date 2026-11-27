@@ -15,6 +15,7 @@ import (
 
 // Runs against a real Postgres when TEST_DATABASE_URL is set, e.g.
 // TEST_DATABASE_URL="postgres://a:a@localhost:5432/streaktest?sslmode=disable" go test ./internal/streak/
+// go test runs packages in parallel and each migrates its database, so give each package its own.
 func testDB(t *testing.T) *ent.Client {
 	url := os.Getenv("TEST_DATABASE_URL")
 	if url == "" {

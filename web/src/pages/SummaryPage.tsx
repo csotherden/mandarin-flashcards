@@ -36,6 +36,7 @@ export function SummaryPage() {
   const practiced = session.cards.filter((card) => byID.has(card.id));
   const score = Math.round(session.overall_score ?? session.attempt.overall_score ?? 0);
   const missed = practiced.filter((card) => (byID.get(card.id)?.overall_score ?? 0) < 85);
+  const sessionXP = session.xp_earned;
   const headline = practiced.length === 0 ? "No cards graded" : score >= 90 ? "Excellent!" : score >= 75 ? "Nice work" : "Good practice";
 
   return (
@@ -49,6 +50,11 @@ export function SummaryPage() {
         <p className="mt-1 text-white/90">
           {practiced.length} of {session.cards.length} cards · {practiced.length - missed.length} at 85 or above
         </p>
+        {sessionXP > 0 && (
+          <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold px-3.5 py-1.5 font-extrabold text-ink">
+            <Icon name="star" /> +{sessionXP} XP
+          </p>
+        )}
       </section>
 
       {error && <p className="mt-3 text-sm font-semibold text-crimson" role="alert">{error}</p>}

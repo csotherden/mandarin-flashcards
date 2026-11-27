@@ -19,6 +19,8 @@ var (
 		{Name: "tone_accuracy_score", Type: field.TypeFloat64, Nullable: true},
 		{Name: "raw_api_feedback", Type: field.TypeJSON, Nullable: true},
 		{Name: "llm_coaching_tip", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "xp_earned", Type: field.TypeInt, Default: 0},
+		{Name: "xp_tier", Type: field.TypeString, Default: ""},
 		{Name: "flashcard_id", Type: field.TypeUUID},
 		{Name: "lesson_attempt_id", Type: field.TypeUUID},
 		{Name: "user_id", Type: field.TypeUUID},
@@ -31,19 +33,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "card_attempt_logs_flashcards_attempt_logs",
-				Columns:    []*schema.Column{CardAttemptLogsColumns[8]},
+				Columns:    []*schema.Column{CardAttemptLogsColumns[10]},
 				RefColumns: []*schema.Column{FlashcardsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "card_attempt_logs_lesson_attempts_logs",
-				Columns:    []*schema.Column{CardAttemptLogsColumns[9]},
+				Columns:    []*schema.Column{CardAttemptLogsColumns[11]},
 				RefColumns: []*schema.Column{LessonAttemptsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "card_attempt_logs_users_card_attempt_logs",
-				Columns:    []*schema.Column{CardAttemptLogsColumns[10]},
+				Columns:    []*schema.Column{CardAttemptLogsColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -52,12 +54,12 @@ var (
 			{
 				Name:    "cardattemptlog_user_id_flashcard_id",
 				Unique:  false,
-				Columns: []*schema.Column{CardAttemptLogsColumns[10], CardAttemptLogsColumns[8]},
+				Columns: []*schema.Column{CardAttemptLogsColumns[12], CardAttemptLogsColumns[10]},
 			},
 			{
 				Name:    "cardattemptlog_lesson_attempt_id",
 				Unique:  false,
-				Columns: []*schema.Column{CardAttemptLogsColumns[9]},
+				Columns: []*schema.Column{CardAttemptLogsColumns[11]},
 			},
 		},
 	}
@@ -291,6 +293,7 @@ var (
 		{Name: "timezone", Type: field.TypeString, Size: 64, Default: ""},
 		{Name: "streak_current", Type: field.TypeInt, Default: 0},
 		{Name: "streak_longest", Type: field.TypeInt, Default: 0},
+		{Name: "xp_total", Type: field.TypeInt, Default: 0},
 		{Name: "streak_last_day", Type: field.TypeString, Nullable: true, Size: 10},
 		{Name: "preferences", Type: field.TypeJSON},
 	}
@@ -299,6 +302,44 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	}
+	// XpAwardsColumns holds the columns for the "xp_awards" table.
+	XpAwardsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "word", Type: field.TypeString, Size: 64},
+		{Name: "day", Type: field.TypeString, Size: 10},
+		{Name: "xp", Type: field.TypeInt, Default: 0},
+		{Name: "tier", Type: field.TypeString, Default: ""},
+		{Name: "best_score", Type: field.TypeFloat64, Default: 0},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// XpAwardsTable holds the schema information for the "xp_awards" table.
+	XpAwardsTable = &schema.Table{
+		Name:       "xp_awards",
+		Columns:    XpAwardsColumns,
+		PrimaryKey: []*schema.Column{XpAwardsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "xp_awards_users_xp_awards",
+				Columns:    []*schema.Column{XpAwardsColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "xpaward_user_id_word_day",
+				Unique:  true,
+				Columns: []*schema.Column{XpAwardsColumns[8], XpAwardsColumns[3], XpAwardsColumns[4]},
+			},
+			{
+				Name:    "xpaward_user_id_day",
+				Unique:  false,
+				Columns: []*schema.Column{XpAwardsColumns[8], XpAwardsColumns[4]},
+			},
+		},
 	}
 	// FlashcardCategoriesColumns holds the columns for the "flashcard_categories" table.
 	FlashcardCategoriesColumns = []*schema.Column{
@@ -385,6 +426,7 @@ var (
 		LessonAttemptsTable,
 		SetFlashcardsTable,
 		UsersTable,
+		XpAwardsTable,
 		FlashcardCategoriesTable,
 		LessonSetsTable,
 		LessonDisabledCardsTable,
@@ -409,6 +451,7 @@ func init() {
 	SetFlashcardsTable.Annotation = &entsql.Annotation{
 		Table: "set_flashcards",
 	}
+	XpAwardsTable.ForeignKeys[0].RefTable = UsersTable
 	FlashcardCategoriesTable.ForeignKeys[0].RefTable = FlashcardsTable
 	FlashcardCategoriesTable.ForeignKeys[1].RefTable = CategoriesTable
 	LessonSetsTable.ForeignKeys[0].RefTable = LessonsTable

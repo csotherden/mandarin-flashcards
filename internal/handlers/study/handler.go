@@ -70,7 +70,9 @@ func (h *Handler) session(ctx context.Context, userID uuid.UUID, attempt *ent.Le
 		return nil, err
 	}
 	latest := map[uuid.UUID]*ent.CardAttemptLog{}
+	earned := 0
 	for _, log := range logs {
+		earned += log.XpEarned
 		prev := latest[log.FlashcardID]
 		if prev == nil || log.CreatedAt.After(prev.CreatedAt) {
 			latest[log.FlashcardID] = log
@@ -91,6 +93,7 @@ func (h *Handler) session(ctx context.Context, userID uuid.UUID, attempt *ent.Le
 		Cards:        cardViews,
 		Results:      results,
 		OverallScore: attempt.OverallScore,
+		XPEarned:     earned,
 	}, nil
 }
 

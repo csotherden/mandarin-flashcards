@@ -29,3 +29,6 @@ type SetFlashcard func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// XPAward is the predicate function for xpaward builders.
+type XPAward func(*sql.Selector)

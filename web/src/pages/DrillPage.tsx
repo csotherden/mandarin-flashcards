@@ -5,7 +5,8 @@ import { Attribution, CardImage } from "../components/CardImage";
 import { Icon } from "../components/Icon";
 import { markSyllable, Pinyin, toneLabel } from "../components/Pinyin";
 import { speakChinese, unlockSpeech } from "../speech";
-import type { AssessResponse, CardResult, Flashcard, Session } from "../types";
+import type { AssessResponse, CardResult, Flashcard, Session, StudyMode } from "../types";
+import { tierLabel, tierPoints } from "../xp";
 
 function mimeType() {
   const types = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
@@ -18,6 +19,8 @@ export function DrillPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [index, setIndex] = useState(0);
   const [graded, setGraded] = useState(0);
+  const [sessionXP, setSessionXP] = useState(0);
+  const addXP = (n: number) => n > 0 && setSessionXP((total) => total + n);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -29,6 +32,7 @@ export function DrillPage() {
         }
         setSession(row);
         setGraded(row.results.length);
+        setSessionXP(row.xp_earned);
         const done = new Set(row.results.map((result) => result.flashcard_id));
         const next = row.cards.findIndex((card) => !done.has(card.id));
         setIndex(next === -1 ? Math.max(row.cards.length - 1, 0) : next);
@@ -78,18 +82,27 @@ export function DrillPage() {
         <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={match ? graded : index}>
           <div className="h-full rounded-full bg-crimson transition-all duration-500" style={{ width: `${Math.max(4, progress * 100)}%` }} />
         </div>
-        <span className="w-14 shrink-0 text-right text-sm font-bold text-muted">
+        <span className="shrink-0 text-sm font-bold text-muted">
           {match ? graded : index + 1} / {total}
+        </span>
+        <span
+          key={sessionXP}
+          className="rise flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-ink px-2.5 py-1 text-sm font-bold text-white"
+          aria-label={`${sessionXP} XP this session`}
+        >
+          <Icon name="star" className="text-gold" />
+          {sessionXP} XP
         </span>
       </header>
       {error && <p className="mx-auto mt-3 w-full max-w-2xl px-5 text-sm font-semibold text-crimson" role="alert">{error}</p>}
       {match ? (
-        <MatchRound session={session} onMatched={() => setGraded((n) => n + 1)} onDone={finish} onError={setError} />
+        <MatchRound session={session} onMatched={() => setGraded((n) => n + 1)} onXP={addXP} onDone={finish} onError={setError} />
       ) : (
         <SpeakRound
           session={session}
           index={index}
           onGraded={() => setGraded((n) => n + 1)}
+          onXP={addXP}
           onNext={() => (index + 1 >= total ? finish() : setIndex(index + 1))}
           onError={setError}
         />
@@ -102,12 +115,14 @@ function SpeakRound({
   session,
   index,
   onGraded,
+  onXP,
   onNext,
   onError,
 }: {
   session: Session;
   index: number;
   onGraded: () => void;
+  onXP: (earned: number) => void;
   onNext: () => void;
   onError: (message: string) => void;
 }) {
@@ -137,6 +152,7 @@ function SpeakRound({
     try {
       const res = await api<AssessResponse>("/api/assess", { method: "POST", body });
       setResult(res);
+      onXP(res.result.xp_earned);
       if (gradedCard.current !== card.id) {
         gradedCard.current = card.id;
         onGraded();
@@ -219,7 +235,7 @@ function SpeakRound({
 
             {/* Back */}
             <section className="flip-face flip-back col-start-1 row-start-1 overflow-y-auto rounded-[32px] bg-maroon p-6 text-white shadow-float" aria-hidden={!flipped}>
-              {result && <Back card={card} result={result} />}
+              {result && <Back card={card} result={result} mode={session.attempt.mode} />}
             </section>
           </div>
         </div>
@@ -269,7 +285,10 @@ function SpeakRound({
 }
 
 /** The red back of the card: the answer, the score, and each syllable's tone. */
-function Back({ card, result }: { card: Flashcard; result: AssessResponse }) {
+function Back({ card, result, mode }: { card: Flashcard; result: AssessResponse; mode: StudyMode }) {
+  const tier = result.result.xp_tier ?? "";
+  const earned = result.result.xp_earned ?? 0;
+  const full = tierPoints(tier, mode);
   const score = Math.round(result.result.overall_score);
   const syllables = result.result.syllables ?? [];
   return (
@@ -282,7 +301,12 @@ function Back({ card, result }: { card: Flashcard; result: AssessResponse }) {
         </div>
         <div className="shrink-0 text-right">
           <p className="text-5xl font-extrabold leading-none text-gold">{result.assessable ? score : "—"}</p>
-          <p className="mt-1 text-sm font-semibold text-white/80">{!result.assessable ? "not graded" : score >= 85 ? "Nice!" : score >= 60 ? "Close" : "Keep at it"}</p>
+          <p className="mt-1 text-sm font-semibold text-white/80">{tierLabel(tier)}</p>
+          {tier !== "" && (
+            <p className={`mt-2 inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-sm font-bold ${earned > 0 ? "bg-gold text-ink" : "bg-black/20 text-white/85"}`}>
+              {earned > 0 ? (earned < full ? `+${earned} XP · improved` : `+${earned} XP`) : "Already earned today"}
+            </p>
+          )}
         </div>
       </div>
       {!result.assessable && <p className="mt-3 text-sm text-white/90">{result.reason || "This take could not be graded. Try again a little louder."}</p>}
@@ -318,11 +342,13 @@ function Back({ card, result }: { card: Flashcard; result: AssessResponse }) {
 function MatchRound({
   session,
   onMatched,
+  onXP,
   onDone,
   onError,
 }: {
   session: Session;
   onMatched: () => void;
+  onXP: (earned: number) => void;
   onDone: () => Promise<void>;
   onError: (message: string) => void;
 }) {
@@ -365,10 +391,11 @@ function MatchRound({
       onMatched();
       speakChinese(cards.find((card) => card.id === nextImage)?.hanzi ?? "", 1);
       try {
-        await api<CardResult>(`/api/study/sessions/${session.attempt.id}/matches`, {
+        const result = await api<CardResult>(`/api/study/sessions/${session.attempt.id}/matches`, {
           method: "POST",
           body: JSON.stringify({ flashcard_id: nextImage, correct: true, mismatch_count: mismatchCount }),
         });
+        onXP(result.xp_earned);
       } catch (err) {
         onError(err instanceof ApiError ? err.message : "Could not save the match");
       }

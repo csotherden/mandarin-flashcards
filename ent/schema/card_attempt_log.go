@@ -26,6 +26,10 @@ func (CardAttemptLog) Fields() []ent.Field {
 		field.Float("tone_accuracy_score").Optional().Nillable(),
 		field.JSON("raw_api_feedback", &models.StoredFeedback{}).Optional(),
 		field.Text("llm_coaching_tip").Optional().Nillable(),
+		// What this grade added to the user's XP (0 when the word already reached this tier
+		// today), and the tier it reached.
+		field.Int("xp_earned").Default(0),
+		field.String("xp_tier").Default(""),
 		field.UUID("user_id", uuid.UUID{}),
 		field.UUID("lesson_attempt_id", uuid.UUID{}),
 		field.UUID("flashcard_id", uuid.UUID{}),

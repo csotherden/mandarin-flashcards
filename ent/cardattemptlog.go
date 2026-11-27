@@ -37,6 +37,10 @@ type CardAttemptLog struct {
 	RawAPIFeedback *models.StoredFeedback `json:"raw_api_feedback,omitempty"`
 	// LlmCoachingTip holds the value of the "llm_coaching_tip" field.
 	LlmCoachingTip *string `json:"llm_coaching_tip,omitempty"`
+	// XpEarned holds the value of the "xp_earned" field.
+	XpEarned int `json:"xp_earned,omitempty"`
+	// XpTier holds the value of the "xp_tier" field.
+	XpTier string `json:"xp_tier,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID uuid.UUID `json:"user_id,omitempty"`
 	// LessonAttemptID holds the value of the "lesson_attempt_id" field.
@@ -104,7 +108,9 @@ func (*CardAttemptLog) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case cardattemptlog.FieldOverallScore, cardattemptlog.FieldToneAccuracyScore:
 			values[i] = new(sql.NullFloat64)
-		case cardattemptlog.FieldMode, cardattemptlog.FieldLlmCoachingTip:
+		case cardattemptlog.FieldXpEarned:
+			values[i] = new(sql.NullInt64)
+		case cardattemptlog.FieldMode, cardattemptlog.FieldLlmCoachingTip, cardattemptlog.FieldXpTier:
 			values[i] = new(sql.NullString)
 		case cardattemptlog.FieldCreatedAt, cardattemptlog.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -176,6 +182,18 @@ func (_m *CardAttemptLog) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.LlmCoachingTip = new(string)
 				*_m.LlmCoachingTip = value.String
+			}
+		case cardattemptlog.FieldXpEarned:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field xp_earned", values[i])
+			} else if value.Valid {
+				_m.XpEarned = int(value.Int64)
+			}
+		case cardattemptlog.FieldXpTier:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field xp_tier", values[i])
+			} else if value.Valid {
+				_m.XpTier = value.String
 			}
 		case cardattemptlog.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -270,6 +288,12 @@ func (_m *CardAttemptLog) String() string {
 		builder.WriteString("llm_coaching_tip=")
 		builder.WriteString(*v)
 	}
+	builder.WriteString(", ")
+	builder.WriteString("xp_earned=")
+	builder.WriteString(fmt.Sprintf("%v", _m.XpEarned))
+	builder.WriteString(", ")
+	builder.WriteString("xp_tier=")
+	builder.WriteString(_m.XpTier)
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))

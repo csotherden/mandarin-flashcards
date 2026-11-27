@@ -20,6 +20,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
 	"github.com/csotherden/mandarin-flashcards/ent/setflashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
+	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -88,6 +89,7 @@ func checkColumn(t, c string) error {
 			lessonattempt.Table:  lessonattempt.ValidColumn,
 			setflashcard.Table:   setflashcard.ValidColumn,
 			user.Table:           user.ValidColumn,
+			xpaward.Table:        xpaward.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

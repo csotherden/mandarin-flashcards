@@ -133,6 +133,41 @@ func (_u *CardAttemptLogUpdate) ClearLlmCoachingTip() *CardAttemptLogUpdate {
 	return _u
 }
 
+// SetXpEarned sets the "xp_earned" field.
+func (_u *CardAttemptLogUpdate) SetXpEarned(v int) *CardAttemptLogUpdate {
+	_u.mutation.ResetXpEarned()
+	_u.mutation.SetXpEarned(v)
+	return _u
+}
+
+// SetNillableXpEarned sets the "xp_earned" field if the given value is not nil.
+func (_u *CardAttemptLogUpdate) SetNillableXpEarned(v *int) *CardAttemptLogUpdate {
+	if v != nil {
+		_u.SetXpEarned(*v)
+	}
+	return _u
+}
+
+// AddXpEarned adds value to the "xp_earned" field.
+func (_u *CardAttemptLogUpdate) AddXpEarned(v int) *CardAttemptLogUpdate {
+	_u.mutation.AddXpEarned(v)
+	return _u
+}
+
+// SetXpTier sets the "xp_tier" field.
+func (_u *CardAttemptLogUpdate) SetXpTier(v string) *CardAttemptLogUpdate {
+	_u.mutation.SetXpTier(v)
+	return _u
+}
+
+// SetNillableXpTier sets the "xp_tier" field if the given value is not nil.
+func (_u *CardAttemptLogUpdate) SetNillableXpTier(v *string) *CardAttemptLogUpdate {
+	if v != nil {
+		_u.SetXpTier(*v)
+	}
+	return _u
+}
+
 // SetUserID sets the "user_id" field.
 func (_u *CardAttemptLogUpdate) SetUserID(v uuid.UUID) *CardAttemptLogUpdate {
 	_u.mutation.SetUserID(v)
@@ -318,6 +353,15 @@ func (_u *CardAttemptLogUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if _u.mutation.LlmCoachingTipCleared() {
 		_spec.ClearField(cardattemptlog.FieldLlmCoachingTip, field.TypeString)
+	}
+	if value, ok := _u.mutation.XpEarned(); ok {
+		_spec.SetField(cardattemptlog.FieldXpEarned, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedXpEarned(); ok {
+		_spec.AddField(cardattemptlog.FieldXpEarned, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.XpTier(); ok {
+		_spec.SetField(cardattemptlog.FieldXpTier, field.TypeString, value)
 	}
 	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -523,6 +567,41 @@ func (_u *CardAttemptLogUpdateOne) SetNillableLlmCoachingTip(v *string) *CardAtt
 // ClearLlmCoachingTip clears the value of the "llm_coaching_tip" field.
 func (_u *CardAttemptLogUpdateOne) ClearLlmCoachingTip() *CardAttemptLogUpdateOne {
 	_u.mutation.ClearLlmCoachingTip()
+	return _u
+}
+
+// SetXpEarned sets the "xp_earned" field.
+func (_u *CardAttemptLogUpdateOne) SetXpEarned(v int) *CardAttemptLogUpdateOne {
+	_u.mutation.ResetXpEarned()
+	_u.mutation.SetXpEarned(v)
+	return _u
+}
+
+// SetNillableXpEarned sets the "xp_earned" field if the given value is not nil.
+func (_u *CardAttemptLogUpdateOne) SetNillableXpEarned(v *int) *CardAttemptLogUpdateOne {
+	if v != nil {
+		_u.SetXpEarned(*v)
+	}
+	return _u
+}
+
+// AddXpEarned adds value to the "xp_earned" field.
+func (_u *CardAttemptLogUpdateOne) AddXpEarned(v int) *CardAttemptLogUpdateOne {
+	_u.mutation.AddXpEarned(v)
+	return _u
+}
+
+// SetXpTier sets the "xp_tier" field.
+func (_u *CardAttemptLogUpdateOne) SetXpTier(v string) *CardAttemptLogUpdateOne {
+	_u.mutation.SetXpTier(v)
+	return _u
+}
+
+// SetNillableXpTier sets the "xp_tier" field if the given value is not nil.
+func (_u *CardAttemptLogUpdateOne) SetNillableXpTier(v *string) *CardAttemptLogUpdateOne {
+	if v != nil {
+		_u.SetXpTier(*v)
+	}
 	return _u
 }
 
@@ -741,6 +820,15 @@ func (_u *CardAttemptLogUpdateOne) sqlSave(ctx context.Context) (_node *CardAtte
 	}
 	if _u.mutation.LlmCoachingTipCleared() {
 		_spec.ClearField(cardattemptlog.FieldLlmCoachingTip, field.TypeString)
+	}
+	if value, ok := _u.mutation.XpEarned(); ok {
+		_spec.SetField(cardattemptlog.FieldXpEarned, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedXpEarned(); ok {
+		_spec.AddField(cardattemptlog.FieldXpEarned, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.XpTier(); ok {
+		_spec.SetField(cardattemptlog.FieldXpTier, field.TypeString, value)
 	}
 	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

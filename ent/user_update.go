@@ -19,6 +19,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
 	"github.com/csotherden/mandarin-flashcards/ent/predicate"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
+	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
 	"github.com/google/uuid"
 )
@@ -160,6 +161,27 @@ func (_u *UserUpdate) AddStreakLongest(v int) *UserUpdate {
 	return _u
 }
 
+// SetXpTotal sets the "xp_total" field.
+func (_u *UserUpdate) SetXpTotal(v int) *UserUpdate {
+	_u.mutation.ResetXpTotal()
+	_u.mutation.SetXpTotal(v)
+	return _u
+}
+
+// SetNillableXpTotal sets the "xp_total" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableXpTotal(v *int) *UserUpdate {
+	if v != nil {
+		_u.SetXpTotal(*v)
+	}
+	return _u
+}
+
+// AddXpTotal adds value to the "xp_total" field.
+func (_u *UserUpdate) AddXpTotal(v int) *UserUpdate {
+	_u.mutation.AddXpTotal(v)
+	return _u
+}
+
 // SetStreakLastDay sets the "streak_last_day" field.
 func (_u *UserUpdate) SetStreakLastDay(v string) *UserUpdate {
 	_u.mutation.SetStreakLastDay(v)
@@ -282,6 +304,21 @@ func (_u *UserUpdate) AddCardAttemptLogs(v ...*CardAttemptLog) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddCardAttemptLogIDs(ids...)
+}
+
+// AddXpAwardIDs adds the "xp_awards" edge to the XPAward entity by IDs.
+func (_u *UserUpdate) AddXpAwardIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.AddXpAwardIDs(ids...)
+	return _u
+}
+
+// AddXpAwards adds the "xp_awards" edges to the XPAward entity.
+func (_u *UserUpdate) AddXpAwards(v ...*XPAward) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddXpAwardIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -415,6 +452,27 @@ func (_u *UserUpdate) RemoveCardAttemptLogs(v ...*CardAttemptLog) *UserUpdate {
 	return _u.RemoveCardAttemptLogIDs(ids...)
 }
 
+// ClearXpAwards clears all "xp_awards" edges to the XPAward entity.
+func (_u *UserUpdate) ClearXpAwards() *UserUpdate {
+	_u.mutation.ClearXpAwards()
+	return _u
+}
+
+// RemoveXpAwardIDs removes the "xp_awards" edge to XPAward entities by IDs.
+func (_u *UserUpdate) RemoveXpAwardIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.RemoveXpAwardIDs(ids...)
+	return _u
+}
+
+// RemoveXpAwards removes "xp_awards" edges to XPAward entities.
+func (_u *UserUpdate) RemoveXpAwards(v ...*XPAward) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveXpAwardIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
@@ -525,6 +583,12 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedStreakLongest(); ok {
 		_spec.AddField(user.FieldStreakLongest, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.XpTotal(); ok {
+		_spec.SetField(user.FieldXpTotal, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedXpTotal(); ok {
+		_spec.AddField(user.FieldXpTotal, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.StreakLastDay(); ok {
 		_spec.SetField(user.FieldStreakLastDay, field.TypeString, value)
@@ -798,6 +862,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(cardattemptlog.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.XpAwardsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.XpAwardsTable,
+			Columns: []string{user.XpAwardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(xpaward.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedXpAwardsIDs(); len(nodes) > 0 && !_u.mutation.XpAwardsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.XpAwardsTable,
+			Columns: []string{user.XpAwardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(xpaward.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.XpAwardsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.XpAwardsTable,
+			Columns: []string{user.XpAwardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(xpaward.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -949,6 +1058,27 @@ func (_u *UserUpdateOne) AddStreakLongest(v int) *UserUpdateOne {
 	return _u
 }
 
+// SetXpTotal sets the "xp_total" field.
+func (_u *UserUpdateOne) SetXpTotal(v int) *UserUpdateOne {
+	_u.mutation.ResetXpTotal()
+	_u.mutation.SetXpTotal(v)
+	return _u
+}
+
+// SetNillableXpTotal sets the "xp_total" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableXpTotal(v *int) *UserUpdateOne {
+	if v != nil {
+		_u.SetXpTotal(*v)
+	}
+	return _u
+}
+
+// AddXpTotal adds value to the "xp_total" field.
+func (_u *UserUpdateOne) AddXpTotal(v int) *UserUpdateOne {
+	_u.mutation.AddXpTotal(v)
+	return _u
+}
+
 // SetStreakLastDay sets the "streak_last_day" field.
 func (_u *UserUpdateOne) SetStreakLastDay(v string) *UserUpdateOne {
 	_u.mutation.SetStreakLastDay(v)
@@ -1071,6 +1201,21 @@ func (_u *UserUpdateOne) AddCardAttemptLogs(v ...*CardAttemptLog) *UserUpdateOne
 		ids[i] = v[i].ID
 	}
 	return _u.AddCardAttemptLogIDs(ids...)
+}
+
+// AddXpAwardIDs adds the "xp_awards" edge to the XPAward entity by IDs.
+func (_u *UserUpdateOne) AddXpAwardIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.AddXpAwardIDs(ids...)
+	return _u
+}
+
+// AddXpAwards adds the "xp_awards" edges to the XPAward entity.
+func (_u *UserUpdateOne) AddXpAwards(v ...*XPAward) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddXpAwardIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -1202,6 +1347,27 @@ func (_u *UserUpdateOne) RemoveCardAttemptLogs(v ...*CardAttemptLog) *UserUpdate
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveCardAttemptLogIDs(ids...)
+}
+
+// ClearXpAwards clears all "xp_awards" edges to the XPAward entity.
+func (_u *UserUpdateOne) ClearXpAwards() *UserUpdateOne {
+	_u.mutation.ClearXpAwards()
+	return _u
+}
+
+// RemoveXpAwardIDs removes the "xp_awards" edge to XPAward entities by IDs.
+func (_u *UserUpdateOne) RemoveXpAwardIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.RemoveXpAwardIDs(ids...)
+	return _u
+}
+
+// RemoveXpAwards removes "xp_awards" edges to XPAward entities.
+func (_u *UserUpdateOne) RemoveXpAwards(v ...*XPAward) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveXpAwardIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1344,6 +1510,12 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.AddedStreakLongest(); ok {
 		_spec.AddField(user.FieldStreakLongest, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.XpTotal(); ok {
+		_spec.SetField(user.FieldXpTotal, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedXpTotal(); ok {
+		_spec.AddField(user.FieldXpTotal, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.StreakLastDay(); ok {
 		_spec.SetField(user.FieldStreakLastDay, field.TypeString, value)
@@ -1617,6 +1789,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(cardattemptlog.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.XpAwardsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.XpAwardsTable,
+			Columns: []string{user.XpAwardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(xpaward.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedXpAwardsIDs(); len(nodes) > 0 && !_u.mutation.XpAwardsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.XpAwardsTable,
+			Columns: []string{user.XpAwardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(xpaward.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.XpAwardsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.XpAwardsTable,
+			Columns: []string{user.XpAwardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(xpaward.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

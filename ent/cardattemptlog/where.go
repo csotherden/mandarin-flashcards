@@ -81,6 +81,16 @@ func LlmCoachingTip(v string) predicate.CardAttemptLog {
 	return predicate.CardAttemptLog(sql.FieldEQ(FieldLlmCoachingTip, v))
 }
 
+// XpEarned applies equality check predicate on the "xp_earned" field. It's identical to XpEarnedEQ.
+func XpEarned(v int) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldEQ(FieldXpEarned, v))
+}
+
+// XpTier applies equality check predicate on the "xp_tier" field. It's identical to XpTierEQ.
+func XpTier(v string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldEQ(FieldXpTier, v))
+}
+
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v uuid.UUID) predicate.CardAttemptLog {
 	return predicate.CardAttemptLog(sql.FieldEQ(FieldUserID, v))
@@ -369,6 +379,111 @@ func LlmCoachingTipEqualFold(v string) predicate.CardAttemptLog {
 // LlmCoachingTipContainsFold applies the ContainsFold predicate on the "llm_coaching_tip" field.
 func LlmCoachingTipContainsFold(v string) predicate.CardAttemptLog {
 	return predicate.CardAttemptLog(sql.FieldContainsFold(FieldLlmCoachingTip, v))
+}
+
+// XpEarnedEQ applies the EQ predicate on the "xp_earned" field.
+func XpEarnedEQ(v int) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldEQ(FieldXpEarned, v))
+}
+
+// XpEarnedNEQ applies the NEQ predicate on the "xp_earned" field.
+func XpEarnedNEQ(v int) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldNEQ(FieldXpEarned, v))
+}
+
+// XpEarnedIn applies the In predicate on the "xp_earned" field.
+func XpEarnedIn(vs ...int) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldIn(FieldXpEarned, vs...))
+}
+
+// XpEarnedNotIn applies the NotIn predicate on the "xp_earned" field.
+func XpEarnedNotIn(vs ...int) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldNotIn(FieldXpEarned, vs...))
+}
+
+// XpEarnedGT applies the GT predicate on the "xp_earned" field.
+func XpEarnedGT(v int) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldGT(FieldXpEarned, v))
+}
+
+// XpEarnedGTE applies the GTE predicate on the "xp_earned" field.
+func XpEarnedGTE(v int) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldGTE(FieldXpEarned, v))
+}
+
+// XpEarnedLT applies the LT predicate on the "xp_earned" field.
+func XpEarnedLT(v int) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldLT(FieldXpEarned, v))
+}
+
+// XpEarnedLTE applies the LTE predicate on the "xp_earned" field.
+func XpEarnedLTE(v int) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldLTE(FieldXpEarned, v))
+}
+
+// XpTierEQ applies the EQ predicate on the "xp_tier" field.
+func XpTierEQ(v string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldEQ(FieldXpTier, v))
+}
+
+// XpTierNEQ applies the NEQ predicate on the "xp_tier" field.
+func XpTierNEQ(v string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldNEQ(FieldXpTier, v))
+}
+
+// XpTierIn applies the In predicate on the "xp_tier" field.
+func XpTierIn(vs ...string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldIn(FieldXpTier, vs...))
+}
+
+// XpTierNotIn applies the NotIn predicate on the "xp_tier" field.
+func XpTierNotIn(vs ...string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldNotIn(FieldXpTier, vs...))
+}
+
+// XpTierGT applies the GT predicate on the "xp_tier" field.
+func XpTierGT(v string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldGT(FieldXpTier, v))
+}
+
+// XpTierGTE applies the GTE predicate on the "xp_tier" field.
+func XpTierGTE(v string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldGTE(FieldXpTier, v))
+}
+
+// XpTierLT applies the LT predicate on the "xp_tier" field.
+func XpTierLT(v string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldLT(FieldXpTier, v))
+}
+
+// XpTierLTE applies the LTE predicate on the "xp_tier" field.
+func XpTierLTE(v string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldLTE(FieldXpTier, v))
+}
+
+// XpTierContains applies the Contains predicate on the "xp_tier" field.
+func XpTierContains(v string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldContains(FieldXpTier, v))
+}
+
+// XpTierHasPrefix applies the HasPrefix predicate on the "xp_tier" field.
+func XpTierHasPrefix(v string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldHasPrefix(FieldXpTier, v))
+}
+
+// XpTierHasSuffix applies the HasSuffix predicate on the "xp_tier" field.
+func XpTierHasSuffix(v string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldHasSuffix(FieldXpTier, v))
+}
+
+// XpTierEqualFold applies the EqualFold predicate on the "xp_tier" field.
+func XpTierEqualFold(v string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldEqualFold(FieldXpTier, v))
+}
+
+// XpTierContainsFold applies the ContainsFold predicate on the "xp_tier" field.
+func XpTierContainsFold(v string) predicate.CardAttemptLog {
+	return predicate.CardAttemptLog(sql.FieldContainsFold(FieldXpTier, v))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.

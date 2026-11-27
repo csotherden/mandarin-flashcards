@@ -38,6 +38,8 @@ type User struct {
 	StreakCurrent int `json:"streak_current,omitempty"`
 	// StreakLongest holds the value of the "streak_longest" field.
 	StreakLongest int `json:"streak_longest,omitempty"`
+	// XpTotal holds the value of the "xp_total" field.
+	XpTotal int `json:"xp_total,omitempty"`
 	// StreakLastDay holds the value of the "streak_last_day" field.
 	StreakLastDay *string `json:"streak_last_day,omitempty"`
 	// Preferences holds the value of the "preferences" field.
@@ -62,9 +64,11 @@ type UserEdges struct {
 	LessonAttempts []*LessonAttempt `json:"lesson_attempts,omitempty"`
 	// CardAttemptLogs holds the value of the card_attempt_logs edge.
 	CardAttemptLogs []*CardAttemptLog `json:"card_attempt_logs,omitempty"`
+	// XpAwards holds the value of the xp_awards edge.
+	XpAwards []*XPAward `json:"xp_awards,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [7]bool
 }
 
 // CategoriesOrErr returns the Categories value or an error if the edge
@@ -121,6 +125,15 @@ func (e UserEdges) CardAttemptLogsOrErr() ([]*CardAttemptLog, error) {
 	return nil, &NotLoadedError{edge: "card_attempt_logs"}
 }
 
+// XpAwardsOrErr returns the XpAwards value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) XpAwardsOrErr() ([]*XPAward, error) {
+	if e.loadedTypes[6] {
+		return e.XpAwards, nil
+	}
+	return nil, &NotLoadedError{edge: "xp_awards"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -128,7 +141,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldPreferences:
 			values[i] = new([]byte)
-		case user.FieldStreakCurrent, user.FieldStreakLongest:
+		case user.FieldStreakCurrent, user.FieldStreakLongest, user.FieldXpTotal:
 			values[i] = new(sql.NullInt64)
 		case user.FieldEmail, user.FieldPasswordHash, user.FieldPasswordSalt, user.FieldRefreshTokenID, user.FieldTimezone, user.FieldStreakLastDay:
 			values[i] = new(sql.NullString)
@@ -212,6 +225,12 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.StreakLongest = int(value.Int64)
 			}
+		case user.FieldXpTotal:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field xp_total", values[i])
+			} else if value.Valid {
+				_m.XpTotal = int(value.Int64)
+			}
 		case user.FieldStreakLastDay:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field streak_last_day", values[i])
@@ -270,6 +289,11 @@ func (_m *User) QueryCardAttemptLogs() *CardAttemptLogQuery {
 	return NewUserClient(_m.config).QueryCardAttemptLogs(_m)
 }
 
+// QueryXpAwards queries the "xp_awards" edge of the User entity.
+func (_m *User) QueryXpAwards() *XPAwardQuery {
+	return NewUserClient(_m.config).QueryXpAwards(_m)
+}
+
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -316,6 +340,9 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("streak_longest=")
 	builder.WriteString(fmt.Sprintf("%v", _m.StreakLongest))
+	builder.WriteString(", ")
+	builder.WriteString("xp_total=")
+	builder.WriteString(fmt.Sprintf("%v", _m.XpTotal))
 	builder.WriteString(", ")
 	if v := _m.StreakLastDay; v != nil {
 		builder.WriteString("streak_last_day=")

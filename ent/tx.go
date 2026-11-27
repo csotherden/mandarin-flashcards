@@ -28,6 +28,8 @@ type Tx struct {
 	SetFlashcard *SetFlashcardClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// XPAward is the client for interacting with the XPAward builders.
+	XPAward *XPAwardClient
 
 	// lazily loaded.
 	client     *Client
@@ -167,6 +169,7 @@ func (tx *Tx) init() {
 	tx.LessonAttempt = NewLessonAttemptClient(tx.config)
 	tx.SetFlashcard = NewSetFlashcardClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.XPAward = NewXPAwardClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

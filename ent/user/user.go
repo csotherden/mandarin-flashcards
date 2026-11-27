@@ -34,6 +34,8 @@ const (
 	FieldStreakCurrent = "streak_current"
 	// FieldStreakLongest holds the string denoting the streak_longest field in the database.
 	FieldStreakLongest = "streak_longest"
+	// FieldXpTotal holds the string denoting the xp_total field in the database.
+	FieldXpTotal = "xp_total"
 	// FieldStreakLastDay holds the string denoting the streak_last_day field in the database.
 	FieldStreakLastDay = "streak_last_day"
 	// FieldPreferences holds the string denoting the preferences field in the database.
@@ -50,6 +52,8 @@ const (
 	EdgeLessonAttempts = "lesson_attempts"
 	// EdgeCardAttemptLogs holds the string denoting the card_attempt_logs edge name in mutations.
 	EdgeCardAttemptLogs = "card_attempt_logs"
+	// EdgeXpAwards holds the string denoting the xp_awards edge name in mutations.
+	EdgeXpAwards = "xp_awards"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// CategoriesTable is the table that holds the categories relation/edge.
@@ -94,6 +98,13 @@ const (
 	CardAttemptLogsInverseTable = "card_attempt_logs"
 	// CardAttemptLogsColumn is the table column denoting the card_attempt_logs relation/edge.
 	CardAttemptLogsColumn = "user_id"
+	// XpAwardsTable is the table that holds the xp_awards relation/edge.
+	XpAwardsTable = "xp_awards"
+	// XpAwardsInverseTable is the table name for the XPAward entity.
+	// It exists in this package in order to avoid circular dependency with the "xpaward" package.
+	XpAwardsInverseTable = "xp_awards"
+	// XpAwardsColumn is the table column denoting the xp_awards relation/edge.
+	XpAwardsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -108,6 +119,7 @@ var Columns = []string{
 	FieldTimezone,
 	FieldStreakCurrent,
 	FieldStreakLongest,
+	FieldXpTotal,
 	FieldStreakLastDay,
 	FieldPreferences,
 }
@@ -143,6 +155,8 @@ var (
 	DefaultStreakCurrent int
 	// DefaultStreakLongest holds the default value on creation for the "streak_longest" field.
 	DefaultStreakLongest int
+	// DefaultXpTotal holds the default value on creation for the "xp_total" field.
+	DefaultXpTotal int
 	// StreakLastDayValidator is a validator for the "streak_last_day" field. It is called by the builders before save.
 	StreakLastDayValidator func(string) error
 	// DefaultPreferences holds the default value on creation for the "preferences" field.
@@ -202,6 +216,11 @@ func ByStreakCurrent(opts ...sql.OrderTermOption) OrderOption {
 // ByStreakLongest orders the results by the streak_longest field.
 func ByStreakLongest(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStreakLongest, opts...).ToFunc()
+}
+
+// ByXpTotal orders the results by the xp_total field.
+func ByXpTotal(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldXpTotal, opts...).ToFunc()
 }
 
 // ByStreakLastDay orders the results by the streak_last_day field.
@@ -292,6 +311,20 @@ func ByCardAttemptLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newCardAttemptLogsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByXpAwardsCount orders the results by xp_awards count.
+func ByXpAwardsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newXpAwardsStep(), opts...)
+	}
+}
+
+// ByXpAwards orders the results by xp_awards terms.
+func ByXpAwards(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newXpAwardsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newCategoriesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -332,5 +365,12 @@ func newCardAttemptLogsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CardAttemptLogsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, CardAttemptLogsTable, CardAttemptLogsColumn),
+	)
+}
+func newXpAwardsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(XpAwardsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, XpAwardsTable, XpAwardsColumn),
 	)
 }

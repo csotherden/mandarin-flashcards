@@ -82,6 +82,8 @@ func CardResult(log *ent.CardAttemptLog) models.CardResult {
 		FlashcardID:       log.FlashcardID,
 		OverallScore:      log.OverallScore,
 		ToneAccuracyScore: log.ToneAccuracyScore,
+		XPEarned:          log.XpEarned,
+		XPTier:            log.XpTier,
 		CreatedAt:         log.CreatedAt,
 	}
 	if log.LlmCoachingTip != nil {

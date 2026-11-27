@@ -102,6 +102,7 @@ export function TodayPage() {
                 <span className="rounded-full bg-white/15 px-3 py-1.5">{modeTitle(mode)}</span>
                 <span className="rounded-full bg-white/15 px-3 py-1.5">about {minutes} min</span>
                 {home.practiced_today > 0 && <span className="rounded-full bg-white/15 px-3 py-1.5">{home.practiced_today} practiced today</span>}
+                {home.xp_today > 0 && <span className="rounded-full bg-gold px-3 py-1.5 text-ink">{home.xp_today} XP today</span>}
               </div>
               <button
                 type="button"

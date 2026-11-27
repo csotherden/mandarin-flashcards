@@ -9,6 +9,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -20,6 +21,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
 	"github.com/csotherden/mandarin-flashcards/ent/predicate"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
+	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 	"github.com/google/uuid"
 )
 
@@ -36,6 +38,8 @@ type UserQuery struct {
 	withLessons         *LessonQuery
 	withLessonAttempts  *LessonAttemptQuery
 	withCardAttemptLogs *CardAttemptLogQuery
+	withXpAwards        *XPAwardQuery
+	modifiers           []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -197,6 +201,28 @@ func (_q *UserQuery) QueryCardAttemptLogs() *CardAttemptLogQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(cardattemptlog.Table, cardattemptlog.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.CardAttemptLogsTable, user.CardAttemptLogsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryXpAwards chains the current query on the "xp_awards" edge.
+func (_q *UserQuery) QueryXpAwards() *XPAwardQuery {
+	query := (&XPAwardClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(xpaward.Table, xpaward.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.XpAwardsTable, user.XpAwardsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -402,6 +428,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withLessons:         _q.withLessons.Clone(),
 		withLessonAttempts:  _q.withLessonAttempts.Clone(),
 		withCardAttemptLogs: _q.withCardAttemptLogs.Clone(),
+		withXpAwards:        _q.withXpAwards.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -471,6 +498,17 @@ func (_q *UserQuery) WithCardAttemptLogs(opts ...func(*CardAttemptLogQuery)) *Us
 		opt(query)
 	}
 	_q.withCardAttemptLogs = query
+	return _q
+}
+
+// WithXpAwards tells the query-builder to eager-load the nodes that are connected to
+// the "xp_awards" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithXpAwards(opts ...func(*XPAwardQuery)) *UserQuery {
+	query := (&XPAwardClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withXpAwards = query
 	return _q
 }
 
@@ -552,13 +590,14 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [7]bool{
 			_q.withCategories != nil,
 			_q.withFlashcards != nil,
 			_q.withCardSets != nil,
 			_q.withLessons != nil,
 			_q.withLessonAttempts != nil,
 			_q.withCardAttemptLogs != nil,
+			_q.withXpAwards != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -569,6 +608,9 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -618,6 +660,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadCardAttemptLogs(ctx, query, nodes,
 			func(n *User) { n.Edges.CardAttemptLogs = []*CardAttemptLog{} },
 			func(n *User, e *CardAttemptLog) { n.Edges.CardAttemptLogs = append(n.Edges.CardAttemptLogs, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withXpAwards; query != nil {
+		if err := _q.loadXpAwards(ctx, query, nodes,
+			func(n *User) { n.Edges.XpAwards = []*XPAward{} },
+			func(n *User, e *XPAward) { n.Edges.XpAwards = append(n.Edges.XpAwards, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -809,9 +858,42 @@ func (_q *UserQuery) loadCardAttemptLogs(ctx context.Context, query *CardAttempt
 	}
 	return nil
 }
+func (_q *UserQuery) loadXpAwards(ctx context.Context, query *XPAwardQuery, nodes []*User, init func(*User), assign func(*User, *XPAward)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(xpaward.FieldUserID)
+	}
+	query.Where(predicate.XPAward(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.XpAwardsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (_q *UserQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
+	}
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
@@ -874,6 +956,9 @@ func (_q *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range _q.modifiers {
+		m(selector)
+	}
 	for _, p := range _q.predicates {
 		p(selector)
 	}
@@ -889,6 +974,32 @@ func (_q *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (_q *UserQuery) ForUpdate(opts ...sql.LockOption) *UserQuery {
+	if _q.driver.Dialect() == dialect.Postgres {
+		_q.Unique(false)
+	}
+	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return _q
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (_q *UserQuery) ForShare(opts ...sql.LockOption) *UserQuery {
+	if _q.driver.Dialect() == dialect.Postgres {
+		_q.Unique(false)
+	}
+	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return _q
 }
 
 // UserGroupBy is the group-by builder for User entities.

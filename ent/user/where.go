@@ -101,6 +101,11 @@ func StreakLongest(v int) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldStreakLongest, v))
 }
 
+// XpTotal applies equality check predicate on the "xp_total" field. It's identical to XpTotalEQ.
+func XpTotal(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldXpTotal, v))
+}
+
 // StreakLastDay applies equality check predicate on the "streak_last_day" field. It's identical to StreakLastDayEQ.
 func StreakLastDay(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldStreakLastDay, v))
@@ -601,6 +606,46 @@ func StreakLongestLTE(v int) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldStreakLongest, v))
 }
 
+// XpTotalEQ applies the EQ predicate on the "xp_total" field.
+func XpTotalEQ(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldXpTotal, v))
+}
+
+// XpTotalNEQ applies the NEQ predicate on the "xp_total" field.
+func XpTotalNEQ(v int) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldXpTotal, v))
+}
+
+// XpTotalIn applies the In predicate on the "xp_total" field.
+func XpTotalIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldIn(FieldXpTotal, vs...))
+}
+
+// XpTotalNotIn applies the NotIn predicate on the "xp_total" field.
+func XpTotalNotIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldXpTotal, vs...))
+}
+
+// XpTotalGT applies the GT predicate on the "xp_total" field.
+func XpTotalGT(v int) predicate.User {
+	return predicate.User(sql.FieldGT(FieldXpTotal, v))
+}
+
+// XpTotalGTE applies the GTE predicate on the "xp_total" field.
+func XpTotalGTE(v int) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldXpTotal, v))
+}
+
+// XpTotalLT applies the LT predicate on the "xp_total" field.
+func XpTotalLT(v int) predicate.User {
+	return predicate.User(sql.FieldLT(FieldXpTotal, v))
+}
+
+// XpTotalLTE applies the LTE predicate on the "xp_total" field.
+func XpTotalLTE(v int) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldXpTotal, v))
+}
+
 // StreakLastDayEQ applies the EQ predicate on the "streak_last_day" field.
 func StreakLastDayEQ(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldStreakLastDay, v))
@@ -806,6 +851,29 @@ func HasCardAttemptLogs() predicate.User {
 func HasCardAttemptLogsWith(preds ...predicate.CardAttemptLog) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := newCardAttemptLogsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasXpAwards applies the HasEdge predicate on the "xp_awards" edge.
+func HasXpAwards() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, XpAwardsTable, XpAwardsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasXpAwardsWith applies the HasEdge predicate on the "xp_awards" edge with a given conditions (other predicates).
+func HasXpAwardsWith(preds ...predicate.XPAward) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newXpAwardsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

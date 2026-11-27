@@ -3,7 +3,6 @@
 package home
 
 import (
-	"github.com/csotherden/mandarin-flashcards/internal/streak"
 	"net/http"
 	"sort"
 	"time"
@@ -19,7 +18,9 @@ import (
 	"github.com/csotherden/mandarin-flashcards/internal/middleware"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
 	"github.com/csotherden/mandarin-flashcards/internal/present"
+	"github.com/csotherden/mandarin-flashcards/internal/streak"
 	deck "github.com/csotherden/mandarin-flashcards/internal/study"
+	"github.com/csotherden/mandarin-flashcards/internal/xp"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
@@ -75,6 +76,11 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	out.StreakDays = status.Current
 	out.StreakLongest = status.Longest
 	out.StreakToday = status.Today
+	out.XPTotal = me.XpTotal
+	if out.XPToday, err = xp.Today(ctx, h.db, me, time.Now()); err != nil {
+		fail(err)
+		return
+	}
 
 	last, err := h.db.LessonAttempt.Query().
 		Where(lessonattempt.HasOwnerWith(user.ID(userID)), lessonattempt.CompletedAtNotNil()).

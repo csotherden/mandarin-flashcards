@@ -24,6 +24,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/lessonattempt"
 	"github.com/csotherden/mandarin-flashcards/ent/setflashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
+	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 )
 
 // Client is the client that holds all ent builders.
@@ -47,6 +48,8 @@ type Client struct {
 	SetFlashcard *SetFlashcardClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// XPAward is the client for interacting with the XPAward builders.
+	XPAward *XPAwardClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -66,6 +69,7 @@ func (c *Client) init() {
 	c.LessonAttempt = NewLessonAttemptClient(c.config)
 	c.SetFlashcard = NewSetFlashcardClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.XPAward = NewXPAwardClient(c.config)
 }
 
 type (
@@ -166,6 +170,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		LessonAttempt:  NewLessonAttemptClient(cfg),
 		SetFlashcard:   NewSetFlashcardClient(cfg),
 		User:           NewUserClient(cfg),
+		XPAward:        NewXPAwardClient(cfg),
 	}, nil
 }
 
@@ -193,6 +198,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		LessonAttempt:  NewLessonAttemptClient(cfg),
 		SetFlashcard:   NewSetFlashcardClient(cfg),
 		User:           NewUserClient(cfg),
+		XPAward:        NewXPAwardClient(cfg),
 	}, nil
 }
 
@@ -223,7 +229,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.CardAttemptLog, c.CardSet, c.Category, c.Flashcard, c.Lesson, c.LessonAttempt,
-		c.SetFlashcard, c.User,
+		c.SetFlashcard, c.User, c.XPAward,
 	} {
 		n.Use(hooks...)
 	}
@@ -234,7 +240,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.CardAttemptLog, c.CardSet, c.Category, c.Flashcard, c.Lesson, c.LessonAttempt,
-		c.SetFlashcard, c.User,
+		c.SetFlashcard, c.User, c.XPAward,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -259,6 +265,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.SetFlashcard.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
+	case *XPAwardMutation:
+		return c.XPAward.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -1751,6 +1759,22 @@ func (c *UserClient) QueryCardAttemptLogs(_m *User) *CardAttemptLogQuery {
 	return query
 }
 
+// QueryXpAwards queries the xp_awards edge of a User.
+func (c *UserClient) QueryXpAwards(_m *User) *XPAwardQuery {
+	query := (&XPAwardClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(xpaward.Table, xpaward.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.XpAwardsTable, user.XpAwardsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -1776,14 +1800,163 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 	}
 }
 
+// XPAwardClient is a client for the XPAward schema.
+type XPAwardClient struct {
+	config
+}
+
+// NewXPAwardClient returns a client for the XPAward from the given config.
+func NewXPAwardClient(c config) *XPAwardClient {
+	return &XPAwardClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `xpaward.Hooks(f(g(h())))`.
+func (c *XPAwardClient) Use(hooks ...Hook) {
+	c.hooks.XPAward = append(c.hooks.XPAward, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `xpaward.Intercept(f(g(h())))`.
+func (c *XPAwardClient) Intercept(interceptors ...Interceptor) {
+	c.inters.XPAward = append(c.inters.XPAward, interceptors...)
+}
+
+// Create returns a builder for creating a XPAward entity.
+func (c *XPAwardClient) Create() *XPAwardCreate {
+	mutation := newXPAwardMutation(c.config, OpCreate)
+	return &XPAwardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of XPAward entities.
+func (c *XPAwardClient) CreateBulk(builders ...*XPAwardCreate) *XPAwardCreateBulk {
+	return &XPAwardCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *XPAwardClient) MapCreateBulk(slice any, setFunc func(*XPAwardCreate, int)) *XPAwardCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &XPAwardCreateBulk{err: fmt.Errorf("calling to XPAwardClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*XPAwardCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &XPAwardCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for XPAward.
+func (c *XPAwardClient) Update() *XPAwardUpdate {
+	mutation := newXPAwardMutation(c.config, OpUpdate)
+	return &XPAwardUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *XPAwardClient) UpdateOne(_m *XPAward) *XPAwardUpdateOne {
+	mutation := newXPAwardMutation(c.config, OpUpdateOne, withXPAward(_m))
+	return &XPAwardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *XPAwardClient) UpdateOneID(id uuid.UUID) *XPAwardUpdateOne {
+	mutation := newXPAwardMutation(c.config, OpUpdateOne, withXPAwardID(id))
+	return &XPAwardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for XPAward.
+func (c *XPAwardClient) Delete() *XPAwardDelete {
+	mutation := newXPAwardMutation(c.config, OpDelete)
+	return &XPAwardDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *XPAwardClient) DeleteOne(_m *XPAward) *XPAwardDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *XPAwardClient) DeleteOneID(id uuid.UUID) *XPAwardDeleteOne {
+	builder := c.Delete().Where(xpaward.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &XPAwardDeleteOne{builder}
+}
+
+// Query returns a query builder for XPAward.
+func (c *XPAwardClient) Query() *XPAwardQuery {
+	return &XPAwardQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeXPAward},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a XPAward entity by its id.
+func (c *XPAwardClient) Get(ctx context.Context, id uuid.UUID) (*XPAward, error) {
+	return c.Query().Where(xpaward.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *XPAwardClient) GetX(ctx context.Context, id uuid.UUID) *XPAward {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryOwner queries the owner edge of a XPAward.
+func (c *XPAwardClient) QueryOwner(_m *XPAward) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(xpaward.Table, xpaward.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, xpaward.OwnerTable, xpaward.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *XPAwardClient) Hooks() []Hook {
+	return c.hooks.XPAward
+}
+
+// Interceptors returns the client interceptors.
+func (c *XPAwardClient) Interceptors() []Interceptor {
+	return c.inters.XPAward
+}
+
+func (c *XPAwardClient) mutate(ctx context.Context, m *XPAwardMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&XPAwardCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&XPAwardUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&XPAwardUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&XPAwardDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown XPAward mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		CardAttemptLog, CardSet, Category, Flashcard, Lesson, LessonAttempt,
-		SetFlashcard, User []ent.Hook
+		SetFlashcard, User, XPAward []ent.Hook
 	}
 	inters struct {
 		CardAttemptLog, CardSet, Category, Flashcard, Lesson, LessonAttempt,
-		SetFlashcard, User []ent.Interceptor
+		SetFlashcard, User, XPAward []ent.Interceptor
 	}
 )

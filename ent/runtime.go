@@ -14,6 +14,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/schema"
 	"github.com/csotherden/mandarin-flashcards/ent/setflashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
+	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
 	"github.com/google/uuid"
 )
@@ -41,6 +42,14 @@ func init() {
 	cardattemptlogDescOverallScore := cardattemptlogFields[2].Descriptor()
 	// cardattemptlog.DefaultOverallScore holds the default value on creation for the overall_score field.
 	cardattemptlog.DefaultOverallScore = cardattemptlogDescOverallScore.Default.(float64)
+	// cardattemptlogDescXpEarned is the schema descriptor for xp_earned field.
+	cardattemptlogDescXpEarned := cardattemptlogFields[6].Descriptor()
+	// cardattemptlog.DefaultXpEarned holds the default value on creation for the xp_earned field.
+	cardattemptlog.DefaultXpEarned = cardattemptlogDescXpEarned.Default.(int)
+	// cardattemptlogDescXpTier is the schema descriptor for xp_tier field.
+	cardattemptlogDescXpTier := cardattemptlogFields[7].Descriptor()
+	// cardattemptlog.DefaultXpTier holds the default value on creation for the xp_tier field.
+	cardattemptlog.DefaultXpTier = cardattemptlogDescXpTier.Default.(string)
 	// cardattemptlogDescID is the schema descriptor for id field.
 	cardattemptlogDescID := cardattemptlogFields[0].Descriptor()
 	// cardattemptlog.DefaultID holds the default value on creation for the id field.
@@ -350,16 +359,73 @@ func init() {
 	userDescStreakLongest := userFields[7].Descriptor()
 	// user.DefaultStreakLongest holds the default value on creation for the streak_longest field.
 	user.DefaultStreakLongest = userDescStreakLongest.Default.(int)
+	// userDescXpTotal is the schema descriptor for xp_total field.
+	userDescXpTotal := userFields[8].Descriptor()
+	// user.DefaultXpTotal holds the default value on creation for the xp_total field.
+	user.DefaultXpTotal = userDescXpTotal.Default.(int)
 	// userDescStreakLastDay is the schema descriptor for streak_last_day field.
-	userDescStreakLastDay := userFields[8].Descriptor()
+	userDescStreakLastDay := userFields[9].Descriptor()
 	// user.StreakLastDayValidator is a validator for the "streak_last_day" field. It is called by the builders before save.
 	user.StreakLastDayValidator = userDescStreakLastDay.Validators[0].(func(string) error)
 	// userDescPreferences is the schema descriptor for preferences field.
-	userDescPreferences := userFields[9].Descriptor()
+	userDescPreferences := userFields[10].Descriptor()
 	// user.DefaultPreferences holds the default value on creation for the preferences field.
 	user.DefaultPreferences = userDescPreferences.Default.(models.Preferences)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
 	// user.DefaultID holds the default value on creation for the id field.
 	user.DefaultID = userDescID.Default.(func() uuid.UUID)
+	xpawardMixin := schema.XPAward{}.Mixin()
+	xpawardMixinFields0 := xpawardMixin[0].Fields()
+	_ = xpawardMixinFields0
+	xpawardFields := schema.XPAward{}.Fields()
+	_ = xpawardFields
+	// xpawardDescCreatedAt is the schema descriptor for created_at field.
+	xpawardDescCreatedAt := xpawardMixinFields0[0].Descriptor()
+	// xpaward.DefaultCreatedAt holds the default value on creation for the created_at field.
+	xpaward.DefaultCreatedAt = xpawardDescCreatedAt.Default.(func() time.Time)
+	// xpawardDescUpdatedAt is the schema descriptor for updated_at field.
+	xpawardDescUpdatedAt := xpawardMixinFields0[1].Descriptor()
+	// xpaward.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	xpaward.DefaultUpdatedAt = xpawardDescUpdatedAt.Default.(func() time.Time)
+	// xpaward.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	xpaward.UpdateDefaultUpdatedAt = xpawardDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// xpawardDescWord is the schema descriptor for word field.
+	xpawardDescWord := xpawardFields[2].Descriptor()
+	// xpaward.WordValidator is a validator for the "word" field. It is called by the builders before save.
+	xpaward.WordValidator = func() func(string) error {
+		validators := xpawardDescWord.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(word string) error {
+			for _, fn := range fns {
+				if err := fn(word); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// xpawardDescDay is the schema descriptor for day field.
+	xpawardDescDay := xpawardFields[3].Descriptor()
+	// xpaward.DayValidator is a validator for the "day" field. It is called by the builders before save.
+	xpaward.DayValidator = xpawardDescDay.Validators[0].(func(string) error)
+	// xpawardDescXp is the schema descriptor for xp field.
+	xpawardDescXp := xpawardFields[4].Descriptor()
+	// xpaward.DefaultXp holds the default value on creation for the xp field.
+	xpaward.DefaultXp = xpawardDescXp.Default.(int)
+	// xpawardDescTier is the schema descriptor for tier field.
+	xpawardDescTier := xpawardFields[5].Descriptor()
+	// xpaward.DefaultTier holds the default value on creation for the tier field.
+	xpaward.DefaultTier = xpawardDescTier.Default.(string)
+	// xpawardDescBestScore is the schema descriptor for best_score field.
+	xpawardDescBestScore := xpawardFields[6].Descriptor()
+	// xpaward.DefaultBestScore holds the default value on creation for the best_score field.
+	xpaward.DefaultBestScore = xpawardDescBestScore.Default.(float64)
+	// xpawardDescID is the schema descriptor for id field.
+	xpawardDescID := xpawardFields[0].Descriptor()
+	// xpaward.DefaultID holds the default value on creation for the id field.
+	xpaward.DefaultID = xpawardDescID.Default.(func() uuid.UUID)
 }

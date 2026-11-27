@@ -272,7 +272,11 @@ type CardResult struct {
 	ToneAccuracyScore *float64       `json:"tone_accuracy_score,omitempty"`
 	CoachingTip       string         `json:"coaching_tip,omitempty"`
 	Syllables         []SyllableView `json:"syllables,omitempty"`
-	CreatedAt         time.Time      `json:"created_at"`
+	// XPEarned is what this grade added (0 when the word already reached this tier today);
+	// XPTier is the tier it reached (keep, close, nice, perfect, or empty when not graded).
+	XPEarned  int       `json:"xp_earned"`
+	XPTier    string    `json:"xp_tier"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type SessionResponse struct {
@@ -280,12 +284,16 @@ type SessionResponse struct {
 	Cards        []FlashcardResponse `json:"cards"`
 	Results      []CardResult        `json:"results"`
 	OverallScore *float64            `json:"overall_score,omitempty"`
+	// XPEarned counts every take in the session, retries included (Results keeps only the
+	// latest take per card).
+	XPEarned int `json:"xp_earned"`
 }
 
 type AssessResponse struct {
 	Result     CardResult `json:"result"`
 	Assessable bool       `json:"assessable"`
 	Reason     string     `json:"reason,omitempty"`
+	XPTotal    int        `json:"xp_total"`
 }
 
 type MatchInput struct {
@@ -300,6 +308,8 @@ type HomeResponse struct {
 	StreakDays     int            `json:"streak_days"`
 	StreakToday    bool           `json:"streak_today"`
 	StreakLongest  int            `json:"streak_longest"`
+	XPTotal        int            `json:"xp_total"`
+	XPToday        int            `json:"xp_today"`
 	PracticedToday int            `json:"practiced_today"`
 	TotalCards     int            `json:"total_cards"`
 	SuggestedCount int            `json:"suggested_count"`

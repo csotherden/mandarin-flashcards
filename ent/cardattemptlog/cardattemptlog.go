@@ -30,6 +30,10 @@ const (
 	FieldRawAPIFeedback = "raw_api_feedback"
 	// FieldLlmCoachingTip holds the string denoting the llm_coaching_tip field in the database.
 	FieldLlmCoachingTip = "llm_coaching_tip"
+	// FieldXpEarned holds the string denoting the xp_earned field in the database.
+	FieldXpEarned = "xp_earned"
+	// FieldXpTier holds the string denoting the xp_tier field in the database.
+	FieldXpTier = "xp_tier"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
 	// FieldLessonAttemptID holds the string denoting the lesson_attempt_id field in the database.
@@ -77,6 +81,8 @@ var Columns = []string{
 	FieldToneAccuracyScore,
 	FieldRawAPIFeedback,
 	FieldLlmCoachingTip,
+	FieldXpEarned,
+	FieldXpTier,
 	FieldUserID,
 	FieldLessonAttemptID,
 	FieldFlashcardID,
@@ -101,6 +107,10 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultOverallScore holds the default value on creation for the "overall_score" field.
 	DefaultOverallScore float64
+	// DefaultXpEarned holds the default value on creation for the "xp_earned" field.
+	DefaultXpEarned int
+	// DefaultXpTier holds the default value on creation for the "xp_tier" field.
+	DefaultXpTier string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -165,6 +175,16 @@ func ByToneAccuracyScore(opts ...sql.OrderTermOption) OrderOption {
 // ByLlmCoachingTip orders the results by the llm_coaching_tip field.
 func ByLlmCoachingTip(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLlmCoachingTip, opts...).ToFunc()
+}
+
+// ByXpEarned orders the results by the xp_earned field.
+func ByXpEarned(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldXpEarned, opts...).ToFunc()
+}
+
+// ByXpTier orders the results by the xp_tier field.
+func ByXpTier(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldXpTier, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the user_id field.

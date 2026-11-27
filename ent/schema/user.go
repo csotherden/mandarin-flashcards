@@ -45,6 +45,9 @@ func (User) Fields() []ent.Field {
 			Default(0),
 		field.Int("streak_longest").
 			Default(0),
+		// Sum of every XPAward; kept alongside so reading it is one row.
+		field.Int("xp_total").
+			Default(0),
 		field.String("streak_last_day").
 			Optional().
 			Nillable().
@@ -75,6 +78,8 @@ func (User) Edges() []ent.Edge {
 			StorageKey(edge.Column("user_id")).
 			Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("card_attempt_logs", CardAttemptLog.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("xp_awards", XPAward.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }

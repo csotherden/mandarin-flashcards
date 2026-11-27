@@ -110,6 +110,9 @@ export type CardResult = {
   tone_accuracy_score?: number;
   coaching_tip?: string;
   syllables?: Syllable[];
+  /** XP this grade added (0 when the word already reached this tier today) and the tier reached. */
+  xp_earned: number;
+  xp_tier: XPTier;
   created_at: string;
 };
 
@@ -129,12 +132,17 @@ export type Session = {
   cards: Flashcard[];
   results: CardResult[];
   overall_score?: number;
+  /** Every take's XP in this session, retries included. */
+  xp_earned: number;
 };
+
+export type XPTier = "" | "keep" | "close" | "nice" | "perfect";
 
 export type AssessResponse = {
   result: CardResult;
   assessable: boolean;
   reason?: string;
+  xp_total: number;
 };
 
 export type HomeSet = { set: CardSet; cover?: Flashcard };
@@ -144,6 +152,8 @@ export type Home = {
   streak_days: number;
   streak_today: boolean;
   streak_longest: number;
+  xp_total: number;
+  xp_today: number;
   practiced_today: number;
   total_cards: number;
   suggested_count: number;

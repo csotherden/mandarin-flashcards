@@ -20,6 +20,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/predicate"
 	"github.com/csotherden/mandarin-flashcards/ent/setflashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
+	"github.com/csotherden/mandarin-flashcards/ent/xpaward"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
 	"github.com/google/uuid"
 )
@@ -41,6 +42,7 @@ const (
 	TypeLessonAttempt  = "LessonAttempt"
 	TypeSetFlashcard   = "SetFlashcard"
 	TypeUser           = "User"
+	TypeXPAward        = "XPAward"
 )
 
 // CardAttemptLogMutation represents an operation that mutates the CardAttemptLog nodes in the graph.
@@ -58,6 +60,9 @@ type CardAttemptLogMutation struct {
 	addtone_accuracy_score *float64
 	raw_api_feedback       **models.StoredFeedback
 	llm_coaching_tip       *string
+	xp_earned              *int
+	addxp_earned           *int
+	xp_tier                *string
 	clearedFields          map[string]struct{}
 	owner                  *uuid.UUID
 	clearedowner           bool
@@ -506,6 +511,98 @@ func (m *CardAttemptLogMutation) ResetLlmCoachingTip() {
 	delete(m.clearedFields, cardattemptlog.FieldLlmCoachingTip)
 }
 
+// SetXpEarned sets the "xp_earned" field.
+func (m *CardAttemptLogMutation) SetXpEarned(i int) {
+	m.xp_earned = &i
+	m.addxp_earned = nil
+}
+
+// XpEarned returns the value of the "xp_earned" field in the mutation.
+func (m *CardAttemptLogMutation) XpEarned() (r int, exists bool) {
+	v := m.xp_earned
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldXpEarned returns the old "xp_earned" field's value of the CardAttemptLog entity.
+// If the CardAttemptLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CardAttemptLogMutation) OldXpEarned(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldXpEarned is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldXpEarned requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldXpEarned: %w", err)
+	}
+	return oldValue.XpEarned, nil
+}
+
+// AddXpEarned adds i to the "xp_earned" field.
+func (m *CardAttemptLogMutation) AddXpEarned(i int) {
+	if m.addxp_earned != nil {
+		*m.addxp_earned += i
+	} else {
+		m.addxp_earned = &i
+	}
+}
+
+// AddedXpEarned returns the value that was added to the "xp_earned" field in this mutation.
+func (m *CardAttemptLogMutation) AddedXpEarned() (r int, exists bool) {
+	v := m.addxp_earned
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetXpEarned resets all changes to the "xp_earned" field.
+func (m *CardAttemptLogMutation) ResetXpEarned() {
+	m.xp_earned = nil
+	m.addxp_earned = nil
+}
+
+// SetXpTier sets the "xp_tier" field.
+func (m *CardAttemptLogMutation) SetXpTier(s string) {
+	m.xp_tier = &s
+}
+
+// XpTier returns the value of the "xp_tier" field in the mutation.
+func (m *CardAttemptLogMutation) XpTier() (r string, exists bool) {
+	v := m.xp_tier
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldXpTier returns the old "xp_tier" field's value of the CardAttemptLog entity.
+// If the CardAttemptLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CardAttemptLogMutation) OldXpTier(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldXpTier is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldXpTier requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldXpTier: %w", err)
+	}
+	return oldValue.XpTier, nil
+}
+
+// ResetXpTier resets all changes to the "xp_tier" field.
+func (m *CardAttemptLogMutation) ResetXpTier() {
+	m.xp_tier = nil
+}
+
 // SetUserID sets the "user_id" field.
 func (m *CardAttemptLogMutation) SetUserID(u uuid.UUID) {
 	m.owner = &u
@@ -742,7 +839,7 @@ func (m *CardAttemptLogMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CardAttemptLogMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, cardattemptlog.FieldCreatedAt)
 	}
@@ -763,6 +860,12 @@ func (m *CardAttemptLogMutation) Fields() []string {
 	}
 	if m.llm_coaching_tip != nil {
 		fields = append(fields, cardattemptlog.FieldLlmCoachingTip)
+	}
+	if m.xp_earned != nil {
+		fields = append(fields, cardattemptlog.FieldXpEarned)
+	}
+	if m.xp_tier != nil {
+		fields = append(fields, cardattemptlog.FieldXpTier)
 	}
 	if m.owner != nil {
 		fields = append(fields, cardattemptlog.FieldUserID)
@@ -795,6 +898,10 @@ func (m *CardAttemptLogMutation) Field(name string) (ent.Value, bool) {
 		return m.RawAPIFeedback()
 	case cardattemptlog.FieldLlmCoachingTip:
 		return m.LlmCoachingTip()
+	case cardattemptlog.FieldXpEarned:
+		return m.XpEarned()
+	case cardattemptlog.FieldXpTier:
+		return m.XpTier()
 	case cardattemptlog.FieldUserID:
 		return m.UserID()
 	case cardattemptlog.FieldLessonAttemptID:
@@ -824,6 +931,10 @@ func (m *CardAttemptLogMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldRawAPIFeedback(ctx)
 	case cardattemptlog.FieldLlmCoachingTip:
 		return m.OldLlmCoachingTip(ctx)
+	case cardattemptlog.FieldXpEarned:
+		return m.OldXpEarned(ctx)
+	case cardattemptlog.FieldXpTier:
+		return m.OldXpTier(ctx)
 	case cardattemptlog.FieldUserID:
 		return m.OldUserID(ctx)
 	case cardattemptlog.FieldLessonAttemptID:
@@ -888,6 +999,20 @@ func (m *CardAttemptLogMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetLlmCoachingTip(v)
 		return nil
+	case cardattemptlog.FieldXpEarned:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetXpEarned(v)
+		return nil
+	case cardattemptlog.FieldXpTier:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetXpTier(v)
+		return nil
 	case cardattemptlog.FieldUserID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
@@ -923,6 +1048,9 @@ func (m *CardAttemptLogMutation) AddedFields() []string {
 	if m.addtone_accuracy_score != nil {
 		fields = append(fields, cardattemptlog.FieldToneAccuracyScore)
 	}
+	if m.addxp_earned != nil {
+		fields = append(fields, cardattemptlog.FieldXpEarned)
+	}
 	return fields
 }
 
@@ -935,6 +1063,8 @@ func (m *CardAttemptLogMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedOverallScore()
 	case cardattemptlog.FieldToneAccuracyScore:
 		return m.AddedToneAccuracyScore()
+	case cardattemptlog.FieldXpEarned:
+		return m.AddedXpEarned()
 	}
 	return nil, false
 }
@@ -957,6 +1087,13 @@ func (m *CardAttemptLogMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddToneAccuracyScore(v)
+		return nil
+	case cardattemptlog.FieldXpEarned:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddXpEarned(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CardAttemptLog numeric field %s", name)
@@ -1026,6 +1163,12 @@ func (m *CardAttemptLogMutation) ResetField(name string) error {
 		return nil
 	case cardattemptlog.FieldLlmCoachingTip:
 		m.ResetLlmCoachingTip()
+		return nil
+	case cardattemptlog.FieldXpEarned:
+		m.ResetXpEarned()
+		return nil
+	case cardattemptlog.FieldXpTier:
+		m.ResetXpTier()
 		return nil
 	case cardattemptlog.FieldUserID:
 		m.ResetUserID()
@@ -6439,6 +6582,8 @@ type UserMutation struct {
 	addstreak_current        *int
 	streak_longest           *int
 	addstreak_longest        *int
+	xp_total                 *int
+	addxp_total              *int
 	streak_last_day          *string
 	preferences              *models.Preferences
 	clearedFields            map[string]struct{}
@@ -6460,6 +6605,9 @@ type UserMutation struct {
 	card_attempt_logs        map[uuid.UUID]struct{}
 	removedcard_attempt_logs map[uuid.UUID]struct{}
 	clearedcard_attempt_logs bool
+	xp_awards                map[uuid.UUID]struct{}
+	removedxp_awards         map[uuid.UUID]struct{}
+	clearedxp_awards         bool
 	done                     bool
 	oldValue                 func(context.Context) (*User, error)
 	predicates               []predicate.User
@@ -6946,6 +7094,62 @@ func (m *UserMutation) ResetStreakLongest() {
 	m.addstreak_longest = nil
 }
 
+// SetXpTotal sets the "xp_total" field.
+func (m *UserMutation) SetXpTotal(i int) {
+	m.xp_total = &i
+	m.addxp_total = nil
+}
+
+// XpTotal returns the value of the "xp_total" field in the mutation.
+func (m *UserMutation) XpTotal() (r int, exists bool) {
+	v := m.xp_total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldXpTotal returns the old "xp_total" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldXpTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldXpTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldXpTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldXpTotal: %w", err)
+	}
+	return oldValue.XpTotal, nil
+}
+
+// AddXpTotal adds i to the "xp_total" field.
+func (m *UserMutation) AddXpTotal(i int) {
+	if m.addxp_total != nil {
+		*m.addxp_total += i
+	} else {
+		m.addxp_total = &i
+	}
+}
+
+// AddedXpTotal returns the value that was added to the "xp_total" field in this mutation.
+func (m *UserMutation) AddedXpTotal() (r int, exists bool) {
+	v := m.addxp_total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetXpTotal resets all changes to the "xp_total" field.
+func (m *UserMutation) ResetXpTotal() {
+	m.xp_total = nil
+	m.addxp_total = nil
+}
+
 // SetStreakLastDay sets the "streak_last_day" field.
 func (m *UserMutation) SetStreakLastDay(s string) {
 	m.streak_last_day = &s
@@ -7355,6 +7559,60 @@ func (m *UserMutation) ResetCardAttemptLogs() {
 	m.removedcard_attempt_logs = nil
 }
 
+// AddXpAwardIDs adds the "xp_awards" edge to the XPAward entity by ids.
+func (m *UserMutation) AddXpAwardIDs(ids ...uuid.UUID) {
+	if m.xp_awards == nil {
+		m.xp_awards = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.xp_awards[ids[i]] = struct{}{}
+	}
+}
+
+// ClearXpAwards clears the "xp_awards" edge to the XPAward entity.
+func (m *UserMutation) ClearXpAwards() {
+	m.clearedxp_awards = true
+}
+
+// XpAwardsCleared reports if the "xp_awards" edge to the XPAward entity was cleared.
+func (m *UserMutation) XpAwardsCleared() bool {
+	return m.clearedxp_awards
+}
+
+// RemoveXpAwardIDs removes the "xp_awards" edge to the XPAward entity by IDs.
+func (m *UserMutation) RemoveXpAwardIDs(ids ...uuid.UUID) {
+	if m.removedxp_awards == nil {
+		m.removedxp_awards = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.xp_awards, ids[i])
+		m.removedxp_awards[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedXpAwards returns the removed IDs of the "xp_awards" edge to the XPAward entity.
+func (m *UserMutation) RemovedXpAwardsIDs() (ids []uuid.UUID) {
+	for id := range m.removedxp_awards {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// XpAwardsIDs returns the "xp_awards" edge IDs in the mutation.
+func (m *UserMutation) XpAwardsIDs() (ids []uuid.UUID) {
+	for id := range m.xp_awards {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetXpAwards resets all changes to the "xp_awards" edge.
+func (m *UserMutation) ResetXpAwards() {
+	m.xp_awards = nil
+	m.clearedxp_awards = false
+	m.removedxp_awards = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -7389,7 +7647,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -7416,6 +7674,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.streak_longest != nil {
 		fields = append(fields, user.FieldStreakLongest)
+	}
+	if m.xp_total != nil {
+		fields = append(fields, user.FieldXpTotal)
 	}
 	if m.streak_last_day != nil {
 		fields = append(fields, user.FieldStreakLastDay)
@@ -7449,6 +7710,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.StreakCurrent()
 	case user.FieldStreakLongest:
 		return m.StreakLongest()
+	case user.FieldXpTotal:
+		return m.XpTotal()
 	case user.FieldStreakLastDay:
 		return m.StreakLastDay()
 	case user.FieldPreferences:
@@ -7480,6 +7743,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldStreakCurrent(ctx)
 	case user.FieldStreakLongest:
 		return m.OldStreakLongest(ctx)
+	case user.FieldXpTotal:
+		return m.OldXpTotal(ctx)
 	case user.FieldStreakLastDay:
 		return m.OldStreakLastDay(ctx)
 	case user.FieldPreferences:
@@ -7556,6 +7821,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStreakLongest(v)
 		return nil
+	case user.FieldXpTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetXpTotal(v)
+		return nil
 	case user.FieldStreakLastDay:
 		v, ok := value.(string)
 		if !ok {
@@ -7584,6 +7856,9 @@ func (m *UserMutation) AddedFields() []string {
 	if m.addstreak_longest != nil {
 		fields = append(fields, user.FieldStreakLongest)
 	}
+	if m.addxp_total != nil {
+		fields = append(fields, user.FieldXpTotal)
+	}
 	return fields
 }
 
@@ -7596,6 +7871,8 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedStreakCurrent()
 	case user.FieldStreakLongest:
 		return m.AddedStreakLongest()
+	case user.FieldXpTotal:
+		return m.AddedXpTotal()
 	}
 	return nil, false
 }
@@ -7618,6 +7895,13 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddStreakLongest(v)
+		return nil
+	case user.FieldXpTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddXpTotal(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
@@ -7688,6 +7972,9 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldStreakLongest:
 		m.ResetStreakLongest()
 		return nil
+	case user.FieldXpTotal:
+		m.ResetXpTotal()
+		return nil
 	case user.FieldStreakLastDay:
 		m.ResetStreakLastDay()
 		return nil
@@ -7700,7 +7987,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.categories != nil {
 		edges = append(edges, user.EdgeCategories)
 	}
@@ -7718,6 +8005,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.card_attempt_logs != nil {
 		edges = append(edges, user.EdgeCardAttemptLogs)
+	}
+	if m.xp_awards != nil {
+		edges = append(edges, user.EdgeXpAwards)
 	}
 	return edges
 }
@@ -7762,13 +8052,19 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeXpAwards:
+		ids := make([]ent.Value, 0, len(m.xp_awards))
+		for id := range m.xp_awards {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.removedcategories != nil {
 		edges = append(edges, user.EdgeCategories)
 	}
@@ -7786,6 +8082,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedcard_attempt_logs != nil {
 		edges = append(edges, user.EdgeCardAttemptLogs)
+	}
+	if m.removedxp_awards != nil {
+		edges = append(edges, user.EdgeXpAwards)
 	}
 	return edges
 }
@@ -7830,13 +8129,19 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeXpAwards:
+		ids := make([]ent.Value, 0, len(m.removedxp_awards))
+		for id := range m.removedxp_awards {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.clearedcategories {
 		edges = append(edges, user.EdgeCategories)
 	}
@@ -7854,6 +8159,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedcard_attempt_logs {
 		edges = append(edges, user.EdgeCardAttemptLogs)
+	}
+	if m.clearedxp_awards {
+		edges = append(edges, user.EdgeXpAwards)
 	}
 	return edges
 }
@@ -7874,6 +8182,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedlesson_attempts
 	case user.EdgeCardAttemptLogs:
 		return m.clearedcard_attempt_logs
+	case user.EdgeXpAwards:
+		return m.clearedxp_awards
 	}
 	return false
 }
@@ -7908,6 +8218,855 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeCardAttemptLogs:
 		m.ResetCardAttemptLogs()
 		return nil
+	case user.EdgeXpAwards:
+		m.ResetXpAwards()
+		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)
+}
+
+// XPAwardMutation represents an operation that mutates the XPAward nodes in the graph.
+type XPAwardMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	created_at    *time.Time
+	updated_at    *time.Time
+	word          *string
+	day           *string
+	xp            *int
+	addxp         *int
+	tier          *string
+	best_score    *float64
+	addbest_score *float64
+	clearedFields map[string]struct{}
+	owner         *uuid.UUID
+	clearedowner  bool
+	done          bool
+	oldValue      func(context.Context) (*XPAward, error)
+	predicates    []predicate.XPAward
+}
+
+var _ ent.Mutation = (*XPAwardMutation)(nil)
+
+// xpawardOption allows management of the mutation configuration using functional options.
+type xpawardOption func(*XPAwardMutation)
+
+// newXPAwardMutation creates new mutation for the XPAward entity.
+func newXPAwardMutation(c config, op Op, opts ...xpawardOption) *XPAwardMutation {
+	m := &XPAwardMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeXPAward,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withXPAwardID sets the ID field of the mutation.
+func withXPAwardID(id uuid.UUID) xpawardOption {
+	return func(m *XPAwardMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *XPAward
+		)
+		m.oldValue = func(ctx context.Context) (*XPAward, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().XPAward.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withXPAward sets the old XPAward of the mutation.
+func withXPAward(node *XPAward) xpawardOption {
+	return func(m *XPAwardMutation) {
+		m.oldValue = func(context.Context) (*XPAward, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m XPAwardMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m XPAwardMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of XPAward entities.
+func (m *XPAwardMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *XPAwardMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *XPAwardMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().XPAward.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *XPAwardMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *XPAwardMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the XPAward entity.
+// If the XPAward object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XPAwardMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *XPAwardMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *XPAwardMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *XPAwardMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the XPAward entity.
+// If the XPAward object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XPAwardMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *XPAwardMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *XPAwardMutation) SetUserID(u uuid.UUID) {
+	m.owner = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *XPAwardMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.owner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the XPAward entity.
+// If the XPAward object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XPAwardMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *XPAwardMutation) ResetUserID() {
+	m.owner = nil
+}
+
+// SetWord sets the "word" field.
+func (m *XPAwardMutation) SetWord(s string) {
+	m.word = &s
+}
+
+// Word returns the value of the "word" field in the mutation.
+func (m *XPAwardMutation) Word() (r string, exists bool) {
+	v := m.word
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWord returns the old "word" field's value of the XPAward entity.
+// If the XPAward object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XPAwardMutation) OldWord(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWord is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWord requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWord: %w", err)
+	}
+	return oldValue.Word, nil
+}
+
+// ResetWord resets all changes to the "word" field.
+func (m *XPAwardMutation) ResetWord() {
+	m.word = nil
+}
+
+// SetDay sets the "day" field.
+func (m *XPAwardMutation) SetDay(s string) {
+	m.day = &s
+}
+
+// Day returns the value of the "day" field in the mutation.
+func (m *XPAwardMutation) Day() (r string, exists bool) {
+	v := m.day
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDay returns the old "day" field's value of the XPAward entity.
+// If the XPAward object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XPAwardMutation) OldDay(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDay is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDay requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDay: %w", err)
+	}
+	return oldValue.Day, nil
+}
+
+// ResetDay resets all changes to the "day" field.
+func (m *XPAwardMutation) ResetDay() {
+	m.day = nil
+}
+
+// SetXp sets the "xp" field.
+func (m *XPAwardMutation) SetXp(i int) {
+	m.xp = &i
+	m.addxp = nil
+}
+
+// Xp returns the value of the "xp" field in the mutation.
+func (m *XPAwardMutation) Xp() (r int, exists bool) {
+	v := m.xp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldXp returns the old "xp" field's value of the XPAward entity.
+// If the XPAward object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XPAwardMutation) OldXp(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldXp is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldXp requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldXp: %w", err)
+	}
+	return oldValue.Xp, nil
+}
+
+// AddXp adds i to the "xp" field.
+func (m *XPAwardMutation) AddXp(i int) {
+	if m.addxp != nil {
+		*m.addxp += i
+	} else {
+		m.addxp = &i
+	}
+}
+
+// AddedXp returns the value that was added to the "xp" field in this mutation.
+func (m *XPAwardMutation) AddedXp() (r int, exists bool) {
+	v := m.addxp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetXp resets all changes to the "xp" field.
+func (m *XPAwardMutation) ResetXp() {
+	m.xp = nil
+	m.addxp = nil
+}
+
+// SetTier sets the "tier" field.
+func (m *XPAwardMutation) SetTier(s string) {
+	m.tier = &s
+}
+
+// Tier returns the value of the "tier" field in the mutation.
+func (m *XPAwardMutation) Tier() (r string, exists bool) {
+	v := m.tier
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTier returns the old "tier" field's value of the XPAward entity.
+// If the XPAward object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XPAwardMutation) OldTier(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTier is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTier requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTier: %w", err)
+	}
+	return oldValue.Tier, nil
+}
+
+// ResetTier resets all changes to the "tier" field.
+func (m *XPAwardMutation) ResetTier() {
+	m.tier = nil
+}
+
+// SetBestScore sets the "best_score" field.
+func (m *XPAwardMutation) SetBestScore(f float64) {
+	m.best_score = &f
+	m.addbest_score = nil
+}
+
+// BestScore returns the value of the "best_score" field in the mutation.
+func (m *XPAwardMutation) BestScore() (r float64, exists bool) {
+	v := m.best_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBestScore returns the old "best_score" field's value of the XPAward entity.
+// If the XPAward object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *XPAwardMutation) OldBestScore(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBestScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBestScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBestScore: %w", err)
+	}
+	return oldValue.BestScore, nil
+}
+
+// AddBestScore adds f to the "best_score" field.
+func (m *XPAwardMutation) AddBestScore(f float64) {
+	if m.addbest_score != nil {
+		*m.addbest_score += f
+	} else {
+		m.addbest_score = &f
+	}
+}
+
+// AddedBestScore returns the value that was added to the "best_score" field in this mutation.
+func (m *XPAwardMutation) AddedBestScore() (r float64, exists bool) {
+	v := m.addbest_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBestScore resets all changes to the "best_score" field.
+func (m *XPAwardMutation) ResetBestScore() {
+	m.best_score = nil
+	m.addbest_score = nil
+}
+
+// SetOwnerID sets the "owner" edge to the User entity by id.
+func (m *XPAwardMutation) SetOwnerID(id uuid.UUID) {
+	m.owner = &id
+}
+
+// ClearOwner clears the "owner" edge to the User entity.
+func (m *XPAwardMutation) ClearOwner() {
+	m.clearedowner = true
+	m.clearedFields[xpaward.FieldUserID] = struct{}{}
+}
+
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
+func (m *XPAwardMutation) OwnerCleared() bool {
+	return m.clearedowner
+}
+
+// OwnerID returns the "owner" edge ID in the mutation.
+func (m *XPAwardMutation) OwnerID() (id uuid.UUID, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
+	}
+	return
+}
+
+// OwnerIDs returns the "owner" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// OwnerID instead. It exists only for internal usage by the builders.
+func (m *XPAwardMutation) OwnerIDs() (ids []uuid.UUID) {
+	if id := m.owner; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetOwner resets all changes to the "owner" edge.
+func (m *XPAwardMutation) ResetOwner() {
+	m.owner = nil
+	m.clearedowner = false
+}
+
+// Where appends a list predicates to the XPAwardMutation builder.
+func (m *XPAwardMutation) Where(ps ...predicate.XPAward) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the XPAwardMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *XPAwardMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.XPAward, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *XPAwardMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *XPAwardMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (XPAward).
+func (m *XPAwardMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *XPAwardMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, xpaward.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, xpaward.FieldUpdatedAt)
+	}
+	if m.owner != nil {
+		fields = append(fields, xpaward.FieldUserID)
+	}
+	if m.word != nil {
+		fields = append(fields, xpaward.FieldWord)
+	}
+	if m.day != nil {
+		fields = append(fields, xpaward.FieldDay)
+	}
+	if m.xp != nil {
+		fields = append(fields, xpaward.FieldXp)
+	}
+	if m.tier != nil {
+		fields = append(fields, xpaward.FieldTier)
+	}
+	if m.best_score != nil {
+		fields = append(fields, xpaward.FieldBestScore)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *XPAwardMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case xpaward.FieldCreatedAt:
+		return m.CreatedAt()
+	case xpaward.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case xpaward.FieldUserID:
+		return m.UserID()
+	case xpaward.FieldWord:
+		return m.Word()
+	case xpaward.FieldDay:
+		return m.Day()
+	case xpaward.FieldXp:
+		return m.Xp()
+	case xpaward.FieldTier:
+		return m.Tier()
+	case xpaward.FieldBestScore:
+		return m.BestScore()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *XPAwardMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case xpaward.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case xpaward.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case xpaward.FieldUserID:
+		return m.OldUserID(ctx)
+	case xpaward.FieldWord:
+		return m.OldWord(ctx)
+	case xpaward.FieldDay:
+		return m.OldDay(ctx)
+	case xpaward.FieldXp:
+		return m.OldXp(ctx)
+	case xpaward.FieldTier:
+		return m.OldTier(ctx)
+	case xpaward.FieldBestScore:
+		return m.OldBestScore(ctx)
+	}
+	return nil, fmt.Errorf("unknown XPAward field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XPAwardMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case xpaward.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case xpaward.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case xpaward.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case xpaward.FieldWord:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWord(v)
+		return nil
+	case xpaward.FieldDay:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDay(v)
+		return nil
+	case xpaward.FieldXp:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetXp(v)
+		return nil
+	case xpaward.FieldTier:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTier(v)
+		return nil
+	case xpaward.FieldBestScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBestScore(v)
+		return nil
+	}
+	return fmt.Errorf("unknown XPAward field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *XPAwardMutation) AddedFields() []string {
+	var fields []string
+	if m.addxp != nil {
+		fields = append(fields, xpaward.FieldXp)
+	}
+	if m.addbest_score != nil {
+		fields = append(fields, xpaward.FieldBestScore)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *XPAwardMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case xpaward.FieldXp:
+		return m.AddedXp()
+	case xpaward.FieldBestScore:
+		return m.AddedBestScore()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *XPAwardMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case xpaward.FieldXp:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddXp(v)
+		return nil
+	case xpaward.FieldBestScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBestScore(v)
+		return nil
+	}
+	return fmt.Errorf("unknown XPAward numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *XPAwardMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *XPAwardMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *XPAwardMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown XPAward nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *XPAwardMutation) ResetField(name string) error {
+	switch name {
+	case xpaward.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case xpaward.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case xpaward.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case xpaward.FieldWord:
+		m.ResetWord()
+		return nil
+	case xpaward.FieldDay:
+		m.ResetDay()
+		return nil
+	case xpaward.FieldXp:
+		m.ResetXp()
+		return nil
+	case xpaward.FieldTier:
+		m.ResetTier()
+		return nil
+	case xpaward.FieldBestScore:
+		m.ResetBestScore()
+		return nil
+	}
+	return fmt.Errorf("unknown XPAward field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *XPAwardMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.owner != nil {
+		edges = append(edges, xpaward.EdgeOwner)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *XPAwardMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case xpaward.EdgeOwner:
+		if id := m.owner; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *XPAwardMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *XPAwardMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *XPAwardMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedowner {
+		edges = append(edges, xpaward.EdgeOwner)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *XPAwardMutation) EdgeCleared(name string) bool {
+	switch name {
+	case xpaward.EdgeOwner:
+		return m.clearedowner
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *XPAwardMutation) ClearEdge(name string) error {
+	switch name {
+	case xpaward.EdgeOwner:
+		m.ClearOwner()
+		return nil
+	}
+	return fmt.Errorf("unknown XPAward unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *XPAwardMutation) ResetEdge(name string) error {
+	switch name {
+	case xpaward.EdgeOwner:
+		m.ResetOwner()
+		return nil
+	}
+	return fmt.Errorf("unknown XPAward edge %s", name)
 }
