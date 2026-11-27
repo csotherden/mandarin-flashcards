@@ -75,7 +75,7 @@ func (c *Client) Assess(ctx context.Context, wav []byte, hanzi, pinyin string) (
 	if err := writer.WriteField("language", "zh-CN"); err != nil {
 		return nil, err
 	}
-	if strings.TrimSpace(pinyin) != "" {
+	if pinyin = requestPinyin(hanzi, pinyin); pinyin != "" {
 		if err := writer.WriteField("pinyin", pinyin); err != nil {
 			return nil, err
 		}
@@ -103,7 +103,7 @@ func (c *Client) Assess(ctx context.Context, wav []byte, hanzi, pinyin string) (
 		return nil, err
 	}
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return nil, fmt.Errorf("toneperfect status %d", res.StatusCode)
+		return nil, statusError(res.StatusCode, payload)
 	}
 
 	parsed, err := ParseCompact(payload)
@@ -111,6 +111,22 @@ func (c *Client) Assess(ctx context.Context, wav []byte, hanzi, pinyin string) (
 		return nil, err
 	}
 	return parsed, nil
+}
+
+// statusError names TonePerfect's error code and message when the body has them
+// ({"error": {"code", "message"}, "request_id"}), so a refusal is diagnosable from the log.
+func statusError(status int, payload []byte) error {
+	var body struct {
+		Error struct {
+			Code    string `json:"code"`
+			Message string `json:"message"`
+		} `json:"error"`
+		RequestID string `json:"request_id"`
+	}
+	if json.Unmarshal(payload, &body) != nil || body.Error.Code == "" {
+		return fmt.Errorf("toneperfect status %d", status)
+	}
+	return fmt.Errorf("toneperfect status %d %s: %s (request %s)", status, body.Error.Code, body.Error.Message, body.RequestID)
 }
 
 func ParseCompact(payload []byte) (*Result, error) {
