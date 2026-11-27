@@ -56,6 +56,7 @@ export function ToneLessonPage() {
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
       <header className="mx-auto flex w-full max-w-2xl items-center gap-4 px-5 pt-5">
+        {typeof step === "number" && <h1 className="sr-only">{lesson.title}</h1>}
         <Link to="/tones" aria-label="Back to tones" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-lg shadow-card">
           <Icon name="close" />
         </Link>
@@ -182,9 +183,9 @@ function Say({ lesson, index, onXP, onError, onNext }: { lesson: ToneLesson; ind
 
   return (
     <div className="flex min-h-[70vh] flex-col">
-      <h1 className="sr-only">
-        {lesson.title}: say {item.hanzi}, word {index + 1} of {lesson.items.length}
-      </h1>
+      <h2 className="sr-only">
+        Say {item.hanzi}, word {index + 1} of {lesson.items.length}
+      </h2>
       <section className="rounded-[32px] bg-white p-6 text-center shadow-float">
         <p className="break-words font-hanzi text-[clamp(4rem,18vw,7rem)] font-bold leading-none">{item.hanzi}</p>
         <Pinyin tonal={item.tonal_pinyin} plain={item.pinyin} spaced className="mt-3 block text-2xl font-bold" />
