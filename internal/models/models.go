@@ -158,9 +158,11 @@ type FlashcardResponse struct {
 	ImageURL              string               `json:"image_url"`
 	HasLocalImage         bool                 `json:"has_local_image"`
 	UnsplashAttribution   *UnsplashAttribution `json:"unsplash_attribution,omitempty"`
-	CategoryIDs           []uuid.UUID          `json:"category_ids"`
-	SetIDs                []uuid.UUID          `json:"set_ids"`
-	CreatedAt             time.Time            `json:"created_at"`
+	// RecentScore is the card's average grade over the last 30 days, when it has any (lists only).
+	RecentScore *float64    `json:"recent_score,omitempty"`
+	CategoryIDs []uuid.UUID `json:"category_ids"`
+	SetIDs      []uuid.UUID `json:"set_ids"`
+	CreatedAt   time.Time   `json:"created_at"`
 }
 
 // AutofillRequest is what the user typed: hanzi, English or pinyin.

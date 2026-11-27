@@ -27,6 +27,7 @@ func (h *Handler) Register(router *mux.Router) {
 	router.HandleFunc("/sets/{id}", h.Update).Methods(http.MethodPut)
 	router.HandleFunc("/sets/{id}", h.Delete).Methods(http.MethodDelete)
 	router.HandleFunc("/sets/{id}/cards", h.ReplaceCards).Methods(http.MethodPut)
+	router.HandleFunc("/sets/{id}/cards/add", h.AddCards).Methods(http.MethodPost)
 }
 
 func cleanSet(in models.SetInput) (models.SetInput, string) {

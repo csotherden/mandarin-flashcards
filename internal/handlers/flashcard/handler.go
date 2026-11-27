@@ -38,6 +38,7 @@ func NewHandler(db *ent.Client, files storage.FileStore, photos *unsplash.Client
 func (h *Handler) Register(router *mux.Router) {
 	router.HandleFunc("/flashcards", h.List).Methods(http.MethodGet)
 	router.HandleFunc("/flashcards", h.Create).Methods(http.MethodPost)
+	router.HandleFunc("/flashcards/bulk-delete", h.BulkDelete).Methods(http.MethodPost)
 	router.HandleFunc("/flashcards/{id:"+uuidPattern+"}", h.Get).Methods(http.MethodGet)
 	router.HandleFunc("/flashcards/{id:"+uuidPattern+"}", h.Update).Methods(http.MethodPut)
 	router.HandleFunc("/flashcards/{id:"+uuidPattern+"}", h.Delete).Methods(http.MethodDelete)

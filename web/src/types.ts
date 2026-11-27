@@ -42,6 +42,8 @@ export type Flashcard = {
   image_url: string;
   has_local_image: boolean;
   unsplash_attribution?: Attribution;
+  /** Average grade over the last 30 days, in lists, when practiced. */
+  recent_score?: number;
   category_ids: string[];
   set_ids: string[];
   created_at: string;

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { api, clearSession, saveSession, token } from "./api";
+import { setSpeechPreferences } from "./speech";
 import type { LoginResponse, User } from "./types";
 
 /** The device's IANA zone. The server keeps it so streak days are the user's own calendar days. */
@@ -13,6 +14,9 @@ export function deviceTimezone() {
 
 type AuthValue = {
   user: User | null;
+  /** Replaces the signed-in user (after saving settings) or the whole session (after a password change). */
+  setUser: (user: User) => void;
+  replaceSession: (res: LoginResponse) => void;
   ready: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
@@ -24,6 +28,11 @@ const AuthContext = createContext<AuthValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
+
+  // Speech follows the signed-in user's settings wherever the app speaks.
+  useEffect(() => {
+    if (user) setSpeechPreferences(user.preferences.default_tts_speed, user.preferences.preferred_voice);
+  }, [user]);
 
   useEffect(() => {
     if (!token()) {
@@ -61,12 +70,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(res.user);
   }
 
+  function replaceSession(res: LoginResponse) {
+    saveSession(res);
+    setUser(res.user);
+  }
+
   function logout() {
     clearSession();
     setUser(null);
   }
 
-  return <AuthContext.Provider value={{ user, ready, login, register, logout }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, setUser, replaceSession, ready, login, register, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

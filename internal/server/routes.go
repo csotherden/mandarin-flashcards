@@ -27,7 +27,7 @@ func (s *Server) setupRoutes() {
 	protected := api.NewRoute().Subrouter()
 	protected.Use(middleware.AuthMiddleware(s.db, s.logger))
 
-	userhandler.NewHandler(s.db, s.logger).Register(protected)
+	userhandler.NewHandler(s.db, s.files, s.logger).Register(protected)
 	home.NewHandler(s.db, s.logger).Register(protected)
 	category.NewHandler(s.db, s.logger).Register(protected)
 	autofill.NewHandler(s.db, s.coach, s.llmLimit, s.logger).Register(protected)

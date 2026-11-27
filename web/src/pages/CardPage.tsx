@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { cloneElement, useEffect, useId, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../api";
 import { Attribution, CardImage } from "../components/CardImage";
@@ -359,13 +359,21 @@ export function CardPage() {
   );
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+/** A labelled field. A hint is shown under it and announced as its description, not its name. */
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactElement<{ id?: string; "aria-describedby"?: string }> }) {
+  const id = useId();
   return (
-    <label className="grid min-w-0 gap-1.5">
-      <span className="label">{label}</span>
-      {children}
-      {hint && <span className="text-xs text-muted">{hint}</span>}
-    </label>
+    <div className="grid min-w-0 gap-1.5">
+      <label className="label" htmlFor={id}>
+        {label}
+      </label>
+      {cloneElement(children, { id, "aria-describedby": hint ? `${id}-hint` : undefined })}
+      {hint && (
+        <span id={`${id}-hint`} className="text-xs text-muted">
+          {hint}
+        </span>
+      )}
+    </div>
   );
 }
 
