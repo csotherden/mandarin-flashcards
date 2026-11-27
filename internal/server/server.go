@@ -47,7 +47,7 @@ func NewServer(config *Config, logger *zap.Logger, db *ent.Client, sqlDB *sql.DB
 		files:      files,
 		tones:      toneperfect.New(config.TonePerfectAPIKey, config.TonePerfectAPIURL),
 		coach:      llm.New(config.LLMAPIKey, config.LLMBaseURL, config.LLMModel),
-		photos:     unsplash.New(config.UnsplashAccessKey),
+		photos:     unsplash.New(config.UnsplashAccessKey, config.UnsplashAPIURL),
 		llmLimit:   ratelimit.New(20, time.Minute),
 		imgLimit:   ratelimit.New(40, time.Minute),
 		gradeLimit: ratelimit.New(30, time.Minute),

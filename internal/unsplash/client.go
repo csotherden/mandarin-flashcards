@@ -17,14 +17,24 @@ import (
 // ErrNotConfigured means UNSPLASH_ACCESS_KEY is unset.
 var ErrNotConfigured = errors.New("unsplash is not configured")
 
+const defaultURL = "https://api.unsplash.com"
+
 type Client struct {
 	accessKey string
+	baseURL   string
 	http      *http.Client
 }
 
-func New(accessKey string) *Client {
+// New is a client for the Unsplash API at baseURL (UNSPLASH_API_URL; empty is Unsplash itself,
+// another value is a stand-in such as a local mock).
+func New(accessKey, baseURL string) *Client {
+	baseURL = strings.TrimRight(strings.TrimSpace(baseURL), "/")
+	if baseURL == "" {
+		baseURL = defaultURL
+	}
 	return &Client{
 		accessKey: strings.TrimSpace(accessKey),
+		baseURL:   baseURL,
 		http:      &http.Client{Timeout: 15 * time.Second},
 	}
 }
@@ -62,7 +72,7 @@ func (c *Client) Search(ctx context.Context, query string) ([]models.ImageCandid
 	if query == "" {
 		return nil, fmt.Errorf("empty search")
 	}
-	endpoint := "https://api.unsplash.com/search/photos?per_page=6&query=" + url.QueryEscape(query)
+	endpoint := c.baseURL + "/search/photos?per_page=6&query=" + url.QueryEscape(query)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return nil, err

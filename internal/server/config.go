@@ -16,6 +16,7 @@ type Config struct {
 	TonePerfectAPIKey   string
 	TonePerfectAPIURL   string
 	UnsplashAccessKey   string
+	UnsplashAPIURL      string
 	LLMAPIKey           string
 	LLMBaseURL          string
 	LLMModel            string
@@ -71,6 +72,7 @@ func NewConfig() *Config {
 		TonePerfectAPIKey:   strings.TrimSpace(os.Getenv("TONEPERFECT_API_KEY")),
 		TonePerfectAPIURL:   strings.TrimSpace(os.Getenv("TONEPERFECT_API_URL")),
 		UnsplashAccessKey:   strings.TrimSpace(os.Getenv("UNSPLASH_ACCESS_KEY")),
+		UnsplashAPIURL:      strings.TrimSpace(os.Getenv("UNSPLASH_API_URL")),
 		LLMAPIKey:           strings.TrimSpace(os.Getenv("LLM_API_KEY")),
 		LLMBaseURL:          strings.TrimSpace(os.Getenv("LLM_BASE_URL")),
 		LLMModel:            strings.TrimSpace(os.Getenv("LLM_MODEL")),
