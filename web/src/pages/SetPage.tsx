@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../api";
 import { CardImage } from "../components/CardImage";
@@ -6,6 +6,7 @@ import { Icon } from "../components/Icon";
 import { Pinyin } from "../components/Pinyin";
 import { SessionSheet } from "../components/SessionSheet";
 import { Sheet } from "../components/Sheet";
+import { UndoBar } from "../components/UndoBar";
 import type { CardSet, Flashcard, SetDetail } from "../types";
 
 export function SetPage() {
@@ -16,6 +17,8 @@ export function SetPage() {
   const [practice, setPractice] = useState(false);
   const [picking, setPicking] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [undo, setUndo] = useState<{ message: string; ids: string[] } | null>(null);
+  const closeUndo = useCallback(() => setUndo(null), []);
 
   function load() {
     api<SetDetail>(`/api/sets/${id}`).then(setDetail).catch((err: Error) => setError(err.message));
@@ -48,7 +51,12 @@ export function SetPage() {
 
   if (!detail) return <p className="text-muted">{error || "Loading…"}</p>;
   const ids = detail.cards.map((card) => card.id);
-  const removeCard = (card: Flashcard) => save(ids.filter((cardID) => cardID !== card.id));
+  // Removing is immediate; the undo bar puts the card back where it was.
+  const removeCard = (card: Flashcard) => {
+    setUndo({ message: `Removed ${card.hanzi} from ${detail.title}`, ids });
+    setDetail({ ...detail, cards: detail.cards.filter((item) => item.id !== card.id) });
+    void save(ids.filter((cardID) => cardID !== card.id));
+  };
 
   return (
     <div>
@@ -109,6 +117,16 @@ export function SetPage() {
         ))}
       </ul>
 
+      {undo && (
+        <UndoBar
+          message={undo.message}
+          onClose={closeUndo}
+          onUndo={() => {
+            void save(undo.ids);
+            setUndo(null);
+          }}
+        />
+      )}
       <SessionSheet open={practice} onClose={() => setPractice(false)} sets={[detail]} initialSetIds={[detail.id]} />
       <PickSheet open={picking} onClose={() => setPicking(false)} have={ids} onAdd={(more) => save([...ids, ...more])} />
       <EditSheet open={editing} onClose={() => setEditing(false)} title={detail.title} onRename={rename} onDelete={remove} />

@@ -60,6 +60,8 @@ export function TodayPage() {
 
       {error && <p className="text-sm font-semibold text-crimson" role="alert">{error}</p>}
 
+      {home.open_session && <ResumeCard open={home.open_session} onEnded={load} />}
+
       {home.total_cards === 0 && (
         <TonesCard home={home} />
       )}
@@ -223,5 +225,56 @@ function TonesCard({ home }: { home: Home }) {
     <Link to="/tones" className="flex items-center justify-center gap-2 rounded-2xl py-2 font-semibold text-muted underline-offset-4 hover:underline">
       <span className="font-hanzi">声</span> Tone practice
     </Link>
+  );
+}
+
+/** The last unfinished session: pick it up, see its results, or end it. */
+function ResumeCard({ open, onEnded }: { open: NonNullable<Home["open_session"]>; onEnded: () => void }) {
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+  const finished = open.done >= open.total;
+
+  async function end() {
+    setBusy(true);
+    try {
+      await api(`/api/study/sessions/${open.id}/complete`, { method: "POST" });
+      if (open.done > 0) navigate(`/summary/${open.id}`);
+      else onEnded();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="surface rise flex flex-wrap items-center gap-x-4 gap-y-3 p-4" aria-label="Unfinished session">
+      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-crimson text-xl text-white" aria-hidden>
+        <Icon name="play" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <b className="block">{finished ? "You finished every card" : "Pick up where you left off"}</b>
+        <span className="block text-sm text-muted">
+          {modeTitle(open.mode)} · {open.done} of {open.total} done
+        </span>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line" role="progressbar" aria-label="Session progress" aria-valuemin={0} aria-valuemax={open.total} aria-valuenow={open.done}>
+          <div className="h-full rounded-full bg-crimson" style={{ width: `${(open.done / open.total) * 100}%` }} />
+        </div>
+      </div>
+      <div className="flex w-full gap-2 sm:w-auto">
+        {finished ? (
+          <button type="button" className="btn-primary h-11 flex-1 sm:flex-none" disabled={busy} onClick={end}>
+            See results
+          </button>
+        ) : (
+          <>
+            <button type="button" className="btn-soft h-11 flex-1 sm:flex-none" disabled={busy} onClick={end}>
+              {open.done > 0 ? "End & see results" : "Dismiss"}
+            </button>
+            <Link to={`/drill/${open.id}`} className="btn-primary h-11 flex-1 sm:flex-none">
+              Resume
+            </Link>
+          </>
+        )}
+      </div>
+    </section>
   );
 }

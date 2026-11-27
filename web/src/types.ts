@@ -166,6 +166,8 @@ export type Home = {
   sets: HomeSet[];
   slipped: { card: Flashcard; average: number }[];
   saved_sessions: { id: string; title: string; card_count: number }[];
+  /** The latest unfinished session from the last week: done of total cards graded. */
+  open_session?: { id: string; mode: StudyMode; done: number; total: number; started_at: string };
 };
 
 export type GeneratedSet = { set: CardSet; cards: Flashcard[]; skipped: string[] };

@@ -3,6 +3,7 @@
 package home
 
 import (
+	"context"
 	"net/http"
 	"sort"
 	"time"
@@ -114,6 +115,14 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	if last != nil {
 		out.LastMode = string(last.Mode)
 	}
+	if out.OpenSession, err = openSession(ctx, h.db, userID); err != nil {
+		fail(err)
+		return
+	}
+	// Finishing a newer session since means the user moved on; don't nag about the old one.
+	if out.OpenSession != nil && last != nil && last.CompletedAt != nil && out.OpenSession.StartedAt.Before(*last.CompletedAt) {
+		out.OpenSession = nil
+	}
 
 	// Cards practiced today, and the averages behind "words that slipped".
 	logs, err := h.db.CardAttemptLog.Query().
@@ -218,4 +227,34 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 
 	out.SuggestedCount = min(10, total)
 	handlerutils.RespondWithJSON(w, h.logger, http.StatusOK, out)
+}
+
+// openWindow is how long an unfinished session is offered for resuming.
+const openWindow = 7 * 24 * time.Hour
+
+// openSession finds the most recent unfinished session from the last week, with its progress.
+func openSession(ctx context.Context, db *ent.Client, userID uuid.UUID) (*models.OpenSession, error) {
+	a, err := db.LessonAttempt.Query().
+		Where(lessonattempt.HasOwnerWith(user.ID(userID)), lessonattempt.CompletedAtIsNil(),
+			lessonattempt.StartedAtGT(time.Now().Add(-openWindow))).
+		Order(ent.Desc(lessonattempt.FieldStartedAt)).
+		First(ctx)
+	if ent.IsNotFound(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if len(a.CardIds) == 0 {
+		return nil, nil
+	}
+	graded, err := db.CardAttemptLog.Query().
+		Where(cardattemptlog.LessonAttemptID(a.ID)).
+		Unique(true).
+		Select(cardattemptlog.FieldFlashcardID).
+		Strings(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &models.OpenSession{ID: a.ID, Mode: string(a.Mode), Done: len(graded), Total: len(a.CardIds), StartedAt: a.StartedAt}, nil
 }

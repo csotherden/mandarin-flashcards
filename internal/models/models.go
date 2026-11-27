@@ -323,6 +323,17 @@ type HomeResponse struct {
 	Sets           []HomeSet      `json:"sets"`
 	Slipped        []SlippedCard  `json:"slipped"`
 	SavedSessions  []SavedSession `json:"saved_sessions"`
+	// OpenSession is the latest session left unfinished in the last week, to pick up again.
+	OpenSession *OpenSession `json:"open_session,omitempty"`
+}
+
+// OpenSession is a started, unfinished session: Done of Total cards graded so far.
+type OpenSession struct {
+	ID        uuid.UUID `json:"id"`
+	Mode      string    `json:"mode"`
+	Done      int       `json:"done"`
+	Total     int       `json:"total"`
+	StartedAt time.Time `json:"started_at"`
 }
 
 // HomeSet is a set with a card whose picture can stand for it.
