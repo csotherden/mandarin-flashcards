@@ -36,7 +36,7 @@ export function Shell() {
           </NavLink>
         ))}
         <Link to="/add" className="btn-primary mt-4 h-12">
-          <Icon name="plus" className="text-lg" /> Add cards
+          <Icon name="plus" className="text-lg text-gold" /> Add cards
         </Link>
         <p className="mt-auto truncate px-2 text-sm text-stone-400">{user?.email}</p>
       </aside>
@@ -53,7 +53,7 @@ export function Shell() {
           <Link
             to="/add"
             aria-label="Add cards"
-            className="-mt-7 grid h-14 w-14 place-items-center rounded-[20px] border-4 border-canvas bg-crimson text-white shadow-[0_8px_20px_rgba(200,16,46,.35)]"
+            className="-mt-7 grid h-14 w-14 place-items-center rounded-[20px] border-[3px] border-gold bg-crimson text-gold shadow-[0_8px_20px_rgba(200,16,46,.35)]"
           >
             <Icon name="plus" className="text-2xl" />
           </Link>
