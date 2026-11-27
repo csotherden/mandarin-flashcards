@@ -47,7 +47,7 @@ const family = `{"sets": [{
   "slug": "%s", "title": "Family", "description": "The people closest to you", "level": "Beginner",
   "cards": [
     {"hanzi": "妈妈", "pinyin": "māma", "tonal_pinyin": "ma1 ma5", "english": "mom", "image_url": "https://example.com/mom.jpg",
-     "unsplash_attribution": {"photographer_name": "A", "photographer_url": "https://u/a", "photo_url": "https://u/p"},
+     "unsplash_attribution": {"photographer_name": "A", "photographer_url": "https://u/a", "photo_url": "https://u/p", "download_location": "https://api.unsplash.com/photos/mom/download"},
      "categories": ["Family"]},
     {"hanzi": "爸爸", "pinyin": "bàba", "tonal_pinyin": "ba4 ba5", "english": "dad", "categories": ["Family"]},
     {"hanzi": "老公", "pinyin": "lǎogōng", "tonal_pinyin": "lao3 gong1", "english": "husband", "categories": ["Family", "Marriage"]}
@@ -65,11 +65,16 @@ func load(t *testing.T, db *ent.Client, body string) LoadResult {
 func TestLoadIsRepeatable(t *testing.T) {
 	db := testDB(t)
 	slug := "family-" + uuid.NewString()[:8]
-	if res := load(t, db, sprintf(family, slug)); res.SetsCreated != 1 || res.CardsCreated != 3 {
+	if res := load(t, db, sprintf(family, slug)); res.SetsCreated != 1 || res.CardsCreated != 3 || len(res.NewPhotos) != 1 {
 		t.Fatalf("first load: %+v", res)
 	}
-	if res := load(t, db, sprintf(family, slug)); res.SetsUpdated != 1 || res.CardsUpdated != 3 || res.CardsCreated != 0 {
-		t.Fatalf("reload: %+v", res)
+	if res := load(t, db, sprintf(family, slug)); res.SetsUpdated != 1 || res.CardsUpdated != 3 || res.CardsCreated != 0 || len(res.NewPhotos) != 0 {
+		t.Fatalf("reload (same photos, nothing to report): %+v", res)
+	}
+	swapped := strings.Replace(sprintf(family, slug), "mom.jpg", "mom2.jpg", 1)
+	swapped = strings.Replace(swapped, "photos/mom/download", "photos/mom2/download", 1)
+	if res := load(t, db, swapped); len(res.NewPhotos) != 1 || res.NewPhotos[0] != "https://api.unsplash.com/photos/mom2/download" {
+		t.Fatalf("changed photo should be reported once: %+v", res.NewPhotos)
 	}
 	// Drop 老公, add 女儿, retitle.
 	edited := strings.Replace(sprintf(family, slug), `"title": "Family"`, `"title": "My family"`, 1)

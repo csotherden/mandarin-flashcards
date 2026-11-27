@@ -84,6 +84,22 @@ func (f File) Validate() []string {
 type LoadResult struct {
 	SetsCreated, SetsUpdated                 int
 	CardsCreated, CardsUpdated, CardsRemoved int
+	// NewPhotos are the Unsplash download locations of photos this load put into the library
+	// (new words, or words whose photo changed). The loader notifies Unsplash of each once;
+	// user imports don't, since copying a library card isn't choosing a photo.
+	NewPhotos []string
+}
+
+func (r *LoadResult) notePhoto(c CardSpec) {
+	if c.ImageURL == "" || c.UnsplashAttribution == nil || c.UnsplashAttribution.DownloadLocation == "" {
+		return
+	}
+	for _, seen := range r.NewPhotos {
+		if seen == c.UnsplashAttribution.DownloadLocation {
+			return
+		}
+	}
+	r.NewPhotos = append(r.NewPhotos, c.UnsplashAttribution.DownloadLocation)
 }
 
 // Load reads a File and makes the library match it, set by set: sets are created or updated by
@@ -150,6 +166,9 @@ func loadSet(ctx context.Context, tx *ent.Tx, spec SetSpec, res *LoadResult) err
 	for i, c := range spec.Cards {
 		if prior, ok := byHanzi[c.Hanzi]; ok {
 			delete(byHanzi, c.Hanzi)
+			if prior.ImageURL != c.ImageURL {
+				res.notePhoto(c)
+			}
 			update := prior.Update().
 				SetSortOrder(i).SetPinyin(c.Pinyin).SetTonalPinyin(pinyin.NormalizeTonal(c.TonalPinyin)).
 				SetEnglish(c.English).SetExampleSentenceHanzi(c.ExampleSentenceHanzi).
@@ -177,6 +196,7 @@ func loadSet(ctx context.Context, tx *ent.Tx, spec SetSpec, res *LoadResult) err
 		if err := create.Exec(ctx); err != nil {
 			return err
 		}
+		res.notePhoto(c)
 		res.CardsCreated++
 	}
 	for _, gone := range byHanzi {

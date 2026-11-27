@@ -22,6 +22,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/internal/library"
 	"github.com/csotherden/mandarin-flashcards/internal/logging"
 	"github.com/csotherden/mandarin-flashcards/internal/server"
+	"github.com/csotherden/mandarin-flashcards/internal/unsplash"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
@@ -158,5 +159,22 @@ func loadLibrary(path string) int {
 	}
 	fmt.Printf("library loaded: sets %d new, %d updated; cards %d new, %d updated, %d removed\n",
 		res.SetsCreated, res.SetsUpdated, res.CardsCreated, res.CardsUpdated, res.CardsRemoved)
+
+	// Unsplash asks to be told when a photo is used; for the library that's when it's loaded.
+	photos := unsplash.New(strings.TrimSpace(os.Getenv("UNSPLASH_ACCESS_KEY")), strings.TrimSpace(os.Getenv("UNSPLASH_API_URL")))
+	if len(res.NewPhotos) > 0 && !photos.Enabled() {
+		fmt.Printf("unsplash: not configured, %d new photos not reported\n", len(res.NewPhotos))
+		return 0
+	}
+	failed := 0
+	for _, location := range res.NewPhotos {
+		if err := photos.TrackDownload(context.Background(), location); err != nil {
+			failed++
+			fmt.Fprintf(os.Stderr, "unsplash: %s: %v\n", location, err)
+		}
+	}
+	if len(res.NewPhotos) > 0 {
+		fmt.Printf("unsplash: reported %d new photos (%d failed)\n", len(res.NewPhotos)-failed, failed)
+	}
 	return 0
 }
