@@ -23,6 +23,8 @@ const (
 	FieldHanzi = "hanzi"
 	// FieldPinyin holds the string denoting the pinyin field in the database.
 	FieldPinyin = "pinyin"
+	// FieldTonalPinyin holds the string denoting the tonal_pinyin field in the database.
+	FieldTonalPinyin = "tonal_pinyin"
 	// FieldEnglish holds the string denoting the english field in the database.
 	FieldEnglish = "english"
 	// FieldExampleSentenceHanzi holds the string denoting the example_sentence_hanzi field in the database.
@@ -87,6 +89,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldHanzi,
 	FieldPinyin,
+	FieldTonalPinyin,
 	FieldEnglish,
 	FieldExampleSentenceHanzi,
 	FieldExampleSentencePinyin,
@@ -138,6 +141,10 @@ var (
 	DefaultPinyin string
 	// PinyinValidator is a validator for the "pinyin" field. It is called by the builders before save.
 	PinyinValidator func(string) error
+	// DefaultTonalPinyin holds the default value on creation for the "tonal_pinyin" field.
+	DefaultTonalPinyin string
+	// TonalPinyinValidator is a validator for the "tonal_pinyin" field. It is called by the builders before save.
+	TonalPinyinValidator func(string) error
 	// DefaultEnglish holds the default value on creation for the "english" field.
 	DefaultEnglish string
 	// EnglishValidator is a validator for the "english" field. It is called by the builders before save.
@@ -186,6 +193,11 @@ func ByHanzi(opts ...sql.OrderTermOption) OrderOption {
 // ByPinyin orders the results by the pinyin field.
 func ByPinyin(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPinyin, opts...).ToFunc()
+}
+
+// ByTonalPinyin orders the results by the tonal_pinyin field.
+func ByTonalPinyin(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTonalPinyin, opts...).ToFunc()
 }
 
 // ByEnglish orders the results by the english field.

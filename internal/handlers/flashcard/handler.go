@@ -14,6 +14,7 @@ import (
 	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
 	"github.com/csotherden/mandarin-flashcards/internal/own"
+	"github.com/csotherden/mandarin-flashcards/internal/pinyin"
 	"github.com/csotherden/mandarin-flashcards/internal/storage"
 	"github.com/csotherden/mandarin-flashcards/internal/unsplash"
 	"github.com/google/uuid"
@@ -58,6 +59,7 @@ func (h *Handler) owned(ctx context.Context, client *ent.Client, userID, id uuid
 func normalizeCard(in models.FlashcardInput) (models.FlashcardInput, error) {
 	in.Hanzi = strings.TrimSpace(in.Hanzi)
 	in.Pinyin = strings.TrimSpace(in.Pinyin)
+	in.TonalPinyin = pinyin.NormalizeTonal(in.TonalPinyin)
 	in.English = strings.TrimSpace(in.English)
 	in.ExampleSentenceHanzi = strings.TrimSpace(in.ExampleSentenceHanzi)
 	in.ExampleSentencePinyin = strings.TrimSpace(in.ExampleSentencePinyin)
@@ -71,6 +73,8 @@ func normalizeCard(in models.FlashcardInput) (models.FlashcardInput, error) {
 		return in, errors.New("Hanzi is too long")
 	case utf8.RuneCountInString(in.Pinyin) > 160:
 		return in, errors.New("Pinyin is too long")
+	case in.TonalPinyin != "" && !pinyin.ValidTonal(in.Hanzi, in.TonalPinyin):
+		return in, errors.New("Tonal pinyin needs one numbered syllable per character, like ma1 ma5 (5 for the neutral tone)")
 	case utf8.RuneCountInString(in.English) > 300:
 		return in, errors.New("English is too long")
 	case utf8.RuneCountInString(in.ExampleSentenceHanzi) > 500 || utf8.RuneCountInString(in.ExampleSentencePinyin) > 500:

@@ -69,6 +69,20 @@ func (_u *FlashcardUpdate) SetNillablePinyin(v *string) *FlashcardUpdate {
 	return _u
 }
 
+// SetTonalPinyin sets the "tonal_pinyin" field.
+func (_u *FlashcardUpdate) SetTonalPinyin(v string) *FlashcardUpdate {
+	_u.mutation.SetTonalPinyin(v)
+	return _u
+}
+
+// SetNillableTonalPinyin sets the "tonal_pinyin" field if the given value is not nil.
+func (_u *FlashcardUpdate) SetNillableTonalPinyin(v *string) *FlashcardUpdate {
+	if v != nil {
+		_u.SetTonalPinyin(*v)
+	}
+	return _u
+}
+
 // SetEnglish sets the "english" field.
 func (_u *FlashcardUpdate) SetEnglish(v string) *FlashcardUpdate {
 	_u.mutation.SetEnglish(v)
@@ -371,6 +385,11 @@ func (_u *FlashcardUpdate) check() error {
 			return &ValidationError{Name: "pinyin", err: fmt.Errorf(`ent: validator failed for field "Flashcard.pinyin": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.TonalPinyin(); ok {
+		if err := flashcard.TonalPinyinValidator(v); err != nil {
+			return &ValidationError{Name: "tonal_pinyin", err: fmt.Errorf(`ent: validator failed for field "Flashcard.tonal_pinyin": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.English(); ok {
 		if err := flashcard.EnglishValidator(v); err != nil {
 			return &ValidationError{Name: "english", err: fmt.Errorf(`ent: validator failed for field "Flashcard.english": %w`, err)}
@@ -422,6 +441,9 @@ func (_u *FlashcardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Pinyin(); ok {
 		_spec.SetField(flashcard.FieldPinyin, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.TonalPinyin(); ok {
+		_spec.SetField(flashcard.FieldTonalPinyin, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.English(); ok {
 		_spec.SetField(flashcard.FieldEnglish, field.TypeString, value)
@@ -706,6 +728,20 @@ func (_u *FlashcardUpdateOne) SetPinyin(v string) *FlashcardUpdateOne {
 func (_u *FlashcardUpdateOne) SetNillablePinyin(v *string) *FlashcardUpdateOne {
 	if v != nil {
 		_u.SetPinyin(*v)
+	}
+	return _u
+}
+
+// SetTonalPinyin sets the "tonal_pinyin" field.
+func (_u *FlashcardUpdateOne) SetTonalPinyin(v string) *FlashcardUpdateOne {
+	_u.mutation.SetTonalPinyin(v)
+	return _u
+}
+
+// SetNillableTonalPinyin sets the "tonal_pinyin" field if the given value is not nil.
+func (_u *FlashcardUpdateOne) SetNillableTonalPinyin(v *string) *FlashcardUpdateOne {
+	if v != nil {
+		_u.SetTonalPinyin(*v)
 	}
 	return _u
 }
@@ -1025,6 +1061,11 @@ func (_u *FlashcardUpdateOne) check() error {
 			return &ValidationError{Name: "pinyin", err: fmt.Errorf(`ent: validator failed for field "Flashcard.pinyin": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.TonalPinyin(); ok {
+		if err := flashcard.TonalPinyinValidator(v); err != nil {
+			return &ValidationError{Name: "tonal_pinyin", err: fmt.Errorf(`ent: validator failed for field "Flashcard.tonal_pinyin": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.English(); ok {
 		if err := flashcard.EnglishValidator(v); err != nil {
 			return &ValidationError{Name: "english", err: fmt.Errorf(`ent: validator failed for field "Flashcard.english": %w`, err)}
@@ -1093,6 +1134,9 @@ func (_u *FlashcardUpdateOne) sqlSave(ctx context.Context) (_node *Flashcard, er
 	}
 	if value, ok := _u.mutation.Pinyin(); ok {
 		_spec.SetField(flashcard.FieldPinyin, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.TonalPinyin(); ok {
+		_spec.SetField(flashcard.FieldTonalPinyin, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.English(); ok {
 		_spec.SetField(flashcard.FieldEnglish, field.TypeString, value)

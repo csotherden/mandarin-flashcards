@@ -2535,6 +2535,7 @@ type FlashcardMutation struct {
 	updated_at              *time.Time
 	hanzi                   *string
 	pinyin                  *string
+	tonal_pinyin            *string
 	english                 *string
 	example_sentence_hanzi  *string
 	example_sentence_pinyin *string
@@ -2807,6 +2808,42 @@ func (m *FlashcardMutation) OldPinyin(ctx context.Context) (v string, err error)
 // ResetPinyin resets all changes to the "pinyin" field.
 func (m *FlashcardMutation) ResetPinyin() {
 	m.pinyin = nil
+}
+
+// SetTonalPinyin sets the "tonal_pinyin" field.
+func (m *FlashcardMutation) SetTonalPinyin(s string) {
+	m.tonal_pinyin = &s
+}
+
+// TonalPinyin returns the value of the "tonal_pinyin" field in the mutation.
+func (m *FlashcardMutation) TonalPinyin() (r string, exists bool) {
+	v := m.tonal_pinyin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTonalPinyin returns the old "tonal_pinyin" field's value of the Flashcard entity.
+// If the Flashcard object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FlashcardMutation) OldTonalPinyin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTonalPinyin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTonalPinyin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTonalPinyin: %w", err)
+	}
+	return oldValue.TonalPinyin, nil
+}
+
+// ResetTonalPinyin resets all changes to the "tonal_pinyin" field.
+func (m *FlashcardMutation) ResetTonalPinyin() {
+	m.tonal_pinyin = nil
 }
 
 // SetEnglish sets the "english" field.
@@ -3340,7 +3377,7 @@ func (m *FlashcardMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FlashcardMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, flashcard.FieldCreatedAt)
 	}
@@ -3352,6 +3389,9 @@ func (m *FlashcardMutation) Fields() []string {
 	}
 	if m.pinyin != nil {
 		fields = append(fields, flashcard.FieldPinyin)
+	}
+	if m.tonal_pinyin != nil {
+		fields = append(fields, flashcard.FieldTonalPinyin)
 	}
 	if m.english != nil {
 		fields = append(fields, flashcard.FieldEnglish)
@@ -3387,6 +3427,8 @@ func (m *FlashcardMutation) Field(name string) (ent.Value, bool) {
 		return m.Hanzi()
 	case flashcard.FieldPinyin:
 		return m.Pinyin()
+	case flashcard.FieldTonalPinyin:
+		return m.TonalPinyin()
 	case flashcard.FieldEnglish:
 		return m.English()
 	case flashcard.FieldExampleSentenceHanzi:
@@ -3416,6 +3458,8 @@ func (m *FlashcardMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldHanzi(ctx)
 	case flashcard.FieldPinyin:
 		return m.OldPinyin(ctx)
+	case flashcard.FieldTonalPinyin:
+		return m.OldTonalPinyin(ctx)
 	case flashcard.FieldEnglish:
 		return m.OldEnglish(ctx)
 	case flashcard.FieldExampleSentenceHanzi:
@@ -3464,6 +3508,13 @@ func (m *FlashcardMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPinyin(v)
+		return nil
+	case flashcard.FieldTonalPinyin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTonalPinyin(v)
 		return nil
 	case flashcard.FieldEnglish:
 		v, ok := value.(string)
@@ -3582,6 +3633,9 @@ func (m *FlashcardMutation) ResetField(name string) error {
 		return nil
 	case flashcard.FieldPinyin:
 		m.ResetPinyin()
+		return nil
+	case flashcard.FieldTonalPinyin:
+		m.ResetTonalPinyin()
 		return nil
 	case flashcard.FieldEnglish:
 		m.ResetEnglish()

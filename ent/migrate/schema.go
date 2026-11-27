@@ -128,6 +128,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "hanzi", Type: field.TypeString, Size: 64},
 		{Name: "pinyin", Type: field.TypeString, Size: 160, Default: ""},
+		{Name: "tonal_pinyin", Type: field.TypeString, Size: 200, Default: ""},
 		{Name: "english", Type: field.TypeString, Size: 300, Default: ""},
 		{Name: "example_sentence_hanzi", Type: field.TypeString, Size: 500, Default: ""},
 		{Name: "example_sentence_pinyin", Type: field.TypeString, Size: 500, Default: ""},
@@ -144,7 +145,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "flashcards_users_flashcards",
-				Columns:    []*schema.Column{FlashcardsColumns[11]},
+				Columns:    []*schema.Column{FlashcardsColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -153,12 +154,12 @@ var (
 			{
 				Name:    "flashcard_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{FlashcardsColumns[11]},
+				Columns: []*schema.Column{FlashcardsColumns[12]},
 			},
 			{
 				Name:    "flashcard_hanzi_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{FlashcardsColumns[3], FlashcardsColumns[11]},
+				Columns: []*schema.Column{FlashcardsColumns[3], FlashcardsColumns[12]},
 			},
 		},
 	}

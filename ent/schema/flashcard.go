@@ -26,6 +26,11 @@ func (Flashcard) Fields() []ent.Field {
 		field.String("pinyin").
 			Default("").
 			MaxLen(160),
+		// Numbered pinyin, one space-separated syllable per character with the neutral tone as 5
+		// ("ma1 ma5"): the form TonePerfect accepts for choosing readings.
+		field.String("tonal_pinyin").
+			Default("").
+			MaxLen(200),
 		field.String("english").
 			Default("").
 			MaxLen(300),

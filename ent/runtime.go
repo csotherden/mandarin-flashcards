@@ -170,32 +170,38 @@ func init() {
 	flashcard.DefaultPinyin = flashcardDescPinyin.Default.(string)
 	// flashcard.PinyinValidator is a validator for the "pinyin" field. It is called by the builders before save.
 	flashcard.PinyinValidator = flashcardDescPinyin.Validators[0].(func(string) error)
+	// flashcardDescTonalPinyin is the schema descriptor for tonal_pinyin field.
+	flashcardDescTonalPinyin := flashcardFields[3].Descriptor()
+	// flashcard.DefaultTonalPinyin holds the default value on creation for the tonal_pinyin field.
+	flashcard.DefaultTonalPinyin = flashcardDescTonalPinyin.Default.(string)
+	// flashcard.TonalPinyinValidator is a validator for the "tonal_pinyin" field. It is called by the builders before save.
+	flashcard.TonalPinyinValidator = flashcardDescTonalPinyin.Validators[0].(func(string) error)
 	// flashcardDescEnglish is the schema descriptor for english field.
-	flashcardDescEnglish := flashcardFields[3].Descriptor()
+	flashcardDescEnglish := flashcardFields[4].Descriptor()
 	// flashcard.DefaultEnglish holds the default value on creation for the english field.
 	flashcard.DefaultEnglish = flashcardDescEnglish.Default.(string)
 	// flashcard.EnglishValidator is a validator for the "english" field. It is called by the builders before save.
 	flashcard.EnglishValidator = flashcardDescEnglish.Validators[0].(func(string) error)
 	// flashcardDescExampleSentenceHanzi is the schema descriptor for example_sentence_hanzi field.
-	flashcardDescExampleSentenceHanzi := flashcardFields[4].Descriptor()
+	flashcardDescExampleSentenceHanzi := flashcardFields[5].Descriptor()
 	// flashcard.DefaultExampleSentenceHanzi holds the default value on creation for the example_sentence_hanzi field.
 	flashcard.DefaultExampleSentenceHanzi = flashcardDescExampleSentenceHanzi.Default.(string)
 	// flashcard.ExampleSentenceHanziValidator is a validator for the "example_sentence_hanzi" field. It is called by the builders before save.
 	flashcard.ExampleSentenceHanziValidator = flashcardDescExampleSentenceHanzi.Validators[0].(func(string) error)
 	// flashcardDescExampleSentencePinyin is the schema descriptor for example_sentence_pinyin field.
-	flashcardDescExampleSentencePinyin := flashcardFields[5].Descriptor()
+	flashcardDescExampleSentencePinyin := flashcardFields[6].Descriptor()
 	// flashcard.DefaultExampleSentencePinyin holds the default value on creation for the example_sentence_pinyin field.
 	flashcard.DefaultExampleSentencePinyin = flashcardDescExampleSentencePinyin.Default.(string)
 	// flashcard.ExampleSentencePinyinValidator is a validator for the "example_sentence_pinyin" field. It is called by the builders before save.
 	flashcard.ExampleSentencePinyinValidator = flashcardDescExampleSentencePinyin.Validators[0].(func(string) error)
 	// flashcardDescImageURL is the schema descriptor for image_url field.
-	flashcardDescImageURL := flashcardFields[6].Descriptor()
+	flashcardDescImageURL := flashcardFields[7].Descriptor()
 	// flashcard.DefaultImageURL holds the default value on creation for the image_url field.
 	flashcard.DefaultImageURL = flashcardDescImageURL.Default.(string)
 	// flashcard.ImageURLValidator is a validator for the "image_url" field. It is called by the builders before save.
 	flashcard.ImageURLValidator = flashcardDescImageURL.Validators[0].(func(string) error)
 	// flashcardDescImageObjectKey is the schema descriptor for image_object_key field.
-	flashcardDescImageObjectKey := flashcardFields[7].Descriptor()
+	flashcardDescImageObjectKey := flashcardFields[8].Descriptor()
 	// flashcard.ImageObjectKeyValidator is a validator for the "image_object_key" field. It is called by the builders before save.
 	flashcard.ImageObjectKeyValidator = flashcardDescImageObjectKey.Validators[0].(func(string) error)
 	// flashcardDescID is the schema descriptor for id field.

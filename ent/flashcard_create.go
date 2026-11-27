@@ -75,6 +75,20 @@ func (_c *FlashcardCreate) SetNillablePinyin(v *string) *FlashcardCreate {
 	return _c
 }
 
+// SetTonalPinyin sets the "tonal_pinyin" field.
+func (_c *FlashcardCreate) SetTonalPinyin(v string) *FlashcardCreate {
+	_c.mutation.SetTonalPinyin(v)
+	return _c
+}
+
+// SetNillableTonalPinyin sets the "tonal_pinyin" field if the given value is not nil.
+func (_c *FlashcardCreate) SetNillableTonalPinyin(v *string) *FlashcardCreate {
+	if v != nil {
+		_c.SetTonalPinyin(*v)
+	}
+	return _c
+}
+
 // SetEnglish sets the "english" field.
 func (_c *FlashcardCreate) SetEnglish(v string) *FlashcardCreate {
 	_c.mutation.SetEnglish(v)
@@ -283,6 +297,10 @@ func (_c *FlashcardCreate) defaults() {
 		v := flashcard.DefaultPinyin
 		_c.mutation.SetPinyin(v)
 	}
+	if _, ok := _c.mutation.TonalPinyin(); !ok {
+		v := flashcard.DefaultTonalPinyin
+		_c.mutation.SetTonalPinyin(v)
+	}
 	if _, ok := _c.mutation.English(); !ok {
 		v := flashcard.DefaultEnglish
 		_c.mutation.SetEnglish(v)
@@ -327,6 +345,14 @@ func (_c *FlashcardCreate) check() error {
 	if v, ok := _c.mutation.Pinyin(); ok {
 		if err := flashcard.PinyinValidator(v); err != nil {
 			return &ValidationError{Name: "pinyin", err: fmt.Errorf(`ent: validator failed for field "Flashcard.pinyin": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.TonalPinyin(); !ok {
+		return &ValidationError{Name: "tonal_pinyin", err: errors.New(`ent: missing required field "Flashcard.tonal_pinyin"`)}
+	}
+	if v, ok := _c.mutation.TonalPinyin(); ok {
+		if err := flashcard.TonalPinyinValidator(v); err != nil {
+			return &ValidationError{Name: "tonal_pinyin", err: fmt.Errorf(`ent: validator failed for field "Flashcard.tonal_pinyin": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.English(); !ok {
@@ -419,6 +445,10 @@ func (_c *FlashcardCreate) createSpec() (*Flashcard, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Pinyin(); ok {
 		_spec.SetField(flashcard.FieldPinyin, field.TypeString, value)
 		_node.Pinyin = value
+	}
+	if value, ok := _c.mutation.TonalPinyin(); ok {
+		_spec.SetField(flashcard.FieldTonalPinyin, field.TypeString, value)
+		_node.TonalPinyin = value
 	}
 	if value, ok := _c.mutation.English(); ok {
 		_spec.SetField(flashcard.FieldEnglish, field.TypeString, value)

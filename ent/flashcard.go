@@ -29,6 +29,8 @@ type Flashcard struct {
 	Hanzi string `json:"hanzi,omitempty"`
 	// Pinyin holds the value of the "pinyin" field.
 	Pinyin string `json:"pinyin,omitempty"`
+	// TonalPinyin holds the value of the "tonal_pinyin" field.
+	TonalPinyin string `json:"tonal_pinyin,omitempty"`
 	// English holds the value of the "english" field.
 	English string `json:"english,omitempty"`
 	// ExampleSentenceHanzi holds the value of the "example_sentence_hanzi" field.
@@ -119,7 +121,7 @@ func (*Flashcard) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case flashcard.FieldUnsplashAttribution:
 			values[i] = new([]byte)
-		case flashcard.FieldHanzi, flashcard.FieldPinyin, flashcard.FieldEnglish, flashcard.FieldExampleSentenceHanzi, flashcard.FieldExampleSentencePinyin, flashcard.FieldImageURL, flashcard.FieldImageObjectKey:
+		case flashcard.FieldHanzi, flashcard.FieldPinyin, flashcard.FieldTonalPinyin, flashcard.FieldEnglish, flashcard.FieldExampleSentenceHanzi, flashcard.FieldExampleSentencePinyin, flashcard.FieldImageURL, flashcard.FieldImageObjectKey:
 			values[i] = new(sql.NullString)
 		case flashcard.FieldCreatedAt, flashcard.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -171,6 +173,12 @@ func (_m *Flashcard) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field pinyin", values[i])
 			} else if value.Valid {
 				_m.Pinyin = value.String
+			}
+		case flashcard.FieldTonalPinyin:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field tonal_pinyin", values[i])
+			} else if value.Valid {
+				_m.TonalPinyin = value.String
 			}
 		case flashcard.FieldEnglish:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -290,6 +298,9 @@ func (_m *Flashcard) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("pinyin=")
 	builder.WriteString(_m.Pinyin)
+	builder.WriteString(", ")
+	builder.WriteString("tonal_pinyin=")
+	builder.WriteString(_m.TonalPinyin)
 	builder.WriteString(", ")
 	builder.WriteString("english=")
 	builder.WriteString(_m.English)

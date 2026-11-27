@@ -29,6 +29,7 @@ func Flashcard(f *ent.Flashcard) models.FlashcardResponse {
 		ID:                    f.ID,
 		Hanzi:                 f.Hanzi,
 		Pinyin:                f.Pinyin,
+		TonalPinyin:           f.TonalPinyin,
 		English:               f.English,
 		ExampleSentenceHanzi:  f.ExampleSentenceHanzi,
 		ExampleSentencePinyin: f.ExampleSentencePinyin,

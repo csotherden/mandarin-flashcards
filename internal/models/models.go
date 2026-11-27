@@ -127,6 +127,7 @@ type CategoryInput struct {
 type FlashcardInput struct {
 	Hanzi                 string               `json:"hanzi"`
 	Pinyin                string               `json:"pinyin"`
+	TonalPinyin           string               `json:"tonal_pinyin"`
 	English               string               `json:"english"`
 	ExampleSentenceHanzi  string               `json:"example_sentence_hanzi"`
 	ExampleSentencePinyin string               `json:"example_sentence_pinyin"`
@@ -140,6 +141,7 @@ type FlashcardResponse struct {
 	ID                    uuid.UUID            `json:"id"`
 	Hanzi                 string               `json:"hanzi"`
 	Pinyin                string               `json:"pinyin"`
+	TonalPinyin           string               `json:"tonal_pinyin"`
 	English               string               `json:"english"`
 	ExampleSentenceHanzi  string               `json:"example_sentence_hanzi"`
 	ExampleSentencePinyin string               `json:"example_sentence_pinyin"`
@@ -151,14 +153,15 @@ type FlashcardResponse struct {
 	CreatedAt             time.Time            `json:"created_at"`
 }
 
+// AutofillRequest is what the user typed: hanzi, English or pinyin.
 type AutofillRequest struct {
-	Hanzi   string `json:"hanzi"`
-	English string `json:"english"`
+	Input string `json:"input"`
 }
 
 type AutofillResponse struct {
 	Hanzi                 string `json:"hanzi"`
 	Pinyin                string `json:"pinyin"`
+	TonalPinyin           string `json:"tonal_pinyin"`
 	English               string `json:"english"`
 	ExampleSentenceHanzi  string `json:"example_sentence_hanzi"`
 	ExampleSentencePinyin string `json:"example_sentence_pinyin"`

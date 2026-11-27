@@ -90,7 +90,13 @@ func (h *Handler) Assess(w http.ResponseWriter, r *http.Request) {
 		handlerutils.RespondWithError(w, h.logger, http.StatusBadRequest, handlerutils.CodeNotSet, "Could not read that recording. Try again", err)
 		return
 	}
-	grade, err := h.tones.Assess(r.Context(), wav, card.Hanzi, card.Pinyin)
+	// The numbered form is what TonePerfect accepts; cards from before it fall back to the
+	// display pinyin, which the client sends only if TonePerfect would accept it.
+	reading := card.TonalPinyin
+	if reading == "" {
+		reading = card.Pinyin
+	}
+	grade, err := h.tones.Assess(r.Context(), wav, card.Hanzi, reading)
 	if err != nil {
 		if errors.Is(err, toneperfect.ErrNotConfigured) {
 			handlerutils.RespondWithError(w, h.logger, http.StatusServiceUnavailable, handlerutils.CodeNotSet, "Pronunciation grading is not configured", nil)

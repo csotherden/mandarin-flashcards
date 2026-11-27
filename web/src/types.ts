@@ -34,6 +34,7 @@ export type Flashcard = {
   id: string;
   hanzi: string;
   pinyin: string;
+  tonal_pinyin: string;
   english: string;
   example_sentence_hanzi: string;
   example_sentence_pinyin: string;
@@ -48,6 +49,7 @@ export type Flashcard = {
 export type Autofill = {
   hanzi: string;
   pinyin: string;
+  tonal_pinyin: string;
   english: string;
   example_sentence_hanzi: string;
   example_sentence_pinyin: string;

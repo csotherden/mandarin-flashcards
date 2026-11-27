@@ -76,6 +76,11 @@ func Pinyin(v string) predicate.Flashcard {
 	return predicate.Flashcard(sql.FieldEQ(FieldPinyin, v))
 }
 
+// TonalPinyin applies equality check predicate on the "tonal_pinyin" field. It's identical to TonalPinyinEQ.
+func TonalPinyin(v string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldEQ(FieldTonalPinyin, v))
+}
+
 // English applies equality check predicate on the "english" field. It's identical to EnglishEQ.
 func English(v string) predicate.Flashcard {
 	return predicate.Flashcard(sql.FieldEQ(FieldEnglish, v))
@@ -309,6 +314,71 @@ func PinyinEqualFold(v string) predicate.Flashcard {
 // PinyinContainsFold applies the ContainsFold predicate on the "pinyin" field.
 func PinyinContainsFold(v string) predicate.Flashcard {
 	return predicate.Flashcard(sql.FieldContainsFold(FieldPinyin, v))
+}
+
+// TonalPinyinEQ applies the EQ predicate on the "tonal_pinyin" field.
+func TonalPinyinEQ(v string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldEQ(FieldTonalPinyin, v))
+}
+
+// TonalPinyinNEQ applies the NEQ predicate on the "tonal_pinyin" field.
+func TonalPinyinNEQ(v string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldNEQ(FieldTonalPinyin, v))
+}
+
+// TonalPinyinIn applies the In predicate on the "tonal_pinyin" field.
+func TonalPinyinIn(vs ...string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldIn(FieldTonalPinyin, vs...))
+}
+
+// TonalPinyinNotIn applies the NotIn predicate on the "tonal_pinyin" field.
+func TonalPinyinNotIn(vs ...string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldNotIn(FieldTonalPinyin, vs...))
+}
+
+// TonalPinyinGT applies the GT predicate on the "tonal_pinyin" field.
+func TonalPinyinGT(v string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldGT(FieldTonalPinyin, v))
+}
+
+// TonalPinyinGTE applies the GTE predicate on the "tonal_pinyin" field.
+func TonalPinyinGTE(v string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldGTE(FieldTonalPinyin, v))
+}
+
+// TonalPinyinLT applies the LT predicate on the "tonal_pinyin" field.
+func TonalPinyinLT(v string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldLT(FieldTonalPinyin, v))
+}
+
+// TonalPinyinLTE applies the LTE predicate on the "tonal_pinyin" field.
+func TonalPinyinLTE(v string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldLTE(FieldTonalPinyin, v))
+}
+
+// TonalPinyinContains applies the Contains predicate on the "tonal_pinyin" field.
+func TonalPinyinContains(v string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldContains(FieldTonalPinyin, v))
+}
+
+// TonalPinyinHasPrefix applies the HasPrefix predicate on the "tonal_pinyin" field.
+func TonalPinyinHasPrefix(v string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldHasPrefix(FieldTonalPinyin, v))
+}
+
+// TonalPinyinHasSuffix applies the HasSuffix predicate on the "tonal_pinyin" field.
+func TonalPinyinHasSuffix(v string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldHasSuffix(FieldTonalPinyin, v))
+}
+
+// TonalPinyinEqualFold applies the EqualFold predicate on the "tonal_pinyin" field.
+func TonalPinyinEqualFold(v string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldEqualFold(FieldTonalPinyin, v))
+}
+
+// TonalPinyinContainsFold applies the ContainsFold predicate on the "tonal_pinyin" field.
+func TonalPinyinContainsFold(v string) predicate.Flashcard {
+	return predicate.Flashcard(sql.FieldContainsFold(FieldTonalPinyin, v))
 }
 
 // EnglishEQ applies the EQ predicate on the "english" field.

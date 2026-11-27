@@ -7,6 +7,7 @@ import type { Autofill, CardSet, Category, Flashcard, ImageCandidate } from "../
 const empty = {
   hanzi: "",
   pinyin: "",
+  tonal_pinyin: "",
   english: "",
   example_sentence_hanzi: "",
   example_sentence_pinyin: "",
@@ -38,6 +39,7 @@ export function CardPage() {
         setForm({
           hanzi: card.hanzi,
           pinyin: card.pinyin,
+          tonal_pinyin: card.tonal_pinyin,
           english: card.english,
           example_sentence_hanzi: card.example_sentence_hanzi,
           example_sentence_pinyin: card.example_sentence_pinyin,
@@ -55,18 +57,22 @@ export function CardPage() {
     return list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
   }
 
+  // Auto-fill starts from whichever the user typed: hanzi, then English, then pinyin.
+  const autofillInput = [form.hanzi, form.english, form.pinyin].map((value) => value.trim()).find(Boolean) ?? "";
+
   async function autofill() {
     setBusy(true);
     setError("");
     try {
       const filled = await api<Autofill>("/api/flashcards/autofill", {
         method: "POST",
-        body: JSON.stringify({ hanzi: form.hanzi, english: form.english }),
+        body: JSON.stringify({ input: autofillInput }),
       });
       setForm((current) => ({
         ...current,
         hanzi: filled.hanzi || current.hanzi,
         pinyin: filled.pinyin,
+        tonal_pinyin: filled.tonal_pinyin,
         english: filled.english,
         example_sentence_hanzi: filled.example_sentence_hanzi,
         example_sentence_pinyin: filled.example_sentence_pinyin,
@@ -170,12 +176,18 @@ export function CardPage() {
         English
         <input className="rounded-2xl border border-stone-300 bg-white px-3 py-3 text-base" value={form.english} onChange={(event) => setForm({ ...form, english: event.target.value })} />
       </label>
-      <button type="button" className="rounded-2xl border border-ink py-3 font-medium" disabled={busy} onClick={autofill}>
-        {busy ? "Filling…" : "Auto-fill & fetch images"}
-      </button>
       <label className="grid gap-1 text-sm">
         Pinyin
         <input className="rounded-2xl border border-stone-300 bg-white px-3 py-3 text-base" value={form.pinyin} onChange={(event) => setForm({ ...form, pinyin: event.target.value })} />
+      </label>
+      <button type="button" className="rounded-2xl border border-ink py-3 font-medium" disabled={busy || !autofillInput} onClick={autofill}>
+        {busy ? "Filling…" : "Auto-fill & fetch images"}
+      </button>
+      <p className="-mt-2 text-xs text-stone-500">Type hanzi, English or pinyin, then auto-fill the rest.</p>
+      <label className="grid gap-1 text-sm">
+        Tonal pinyin
+        <input className="rounded-2xl border border-stone-300 bg-white px-3 py-3 text-base" placeholder="ma1 ma5" value={form.tonal_pinyin} onChange={(event) => setForm({ ...form, tonal_pinyin: event.target.value })} />
+        <span className="text-xs text-stone-500">One numbered syllable per character, 5 for the neutral tone. Used to grade pronunciation.</span>
       </label>
       <label className="grid gap-1 text-sm">
         Example

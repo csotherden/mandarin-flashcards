@@ -106,14 +106,10 @@ func (c *Client) complete(ctx context.Context, system, user string) (string, err
 	return strings.TrimSpace(parsed.Choices[0].Message.Content), nil
 }
 
-// Autofill asks the model for card fields and a concrete Unsplash search phrase.
-func (c *Client) Autofill(ctx context.Context, hanzi, english string) (*models.AutofillResponse, error) {
-	system := `You fill Mandarin flashcards. Reply with one JSON object and no markdown.
-Keys: hanzi, pinyin (tone marks), english, example_sentence_hanzi, example_sentence_pinyin, image_search.
-image_search is a short concrete English photo query. For abstract words pick a physical scene a photo can show, such as "convenience store" for 方便.
-Keep the example sentence short and everyday.`
-	user := fmt.Sprintf("hanzi: %s\nenglish: %s", strings.TrimSpace(hanzi), strings.TrimSpace(english))
-	text, err := c.complete(ctx, system, user)
+// Autofill asks the model for card fields and a concrete Unsplash search phrase, from whatever
+// the user typed: hanzi, an English word or phrase, or pinyin.
+func (c *Client) Autofill(ctx context.Context, input string) (*models.AutofillResponse, error) {
+	text, err := c.complete(ctx, autofillPrompt, "input: "+strings.TrimSpace(input))
 	if err != nil {
 		return nil, err
 	}
@@ -123,6 +119,7 @@ Keep the example sentence short and everyday.`
 	}
 	out.Hanzi = strings.TrimSpace(out.Hanzi)
 	out.Pinyin = strings.TrimSpace(out.Pinyin)
+	out.TonalPinyin = strings.TrimSpace(out.TonalPinyin)
 	out.English = strings.TrimSpace(out.English)
 	out.ExampleSentenceHanzi = strings.TrimSpace(out.ExampleSentenceHanzi)
 	out.ExampleSentencePinyin = strings.TrimSpace(out.ExampleSentencePinyin)
@@ -132,6 +129,24 @@ Keep the example sentence short and everyday.`
 	}
 	return &out, nil
 }
+
+// autofillPrompt fills a card from hanzi, English or pinyin. tonal_pinyin is the form TonePerfect
+// accepts for choosing readings (one numbered syllable per character); the handler drops it when
+// the model gets that form wrong.
+const autofillPrompt = `You fill Mandarin flashcards for a learner. The input is Chinese characters (hanzi), an English word or phrase, or pinyin (with tone marks, tone numbers, or no tones). Work out which it is, then reply with one JSON object and no markdown.
+
+Keys:
+- hanzi: the word in simplified Chinese. If the input is hanzi, return it unchanged.
+- pinyin: the word's standard pronunciation with tone marks, written as a dictionary writes it; neutral-tone syllables carry no mark. E.g. "lǎogōng", "lǎopo", "māma", "nǚ'ér".
+- tonal_pinyin: the same pronunciation with tone numbers: lowercase, exactly one syllable per Chinese character, separated by single spaces. Write ü as ü. 儿 is always its own syllable ("er5" in erhua, "er2" when it means son or daughter). Neutral-tone syllables in the word's standard pronunciation are 5 (老婆 "lao3 po5", 爸爸 "ba4 ba5", 妈妈 "ma1 ma5"). Do not apply tone sandhi: 你好 is "ni3 hao3" and 一 is "yi1". Examples: 老公 "lao3 gong1", 女儿 "nü3 er2", 一点儿 "yi1 dian3 er5".
+- english: a short English meaning.
+- example_sentence_hanzi: one short, everyday sentence using the word.
+- example_sentence_pinyin: that sentence's pinyin with tone marks.
+- image_search: a short, concrete English photo query. For abstract words pick a physical scene a photo can show, such as "convenience store" for 方便.
+
+When the input is English, choose the word native speakers use in everyday conversation: the informal, spoken word, not the formal or written one. For example "husband" is 老公 (not 丈夫), "wife" is 老婆 (not 妻子), and "dad" or "father" is 爸爸 (not 父亲). Use the formal word only when the English itself is formal or technical.
+
+When the input is pinyin, choose the most common everyday word with that reading, matching its tones when they are given.`
 
 // Coach turns a TonePerfect breakdown into one or two sentences of advice.
 func (c *Client) Coach(ctx context.Context, hanzi string, overall float64, syllables []models.SyllableView) (string, error) {

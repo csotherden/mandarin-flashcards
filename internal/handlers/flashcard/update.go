@@ -53,6 +53,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	update := tx.Flashcard.UpdateOneID(current.ID).
 		SetHanzi(req.Hanzi).
 		SetPinyin(req.Pinyin).
+		SetTonalPinyin(req.TonalPinyin).
 		SetEnglish(req.English).
 		SetExampleSentenceHanzi(req.ExampleSentenceHanzi).
 		SetExampleSentencePinyin(req.ExampleSentencePinyin).

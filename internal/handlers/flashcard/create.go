@@ -36,6 +36,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	create := tx.Flashcard.Create().
 		SetHanzi(req.Hanzi).
 		SetPinyin(req.Pinyin).
+		SetTonalPinyin(req.TonalPinyin).
 		SetEnglish(req.English).
 		SetExampleSentenceHanzi(req.ExampleSentenceHanzi).
 		SetExampleSentencePinyin(req.ExampleSentencePinyin).
