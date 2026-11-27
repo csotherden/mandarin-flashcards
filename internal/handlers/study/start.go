@@ -5,10 +5,12 @@ import (
 
 	"github.com/csotherden/mandarin-flashcards/ent"
 	entset "github.com/csotherden/mandarin-flashcards/ent/cardset"
+	entflashcard "github.com/csotherden/mandarin-flashcards/ent/flashcard"
 	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/internal/handlerutils"
 	"github.com/csotherden/mandarin-flashcards/internal/middleware"
 	"github.com/csotherden/mandarin-flashcards/internal/models"
+	"github.com/csotherden/mandarin-flashcards/internal/own"
 	deck "github.com/csotherden/mandarin-flashcards/internal/study"
 	"github.com/google/uuid"
 )
@@ -42,8 +44,15 @@ func (h *Handler) Start(w http.ResponseWriter, r *http.Request) {
 	if req.SourceAttemptID != nil {
 		sources++
 	}
+	req.SetIDs = own.Unique(req.SetIDs)
+	if len(req.SetIDs) > 0 {
+		sources++
+	}
+	if req.All {
+		sources++
+	}
 	if sources != 1 {
-		handlerutils.RespondWithError(w, h.logger, http.StatusBadRequest, handlerutils.CodeNotSet, "Choose a lesson, a set, or missed cards from a previous drill", nil)
+		handlerutils.RespondWithError(w, h.logger, http.StatusBadRequest, handlerutils.CodeNotSet, "Choose sets, a saved session, all cards, or missed cards from a previous drill", nil)
 		return
 	}
 
@@ -77,6 +86,34 @@ func (h *Handler) Start(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		cards, err = deck.LoadSet(r.Context(), h.db, userID, *req.SetID)
+		if err != nil {
+			handlerutils.RespondWithError(w, h.logger, http.StatusInternalServerError, handlerutils.CodeNotSet, "Could not start the drill", err)
+			return
+		}
+	case len(req.SetIDs) > 0:
+		if err := own.CardSets(r.Context(), h.db, userID, req.SetIDs); err != nil {
+			handlerutils.RespondWithError(w, h.logger, http.StatusNotFound, handlerutils.CodeNotSet, "Set not found", nil)
+			return
+		}
+		seen := map[uuid.UUID]bool{}
+		for _, setID := range req.SetIDs {
+			loaded, err := deck.LoadSet(r.Context(), h.db, userID, setID)
+			if err != nil {
+				handlerutils.RespondWithError(w, h.logger, http.StatusInternalServerError, handlerutils.CodeNotSet, "Could not start the drill", err)
+				return
+			}
+			for _, card := range loaded {
+				if !seen[card.ID] {
+					seen[card.ID] = true
+					cards = append(cards, card)
+				}
+			}
+		}
+	case req.All:
+		ids, err := h.db.Flashcard.Query().Where(entflashcard.HasOwnerWith(user.ID(userID))).IDs(r.Context())
+		if err == nil {
+			cards, err = deck.LoadOwned(r.Context(), h.db, userID, ids)
+		}
 		if err != nil {
 			handlerutils.RespondWithError(w, h.logger, http.StatusInternalServerError, handlerutils.CodeNotSet, "Could not start the drill", err)
 			return

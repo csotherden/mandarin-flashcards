@@ -56,7 +56,8 @@ func (h *Handler) owned(ctx context.Context, client *ent.Client, userID, id uuid
 	return row, err
 }
 
-func normalizeCard(in models.FlashcardInput) (models.FlashcardInput, error) {
+// NormalizeCard trims and validates a card input.
+func NormalizeCard(in models.FlashcardInput) (models.FlashcardInput, error) {
 	in.Hanzi = strings.TrimSpace(in.Hanzi)
 	in.Pinyin = strings.TrimSpace(in.Pinyin)
 	in.TonalPinyin = pinyin.NormalizeTonal(in.TonalPinyin)
@@ -73,6 +74,8 @@ func normalizeCard(in models.FlashcardInput) (models.FlashcardInput, error) {
 		return in, errors.New("Hanzi is too long")
 	case utf8.RuneCountInString(in.Pinyin) > 160:
 		return in, errors.New("Pinyin is too long")
+	case len(in.CategoryNames) > 10:
+		return in, errors.New("Choose at most 10 categories")
 	case in.TonalPinyin != "" && !pinyin.ValidTonal(in.Hanzi, in.TonalPinyin):
 		return in, errors.New("Tonal pinyin needs one numbered syllable per character, like ma1 ma5 (5 for the neutral tone)")
 	case utf8.RuneCountInString(in.English) > 300:
@@ -94,6 +97,11 @@ func (h *Handler) linkCard(ctx context.Context, client *ent.Client, userID uuid.
 	if err := own.Categories(ctx, client, userID, in.CategoryIDs); err != nil {
 		return nil, err
 	}
+	named, err := own.CategoryNames(ctx, client, userID, in.CategoryNames)
+	if err != nil {
+		return nil, err
+	}
+	in.CategoryIDs = own.Unique(append(in.CategoryIDs, named...))
 	if err := own.CardSets(ctx, client, userID, in.SetIDs); err != nil {
 		return nil, err
 	}

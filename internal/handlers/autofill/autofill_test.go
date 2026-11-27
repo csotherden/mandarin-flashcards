@@ -19,3 +19,16 @@ func TestIsHanzi(t *testing.T) {
 		}
 	}
 }
+
+func TestMatchCategories(t *testing.T) {
+	got := matchCategories([]string{"family", "People", "Family", "", "Relationships", "Extra"}, []string{"Family"})
+	want := []string{"Family", "People", "Relationships"}
+	if len(got) != len(want) {
+		t.Fatalf("matchCategories = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("matchCategories = %v, want %v", got, want)
+		}
+	}
+}

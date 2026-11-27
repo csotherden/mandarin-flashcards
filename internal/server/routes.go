@@ -6,7 +6,9 @@ import (
 	"github.com/csotherden/mandarin-flashcards/internal/handlers/cardset"
 	"github.com/csotherden/mandarin-flashcards/internal/handlers/category"
 	"github.com/csotherden/mandarin-flashcards/internal/handlers/flashcard"
+	"github.com/csotherden/mandarin-flashcards/internal/handlers/generate"
 	"github.com/csotherden/mandarin-flashcards/internal/handlers/health"
+	"github.com/csotherden/mandarin-flashcards/internal/handlers/home"
 	"github.com/csotherden/mandarin-flashcards/internal/handlers/images"
 	"github.com/csotherden/mandarin-flashcards/internal/handlers/lesson"
 	"github.com/csotherden/mandarin-flashcards/internal/handlers/study"
@@ -24,9 +26,12 @@ func (s *Server) setupRoutes() {
 	protected.Use(middleware.AuthMiddleware(s.db, s.logger))
 
 	userhandler.NewHandler(s.db, s.logger).Register(protected)
+	home.NewHandler(s.db, s.logger).Register(protected)
 	category.NewHandler(s.db, s.logger).Register(protected)
-	autofill.NewHandler(s.coach, s.llmLimit, s.logger).Register(protected)
-	flashcard.NewHandler(s.db, s.files, s.photos, s.logger).Register(protected)
+	autofill.NewHandler(s.db, s.coach, s.llmLimit, s.logger).Register(protected)
+	cards := flashcard.NewHandler(s.db, s.files, s.photos, s.logger)
+	cards.Register(protected)
+	generate.NewHandler(s.db, s.coach, s.photos, cards, s.llmLimit, s.logger).Register(protected)
 	images.NewHandler(s.photos, s.imgLimit, s.logger).Register(protected)
 	cardset.NewHandler(s.db, s.logger).Register(protected)
 	lesson.NewHandler(s.db, s.logger).Register(protected)

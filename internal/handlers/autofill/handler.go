@@ -3,6 +3,7 @@ package autofill
 import (
 	"net/http"
 
+	"github.com/csotherden/mandarin-flashcards/ent"
 	"github.com/csotherden/mandarin-flashcards/internal/llm"
 	"github.com/csotherden/mandarin-flashcards/internal/ratelimit"
 	"github.com/gorilla/mux"
@@ -10,13 +11,14 @@ import (
 )
 
 type Handler struct {
+	db     *ent.Client
 	llm    *llm.Client
 	limit  *ratelimit.Limiter
 	logger *zap.Logger
 }
 
-func NewHandler(client *llm.Client, limit *ratelimit.Limiter, logger *zap.Logger) *Handler {
-	return &Handler{llm: client, limit: limit, logger: logger}
+func NewHandler(db *ent.Client, client *llm.Client, limit *ratelimit.Limiter, logger *zap.Logger) *Handler {
+	return &Handler{db: db, llm: client, limit: limit, logger: logger}
 }
 
 func (h *Handler) Register(router *mux.Router) {

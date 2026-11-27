@@ -134,7 +134,9 @@ type FlashcardInput struct {
 	ImageURL              string               `json:"image_url"`
 	UnsplashAttribution   *UnsplashAttribution `json:"unsplash_attribution"`
 	CategoryIDs           []uuid.UUID          `json:"category_ids"`
-	SetIDs                []uuid.UUID          `json:"set_ids"`
+	// CategoryNames are categories by name: existing ones (any case) are linked, missing ones made.
+	CategoryNames []string    `json:"category_names"`
+	SetIDs        []uuid.UUID `json:"set_ids"`
 }
 
 type FlashcardResponse struct {
@@ -166,6 +168,10 @@ type AutofillResponse struct {
 	ExampleSentenceHanzi  string `json:"example_sentence_hanzi"`
 	ExampleSentencePinyin string `json:"example_sentence_pinyin"`
 	ImageSearch           string `json:"image_search"`
+	// Categories are suggested topic categories, reusing the user's own names where one fits.
+	Categories []string `json:"categories"`
+	// ExistingCardID is the user's card with the same hanzi, when there is one.
+	ExistingCardID *uuid.UUID `json:"existing_card_id,omitempty"`
 }
 
 type ImageCandidate struct {
@@ -231,11 +237,14 @@ type IDsInput struct {
 }
 
 type StartSessionRequest struct {
-	LessonID        *uuid.UUID `json:"lesson_id"`
-	SetID           *uuid.UUID `json:"set_id"`
-	SourceAttemptID *uuid.UUID `json:"source_attempt_id"`
-	Mode            string     `json:"mode"`
-	CardCount       int        `json:"card_count"`
+	LessonID *uuid.UUID `json:"lesson_id"`
+	SetID    *uuid.UUID `json:"set_id"`
+	// SetIDs draws from several sets at once; All draws from every card the user has.
+	SetIDs          []uuid.UUID `json:"set_ids"`
+	All             bool        `json:"all"`
+	SourceAttemptID *uuid.UUID  `json:"source_attempt_id"`
+	Mode            string      `json:"mode"`
+	CardCount       int         `json:"card_count"`
 }
 
 type AttemptResponse struct {
@@ -275,4 +284,50 @@ type MatchInput struct {
 	FlashcardID   uuid.UUID `json:"flashcard_id"`
 	Correct       bool      `json:"correct"`
 	MismatchCount int       `json:"mismatch_count"`
+}
+
+// HomeResponse is the Today screen.
+type HomeResponse struct {
+	StreakDays     int            `json:"streak_days"`
+	PracticedToday int            `json:"practiced_today"`
+	TotalCards     int            `json:"total_cards"`
+	SuggestedCount int            `json:"suggested_count"`
+	LastMode       string         `json:"last_mode,omitempty"`
+	Sets           []HomeSet      `json:"sets"`
+	Slipped        []SlippedCard  `json:"slipped"`
+	SavedSessions  []SavedSession `json:"saved_sessions"`
+}
+
+// HomeSet is a set with a card whose picture can stand for it.
+type HomeSet struct {
+	Set   SetResponse        `json:"set"`
+	Cover *FlashcardResponse `json:"cover,omitempty"`
+}
+
+// SlippedCard is a recently practiced card whose average score is under 85.
+type SlippedCard struct {
+	Card    FlashcardResponse `json:"card"`
+	Average float64           `json:"average"`
+}
+
+// SavedSession is a saved lesson the Today screen can start in one tap.
+type SavedSession struct {
+	ID        uuid.UUID `json:"id"`
+	Title     string    `json:"title"`
+	CardCount int       `json:"card_count"`
+}
+
+// GenerateSetRequest asks for a themed set made on autopilot; SetID adds to an existing set.
+type GenerateSetRequest struct {
+	Theme string     `json:"theme"`
+	Count int        `json:"count"`
+	SetID *uuid.UUID `json:"set_id"`
+}
+
+// GenerateSetResponse is the set and the cards made for it; Skipped are words left out
+// (already known, or not fillable).
+type GenerateSetResponse struct {
+	Set     SetResponse         `json:"set"`
+	Cards   []FlashcardResponse `json:"cards"`
+	Skipped []string            `json:"skipped"`
 }

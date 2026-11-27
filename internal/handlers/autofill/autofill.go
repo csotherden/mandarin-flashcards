@@ -7,6 +7,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/csotherden/mandarin-flashcards/ent/category"
+	"github.com/csotherden/mandarin-flashcards/ent/flashcard"
+	"github.com/csotherden/mandarin-flashcards/ent/user"
 	"github.com/csotherden/mandarin-flashcards/internal/handlerutils"
 	"github.com/csotherden/mandarin-flashcards/internal/llm"
 	"github.com/csotherden/mandarin-flashcards/internal/middleware"
@@ -39,7 +42,12 @@ func (h *Handler) Autofill(w http.ResponseWriter, r *http.Request) {
 		handlerutils.RespondWithError(w, h.logger, http.StatusBadRequest, handlerutils.CodeNotSet, "Enter a word or a short phrase", nil)
 		return
 	}
-	filled, err := h.llm.Autofill(r.Context(), input)
+	existing, err := h.db.Category.Query().Where(category.HasOwnerWith(user.ID(userID))).Select(category.FieldName).Strings(r.Context())
+	if err != nil {
+		handlerutils.RespondWithError(w, h.logger, http.StatusInternalServerError, handlerutils.CodeNotSet, "Could not suggest card details", err)
+		return
+	}
+	filled, err := h.llm.Autofill(r.Context(), input, existing)
 	if err != nil {
 		if errors.Is(err, llm.ErrNotConfigured) {
 			handlerutils.RespondWithError(w, h.logger, http.StatusServiceUnavailable, handlerutils.CodeNotSet, "Card suggestions are not configured", nil)
@@ -59,7 +67,40 @@ func (h *Handler) Autofill(w http.ResponseWriter, r *http.Request) {
 			zap.String("hanzi", filled.Hanzi), zap.String("tonal_pinyin", filled.TonalPinyin))
 		filled.TonalPinyin = ""
 	}
+	filled.Categories = matchCategories(filled.Categories, existing)
+	if card, err := h.db.Flashcard.Query().
+		Where(flashcard.Hanzi(filled.Hanzi), flashcard.HasOwnerWith(user.ID(userID))).
+		First(r.Context()); err == nil {
+		filled.ExistingCardID = &card.ID
+	}
 	handlerutils.RespondWithJSON(w, h.logger, http.StatusOK, filled)
+}
+
+// matchCategories keeps at most three suggestions, spelled as the user's existing category
+// when one matches (any case), without repeats.
+func matchCategories(suggested, existing []string) []string {
+	byKey := make(map[string]string, len(existing))
+	for _, name := range existing {
+		byKey[strings.ToLower(name)] = name
+	}
+	out := []string{}
+	seen := map[string]bool{}
+	for _, name := range suggested {
+		name = strings.TrimSpace(name)
+		key := strings.ToLower(name)
+		if name == "" || seen[key] || utf8.RuneCountInString(name) > 40 {
+			continue
+		}
+		seen[key] = true
+		if own, ok := byKey[key]; ok {
+			name = own
+		}
+		out = append(out, name)
+		if len(out) == 3 {
+			break
+		}
+	}
+	return out
 }
 
 // isHanzi reports whether s is Chinese characters (and punctuation or spaces), with no Latin

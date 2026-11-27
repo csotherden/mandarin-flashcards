@@ -27,7 +27,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	if !handlerutils.DecodeJSON(w, r, h.logger, &req) {
 		return
 	}
-	req, err := normalizeCard(req)
+	req, err := NormalizeCard(req)
 	if err != nil {
 		handlerutils.RespondWithError(w, h.logger, http.StatusBadRequest, handlerutils.CodeNotSet, err.Error(), nil)
 		return

@@ -108,8 +108,12 @@ func (c *Client) complete(ctx context.Context, system, user string) (string, err
 
 // Autofill asks the model for card fields and a concrete Unsplash search phrase, from whatever
 // the user typed: hanzi, an English word or phrase, or pinyin.
-func (c *Client) Autofill(ctx context.Context, input string) (*models.AutofillResponse, error) {
-	text, err := c.complete(ctx, autofillPrompt, "input: "+strings.TrimSpace(input))
+func (c *Client) Autofill(ctx context.Context, input string, categories []string) (*models.AutofillResponse, error) {
+	user := "input: " + strings.TrimSpace(input)
+	if len(categories) > 0 {
+		user += "\nexisting categories: " + strings.Join(categories, ", ")
+	}
+	text, err := c.complete(ctx, autofillPrompt, user)
 	if err != nil {
 		return nil, err
 	}
@@ -144,6 +148,8 @@ Keys:
 - example_sentence_pinyin: that sentence's pinyin with tone marks.
 - image_search: a short English photo search query for the card's picture. The picture is the learner's main clue, so it must show this word and nothing a learner could mistake for a related word that is likely to be another card. Follow the rules below.
 
+- categories: one to three short topic categories for the word, Title Case, one or two words each, such as "Family", "Food", "Greetings", "Colors", "Verbs". Reuse names from "existing categories" whenever one fits, spelled exactly as given; add a new name only when none fits.
+
 Rules for image_search:
 - One subject, shown on its own: the thing itself, not a scene around it. For 西红柿 (tomato), "single ripe red tomato on white background", not "cutting board with chopped tomato and salad ingredients", which could be a card for cooking, salad, chopping or lettuce.
 - For people and family words, show only the person the word names, with a visible cue that sets them apart from related words (husband vs wife vs couple, son vs daughter vs father or mother, grandmother vs grandfather). For 老公 (husband), "smiling groom in a suit, portrait"; for 老婆 (wife), "smiling bride in a wedding dress, portrait"; for 女儿 (daughter), "portrait of a young girl"; for 儿子 (son), "portrait of a young boy". Never pair people ("married couple cooking", "father and daughter painting").
@@ -155,15 +161,48 @@ When the input is English, choose the word native speakers use in everyday conve
 
 When the input is pinyin, choose the most common everyday word with that reading, matching its tones when they are given.`
 
+// SuggestWords picks up to count everyday words for a themed set, in hanzi, avoiding the ones the
+// learner already has (known; the caller filters again, since a model can miss one).
+func (c *Client) SuggestWords(ctx context.Context, theme string, count int, known []string) ([]string, error) {
+	user := fmt.Sprintf("theme: %s\ncount: %d", strings.TrimSpace(theme), count)
+	if len(known) > 0 {
+		user += "\nalready known: " + strings.Join(known, ", ")
+	}
+	text, err := c.complete(ctx, suggestWordsPrompt, user)
+	if err != nil {
+		return nil, err
+	}
+	var out struct {
+		Words []string `json:"words"`
+	}
+	if err := json.Unmarshal([]byte(extractJSON(text)), &out); err != nil {
+		return nil, fmt.Errorf("llm suggest words json: %w", err)
+	}
+	words := make([]string, 0, len(out.Words))
+	for _, w := range out.Words {
+		if w = strings.TrimSpace(w); w != "" {
+			words = append(words, w)
+		}
+	}
+	return words, nil
+}
+
+const suggestWordsPrompt = `You choose vocabulary for a Mandarin learner's flashcard set. Reply with one JSON object and no markdown: {"words": ["...", "..."]}.
+
+Give exactly "count" different words or very short phrases in simplified Chinese characters that fit the theme, the most useful first. Each item is the hanzi only, no pinyin or English.
+- Prefer the informal, everyday spoken word (老公 not 丈夫, 爸爸 not 父亲).
+- Prefer concrete words a single photo can show clearly; avoid near-synonyms of each other in the same set.
+- Never include a word listed under "already known", or the same word twice.`
+
 // Coach turns a TonePerfect breakdown into one or two sentences of advice.
 func (c *Client) Coach(ctx context.Context, hanzi string, overall float64, syllables []models.SyllableView) (string, error) {
 	blob, err := json.Marshal(syllables)
 	if err != nil {
 		return "", err
 	}
-	system := `You coach Mandarin pronunciation. Reply with one or two sentences, no preamble.
-Name the character, the expected tone, and what was heard. Be specific and calm.
-Do not mention scores, JSON, or that you are a model.`
+	system := `You coach a beginner learning Mandarin pronunciation. Reply in English, in one or two sentences, no preamble.
+Name the character with its pinyin, e.g. 老 (lǎo), the tone it needs and what was heard, and say how to fix it. Be specific and calm.
+Do not write whole sentences in Chinese. Do not mention scores, JSON, or that you are a model.`
 	user := fmt.Sprintf("word: %s\noverall: %.1f\nsyllables: %s", hanzi, overall, blob)
 	text, err := c.complete(ctx, system, user)
 	if err != nil {
