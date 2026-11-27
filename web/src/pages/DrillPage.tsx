@@ -228,9 +228,7 @@ function SpeakRound({
       <div className="mt-auto pt-8">
         {!flipped ? (
           <div className="flex items-center justify-between gap-4">
-            <button type="button" className="btn-soft h-12 w-24 bg-white shadow-card" onClick={() => setHint((value) => !value)} aria-pressed={hint}>
-              Hint
-            </button>
+            <EnglishToggle on={hint} onToggle={() => setHint((value) => !value)} />
             <button
               type="button"
               ref={micRef}
@@ -344,12 +342,14 @@ function MatchRound({
   const [locked, setLocked] = useState<Record<string, boolean>>({});
   const [misses, setMisses] = useState<Record<string, number>>({});
   const [wrong, setWrong] = useState(false);
+  const [reveal, setReveal] = useState(false);
 
   useEffect(() => {
     setImageID(null);
     setHanziID(null);
     setLocked({});
     setWrong(false);
+    setReveal(false);
   }, [round]);
 
   async function choose(kind: "image" | "hanzi", id: string) {
@@ -411,9 +411,12 @@ function MatchRound({
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-5 pb-8 pt-6">
-      <p className="text-center font-semibold text-muted">
-        Match each photo to its word{rounds.length > 1 && ` · round ${round + 1} of ${rounds.length}`}
-      </p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-semibold text-muted">
+          Match each photo to its word{rounds.length > 1 && ` · round ${round + 1} of ${rounds.length}`}
+        </p>
+        <EnglishToggle on={reveal} onToggle={() => setReveal((value) => !value)} />
+      </div>
       <div className="mt-4 grid grid-cols-3 gap-2.5">
         {cards.map((card) => (
           <button
@@ -425,7 +428,14 @@ function MatchRound({
             onClick={() => choose("image", card.id)}
             className={`overflow-hidden rounded-2xl border-[3px] bg-white shadow-card transition ${tile(card.id, imageID === card.id)}`}
           >
-            <CardImage card={{ ...card, hanzi: "" }} className="aspect-square w-full" />
+            <span className="relative block">
+              <CardImage card={{ ...card, hanzi: "" }} className="aspect-square w-full" />
+              {reveal && (
+                <span className="rise absolute inset-x-0 bottom-0 bg-ink/80 px-1.5 py-1 text-center text-xs font-semibold leading-tight text-white" aria-hidden>
+                  {card.english}
+                </span>
+              )}
+            </span>
           </button>
         ))}
       </div>
@@ -454,4 +464,23 @@ function shuffle<T>(items: T[]) {
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
   return copy;
+}
+
+/**
+ * Shows or hides the English for the pictures, for when a photo is ambiguous (older or younger
+ * brother?). Revealing is free: it never affects the score or XP.
+ */
+function EnglishToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={on}
+      aria-label={on ? "Hide English" : "Show English"}
+      className={`flex h-12 min-w-24 shrink-0 items-center justify-center gap-1.5 rounded-2xl px-3.5 font-semibold shadow-card transition ${on ? "bg-ink text-white" : "bg-white text-ink"}`}
+    >
+      <Icon name={on ? "eye-off" : "eye"} className="text-xl" />
+      <span className="text-sm">English</span>
+    </button>
+  );
 }
