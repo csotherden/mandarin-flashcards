@@ -28,13 +28,13 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
   }
 
   return (
-    <main className="min-h-screen lg:grid lg:grid-cols-2">
+    <main className="min-h-dvh lg:grid lg:grid-cols-2">
       <section className="relative hidden overflow-hidden bg-hero p-12 text-white lg:flex lg:flex-col lg:justify-end">
         <span className="absolute -right-10 -top-16 font-hanzi text-[22rem] font-black leading-none text-white/10" aria-hidden>卡</span>
         <h2 className="text-5xl font-extrabold leading-tight">Say it.<br />Hear which tone slipped.</h2>
         <p className="mt-4 max-w-md text-lg text-white/90">Picture cards for the words that keep getting away, graded syllable by syllable.</p>
       </section>
-      <div className="mx-auto flex min-h-screen max-w-md flex-col px-6 pb-10 lg:min-h-0 lg:justify-center lg:pb-0">
+      <div className="mx-auto flex min-h-dvh max-w-md flex-col px-6 pb-10 lg:min-h-0 lg:justify-center lg:pb-0">
         <div className="relative -mx-6 overflow-hidden bg-hero px-6 pb-7 pt-10 text-white lg:hidden">
           <span className="absolute -right-6 -top-8 font-hanzi text-[9rem] font-black leading-none text-white/10" aria-hidden>
             卡

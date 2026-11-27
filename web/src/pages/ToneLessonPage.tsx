@@ -54,7 +54,7 @@ export function ToneLessonPage() {
   const total = lesson.items.length;
 
   return (
-    <div className="flex min-h-screen flex-col bg-canvas">
+    <div className="flex min-h-dvh flex-col bg-canvas">
       <header className="mx-auto flex w-full max-w-2xl items-center gap-4 px-5 pt-5">
         {typeof step === "number" && <h1 className="sr-only">{lesson.title}</h1>}
         <Link to="/tones" aria-label="Back to tones" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-lg shadow-card">

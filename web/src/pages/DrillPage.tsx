@@ -58,7 +58,7 @@ export function DrillPage() {
   if (!session) return <p className="p-6 text-muted">{error || "Loading…"}</p>;
   if (session.cards.length === 0) {
     return (
-      <div className="grid min-h-screen place-items-center p-6 text-center">
+      <div className="grid min-h-dvh place-items-center p-6 text-center">
         <div>
           <p className="font-semibold">This session has no cards.</p>
           <button type="button" className="btn-primary mt-4 h-12" onClick={() => navigate("/")}>Back to Today</button>
@@ -72,7 +72,7 @@ export function DrillPage() {
   const progress = match ? graded / total : index / total;
 
   return (
-    <div className="flex min-h-screen flex-col bg-canvas">
+    <div className="flex min-h-dvh flex-col bg-canvas">
       <header className={`mx-auto flex w-full ${match ? "max-w-2xl" : "max-w-xl"} items-center gap-4 px-5 pt-5`}>
         <h1 className="sr-only">{modeTitle(session.attempt.mode)} practice</h1>
         <button type="button" aria-label="End session" onClick={exit} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-lg shadow-card">

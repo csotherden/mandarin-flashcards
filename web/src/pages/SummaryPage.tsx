@@ -40,7 +40,7 @@ export function SummaryPage() {
   const headline = practiced.length === 0 ? "No cards graded" : score >= 90 ? "Excellent!" : score >= 75 ? "Nice work" : "Good practice";
 
   return (
-    <main className="mx-auto min-h-screen max-w-2xl px-5 py-6">
+    <main className="mx-auto min-h-dvh max-w-2xl px-5 py-6">
       <section className="rise relative overflow-hidden rounded-[28px] bg-hero p-6 text-center text-white">
         <Icon name="star" className="absolute left-5 top-5 text-3xl text-gold" />
         <Icon name="star" className="absolute right-6 top-10 text-xl text-gold" />

@@ -24,10 +24,19 @@ export function chineseVoices(): SpeechSynthesisVoice[] {
     .filter((voice) => /^(zh|cmn)/i.test(voice.lang) && !/HK|yue/i.test(voice.lang));
 }
 
-/** Speaks Chinese at `rate` (1 normal, below 1 slower), scaled by the user's speed setting. */
+// Held so the engine can't garbage-collect an utterance mid-sentence (it then never plays).
+let current: SpeechSynthesisUtterance | null = null;
+
+/**
+ * Speaks Chinese at `rate` (1 normal, below 1 slower), scaled by the user's speed setting.
+ *
+ * iOS Safari quirks handled here: speaking immediately after cancel() is often silently dropped,
+ * so we only cancel when something is actually playing and give it a moment first; and the engine
+ * can be left paused, so we resume it before speaking.
+ */
 export function speakChinese(text: string, rate: number) {
-  if (!text || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
+  const synth = typeof window !== "undefined" ? window.speechSynthesis : undefined;
+  if (!text || !synth) return;
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = "zh-CN";
   utterance.rate = Math.min(2, Math.max(0.3, rate * preferences.speed));
@@ -37,7 +46,20 @@ export function speakChinese(text: string, rate: number) {
     voices.find((item) => /tingting/i.test(item.name)) ||
     voices.find((item) => item.lang.toLowerCase().startsWith("zh"));
   if (voice) utterance.voice = voice;
-  window.speechSynthesis.speak(utterance);
+  utterance.onend = utterance.onerror = () => {
+    if (current === utterance) current = null;
+  };
+  const go = () => {
+    current = utterance;
+    if (synth.paused) synth.resume();
+    synth.speak(utterance);
+  };
+  if (synth.speaking || synth.pending) {
+    synth.cancel();
+    window.setTimeout(go, 120);
+  } else {
+    go();
+  }
 }
 
 if (typeof window !== "undefined" && window.speechSynthesis) {

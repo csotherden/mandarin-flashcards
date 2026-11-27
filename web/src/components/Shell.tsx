@@ -16,7 +16,7 @@ export function BrandMark({ className = "h-9 w-9 text-xl" }: { className?: strin
 export function Shell() {
   const { user } = useAuth();
   return (
-    <div className="min-h-screen lg:flex">
+    <div className="min-h-dvh lg:flex">
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col gap-1.5 bg-ink px-4 py-6 text-white lg:flex">
         <Link to="/" className="mb-6 flex items-center gap-3 px-2 text-lg font-bold">
           <BrandMark />
